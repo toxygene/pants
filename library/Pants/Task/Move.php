@@ -6,9 +6,7 @@
 namespace Pants\Task;
 
 use Pants\File,
-    Pants\FileSets,
-    Pants\Task\AbstractTask,
-    Pants\FileSetTask;
+    Pants\Task\AbstractTask;
 
 /**
  *
