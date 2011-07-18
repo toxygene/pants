@@ -51,27 +51,4 @@ class ChownTest extends TestCase
              ->execute();
     }
 
-    public function testChownErrorThrowsException()
-    {
-        $this->setExpectedException("Pants\File\RuntimeException");
-
-        $file = $this->getMock(
-            "Pants\File",
-            array(),
-            array(),
-            '',
-            false
-        );
-
-        $file->expects($this->once())
-             ->method("setOwner")
-             ->with("test")
-             ->will($this->throwException(new RuntimeException));
-
-        $this->_chown
-             ->setFile($file)
-             ->setOwner("test")
-             ->execute();
-    }
-
 }

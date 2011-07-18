@@ -20,14 +20,14 @@ class CopyTest extends TestCase
      * Copy task
      * @var Copy
      */
-    protected $_Copy;
+    protected $_copy;
 
     /**
      * Setup the test
      */
     public function setUp()
     {
-        $this->_Copy = new Copy();
+        $this->_copy = new Copy();
     }
 
     public function testOwnerIsSetOnTheFileObject()
@@ -41,10 +41,10 @@ class CopyTest extends TestCase
         );
 
         $file->expects($this->once())
-             ->method("Copy")
+             ->method("copy")
              ->with("destination");
 
-        $this->_Copy
+        $this->_copy
              ->setFile($file)
              ->setDestination("destination")
              ->execute();
