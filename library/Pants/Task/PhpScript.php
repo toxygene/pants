@@ -22,11 +22,15 @@ class PhpScript extends AbstractTask
 
     /**
      * Execute the task
+     *
+     * @return PhpScript
      */
     public function execute()
     {
         require $this->getFile()
                      ->getRealPath();
+
+        return $this;
     }
 
     /**
