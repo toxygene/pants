@@ -5,9 +5,9 @@
 
 namespace Pants;
 
-use Pants\FileSets,
-    Pants\Properties,
-    Pants\Targets;
+use Pants\Properties,
+    Pants\Targets,
+    Pants\Tasks;
 
 /**
  *
@@ -22,12 +22,6 @@ class Project
     protected $_default;
 
     /**
-     * FileSets
-     * @var FileSets
-     */
-    protected $_fileSets;
-
-    /**
      * Properties
      * @var Properties
      */
@@ -40,27 +34,19 @@ class Project
     protected $_targets;
 
     /**
+     * Tasks
+     * @var Tasks
+     */
+    protected $_tasks;
+
+    /**
      * Constructor
      */
     public function __construct()
     {
-        $this->_fileSets   = new FileSets();
         $this->_properties = new Properties();
-        $this->_targets    = new Targets($this);
-    }
-
-    /**
-     * Add a task
-     *
-     * @param Task $task
-     * @return Project
-     */
-    public function addTask(Task $task)
-    {
-        $task->setProject($this)
-             ->execute();
-
-        return $this;
+        $this->_targets    = new Targets();
+        $this->_tasks      = new Tasks();
     }
 
     /**
@@ -71,6 +57,11 @@ class Project
      */
     public function execute($targets = array())
     {
+        foreach ($this->getTasks() as $task) {
+            $task->setProject($this)
+                 ->execute();
+        }
+
         if (!$targets) {
             $targets = array($this->getDefault());
         }
@@ -78,6 +69,7 @@ class Project
         foreach ($targets as $target) {
             $this->getTargets()
                  ->$target
+                 ->setProject($this)
                  ->execute();
         }
 
@@ -92,16 +84,6 @@ class Project
     public function getDefault()
     {
         return $this->_default;
-    }
-
-    /**
-     * Get the filesets
-     *
-     * @return FileSets
-     */
-    public function getFileSets()
-    {
-        return $this->_fileSets;
     }
 
     /**
@@ -122,6 +104,16 @@ class Project
     public function getTargets()
     {
         return $this->_targets;
+    }
+
+    /**
+     * Get the tasks
+     *
+     * @return Tasks
+     */
+    public function getTasks()
+    {
+        return $this->_tasks;
     }
 
     /**

@@ -6,7 +6,6 @@
 namespace Pants;
 
 use InvalidArgumentException,
-    Pants\Project,
     Pants\Target;
 
 /**
@@ -16,26 +15,10 @@ class Targets
 {
 
     /**
-     * Project
-     * @var Project
-     */
-    protected $_project;
-
-    /**
      * Targets
      * @var array
      */
     protected $_targets = array();
-
-    /**
-     * Constructor
-     *
-     * @param Project $project
-     */
-    public function __construct(Project $project)
-    {
-        $this->_project = $project;
-    }
 
     /**
      * Get a target
@@ -77,8 +60,6 @@ class Targets
             throw new InvalidArgumentException("The value must be a target");
         }
 
-        $value->setProject($this->getProject());
-
         $this->_targets[$name] = $value;
     }
 
@@ -113,16 +94,6 @@ class Targets
         $this->{$target->getName()} = $target;
 
         return $this;
-    }
-
-    /**
-     * Get the project
-     *
-     * @return Project
-     */
-    public function getProject()
-    {
-        return $this->_project;
     }
 
 }

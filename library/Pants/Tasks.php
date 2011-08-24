@@ -6,7 +6,6 @@
 namespace Pants;
 
 use ArrayIterator,
-    InvalidArgumentException,
     IteratorAggregate,
     Pants\Task;
 
@@ -31,6 +30,7 @@ class Tasks implements IteratorAggregate
     public function add(Task $task)
     {
         $this->_tasks[] = $task;
+
         return $this;
     }
 
