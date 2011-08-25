@@ -15,13 +15,13 @@ class Move extends AbstractTask
 {
 
     /**
-     * The target file
-     * @var File
+     * Target file
+     * @var string
      */
     protected $_file;
 
     /**
-     * The destination file
+     * Destination file
      * @var string
      */
     protected $_destination;
@@ -39,7 +39,7 @@ class Move extends AbstractTask
     /**
      * Get the target file
      *
-     * @return File
+     * @return string
      */
     public function getFile()
     {
@@ -53,8 +53,8 @@ class Move extends AbstractTask
      */
     public function execute()
     {
-        $this->getFile()
-             ->move($this->getDestination());
+        $this->getFileSystem()
+             ->move($this->getFile(), $this->getDescription());
 
         return $this;
     }
@@ -74,15 +74,11 @@ class Move extends AbstractTask
     /**
      * Set the target file
      *
-     * @param string|File $file
+     * @param string $file
      * @return Move
      */
     public function setFile($file)
     {
-        if (!$file instanceof File) {
-            $file = new File($file);
-        }
-
         $this->_file = $file;
         return $this;
     }

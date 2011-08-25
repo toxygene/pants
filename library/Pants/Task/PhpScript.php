@@ -15,8 +15,8 @@ class PhpScript extends AbstractTask
 {
 
     /**
-     * The target file
-     * @var File
+     * Target file
+     * @var string
      */
     protected $_file;
 
@@ -27,8 +27,7 @@ class PhpScript extends AbstractTask
      */
     public function execute()
     {
-        require $this->getFile()
-                     ->getRealPath();
+        require $this->getFile();
 
         return $this;
     }
@@ -36,7 +35,7 @@ class PhpScript extends AbstractTask
     /**
      * Get the target file
      *
-     * @return File
+     * @return string
      */
     public function getFile()
     {
@@ -46,15 +45,11 @@ class PhpScript extends AbstractTask
     /**
      * Set the target file
      *
-     * @param string|File $file
+     * @param string $file
      * @return Chgrp
      */
     public function setFile($file)
     {
-        if (!$file instanceof File) {
-            $file = new File($file);
-        }
-
         $this->_file = $file;
         return $this;
     }

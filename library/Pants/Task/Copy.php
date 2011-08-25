@@ -5,23 +5,22 @@
 
 namespace Pants\Task;
 
-use Pants\File,
-    Pants\Task\AbstractTask;
+use Pants\Task\AbstractFileTask;
 
 /**
  *
  */
-class Copy extends AbstractTask
+class Copy extends AbstractFileTask
 {
 
     /**
-     * The target file
-     * @var File
+     * Target file
+     * @var string
      */
     protected $_file;
 
     /**
-     * The destination file
+     * Destination file
      * @var string
      */
     protected $_destination;
@@ -39,7 +38,7 @@ class Copy extends AbstractTask
     /**
      * Get the target file
      *
-     * @return File
+     * @return string
      */
     public function getFile()
     {
@@ -53,8 +52,8 @@ class Copy extends AbstractTask
      */
     public function execute()
     {
-        $this->getFile()
-             ->copy($this->getDestination());
+        $this->getFileSystem()
+             ->copy($this->getFile(), $this->getDestination());
 
         return $this;
     }
@@ -74,15 +73,11 @@ class Copy extends AbstractTask
     /**
      * Set the target file
      *
-     * @param string|File $file
+     * @param string $file
      * @return Copy
      */
     public function setFile($file)
     {
-        if (!$file instanceof File) {
-            $file = new File($file);
-        }
-
         $this->_file = $file;
         return $this;
     }

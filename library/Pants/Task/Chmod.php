@@ -5,28 +5,19 @@
 
 namespace Pants\Task;
 
-use Pants\File,
-    Pants\FileSets,
-    Pants\FileSetTask,
-    Pants\Task\AbstractTask;
+use Pants\Task\AbstractFileTask;
 
 /**
  *
  */
-class Chmod extends AbstractTask implements FileSetTask
+class Chmod extends AbstractFileTask
 {
 
     /**
-     * The target file
-     * @var File
+     * Target file
+     * @var string
      */
     protected $_file;
-
-    /**
-     * Filesets
-     * @var FileSets
-     */
-    protected $_filesets;
 
     /**
      * Mode to set
@@ -35,31 +26,13 @@ class Chmod extends AbstractTask implements FileSetTask
     protected $_mode;
 
     /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        $this->_filesets = new FileSets();
-    }
-
-    /**
      * Get the target file
      *
-     * @return File
+     * @return string
      */
     public function getFile()
     {
         return $this->_file;
-    }
-
-    /**
-     * Get the target filesets
-     *
-     * @return FileSets
-     */
-    public function getFileSets()
-    {
-        return $this->_filesets;
     }
 
     /**
@@ -79,14 +52,8 @@ class Chmod extends AbstractTask implements FileSetTask
      */
     public function execute()
     {
-        $this->getFile()
-             ->setPermission($this->getMode());
-
-        foreach ($this->getFileSets() as $fileSet) {
-            foreach ($fileSet as $file) {
-                $file->setPermission($this->getMode());
-            }
-        }
+        $this->getFileSystem()
+             ->chown($this->getFile(), $this->getMode());
 
         return $this;
     }
@@ -94,15 +61,11 @@ class Chmod extends AbstractTask implements FileSetTask
     /**
      * Set the target file
      *
-     * @param string|File $file
+     * @param string $file
      * @return Chmod
      */
     public function setFile($file)
     {
-        if (!$file instanceof File) {
-            $file = new File($file);
-        }
-
         $this->_file = $file;
         return $this;
     }

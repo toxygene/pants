@@ -5,10 +5,9 @@
 
 namespace PantsTest\Task;
 
-use Pants\File,
-    Pants\File\RuntimeException,
-    Pants\Task\Chgrp,
-    PHPUnit_Framework_TestCase as TestCase;
+use Pants\Task\Chgrp,
+    PHPUnit_Framework_TestCase as TestCase,
+    Pile\FileSystem;
 
 /**
  *
@@ -32,22 +31,23 @@ class ChgrpTest extends TestCase
 
     public function testOwnerIsSetOnTheFileObject()
     {
-        $file = $this->getMock(
-            "Pants\File",
+        $fileSystem = $this->getMock(
+            "Pile\FileSystem",
             array(),
             array(),
             '',
             false
         );
 
-        $file->expects($this->once())
-             ->method("setGroup")
-             ->with("test")
-             ->will($this->returnValue($file));
+        $fileSystem->expects($this->once())
+                   ->method("chgrp")
+                   ->with("one", "two")
+                   ->will($this->returnValue($file));
 
         $this->_chown
-             ->setFile($file)
-             ->setGroup("test")
+             ->setFileSystem($fileSystem)
+             ->setFile("one")
+             ->setGroup("two")
              ->execute();
     }
 
