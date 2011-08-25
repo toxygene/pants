@@ -22,6 +22,7 @@ class Autoloader
         "Pants\Target",
         "Pants\Targets",
         "Pants\Task",
+        "Pants\Task\AbstractFileTask",
         "Pants\Task\AbstractTask",
         "Pants\Task\Call",
         "Pants\Task\Chgrp",

@@ -5,10 +5,9 @@
 
 namespace PantsTest\Task;
 
-use Pants\File,
-    Pants\File\RuntimeException,
-    Pants\Task\Chmod,
-    PHPUnit_Framework_TestCase as TestCase;
+use Pants\Task\Chmod,
+    PHPUnit_Framework_TestCase as TestCase,
+    Pile\FileSystem;
 
 /**
  *
@@ -32,21 +31,22 @@ class ChmodTest extends TestCase
 
     public function testPermissionsIsSetOnTheFileObject()
     {
-        $file = $this->getMock(
-            "Pants\File",
+        $fileSystem = $this->getMock(
+            "Pile\FileSystem",
             array(),
             array(),
             '',
             false
         );
 
-        $file->expects($this->once())
-             ->method("setPermission")
-             ->with("0755")
-             ->will($this->returnValue($file));
+        $fileSystem->expects($this->once())
+                   ->method("chmod")
+                   ->with("file", "0755")
+                   ->will($this->returnValue($fileSystem));
 
         $this->_chmod
-             ->setFile($file)
+             ->setFileSystem($fileSystem)
+             ->setFile("file")
              ->setMode("0755")
              ->execute();
     }

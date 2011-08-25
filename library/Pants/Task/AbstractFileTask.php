@@ -3,7 +3,7 @@
  *
  */
 
-namespace Pants;
+namespace Pants\Task;
 
 use Pants\Task\AbstractTask,
     Pile\FileSystem;
@@ -11,7 +11,7 @@ use Pants\Task\AbstractTask,
 /**
  *
  */
-class AbstractFileTask extends AbstractTask
+abstract class AbstractFileTask extends AbstractTask
 {
 
     /**

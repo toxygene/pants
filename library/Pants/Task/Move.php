@@ -5,13 +5,12 @@
 
 namespace Pants\Task;
 
-use Pants\File,
-    Pants\Task\AbstractTask;
+use Pants\Task\AbstractFileTask;
 
 /**
  *
  */
-class Move extends AbstractTask
+class Move extends AbstractFileTask
 {
 
     /**
@@ -54,7 +53,7 @@ class Move extends AbstractTask
     public function execute()
     {
         $this->getFileSystem()
-             ->move($this->getFile(), $this->getDescription());
+             ->move($this->getFile(), $this->getDestination());
 
         return $this;
     }

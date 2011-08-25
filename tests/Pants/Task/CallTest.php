@@ -22,9 +22,6 @@ class CallTest extends TestCase
     protected $_call;
 
     /**
-     * Mock project
-
-    /**
      * Setup the test case
      */
     public function setUp()
@@ -58,6 +55,11 @@ class CallTest extends TestCase
         $mock->expects($this->any())
              ->method("getName")
              ->will($this->returnValue("asdf"));
+
+        $mock->expects($this->once())
+             ->method("setProject")
+             ->with($project)
+             ->will($this->returnValue($mock));
 
         $mock->expects($this->once())
              ->method("execute")

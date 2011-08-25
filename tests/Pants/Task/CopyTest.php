@@ -5,10 +5,9 @@
 
 namespace PantsTest\Task;
 
-use Pants\File,
-    Pants\File\RuntimeException,
-    Pants\Task\Copy,
-    PHPUnit_Framework_TestCase as TestCase;
+use Pants\Task\Copy,
+    PHPUnit_Framework_TestCase as TestCase,
+    Pile\FileSystem;
 
 /**
  *
@@ -32,20 +31,22 @@ class CopyTest extends TestCase
 
     public function testOwnerIsSetOnTheFileObject()
     {
-        $file = $this->getMock(
-            "Pants\File",
+        $fileSystem = $this->getMock(
+            "Pile\FileSystem",
             array(),
             array(),
             '',
             false
         );
 
-        $file->expects($this->once())
-             ->method("copy")
-             ->with("destination");
+        $fileSystem->expects($this->once())
+                   ->method("copy")
+                   ->with("file", "destination")
+                   ->will($this->returnValue($fileSystem));
 
         $this->_copy
-             ->setFile($file)
+             ->setFileSystem($fileSystem)
+             ->setFile("file")
              ->setDestination("destination")
              ->execute();
     }

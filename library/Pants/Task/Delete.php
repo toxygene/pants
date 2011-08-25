@@ -37,7 +37,7 @@ class Delete extends AbstractFileTask
     public function execute()
     {
         $this->getFileSystem()
-             ->delete($this->getFile());
+             ->unlink($this->getFile());
 
         return $this;
     }

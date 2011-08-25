@@ -5,10 +5,9 @@
 
 namespace PantsTest\Task;
 
-use Pants\File,
-    Pants\File\RuntimeException,
-    Pants\Task\Chown,
-    PHPUnit_Framework_TestCase as TestCase;
+use Pants\Task\Chown,
+    PHPUnit_Framework_TestCase as TestCase,
+    Pile\FileSystem;
 
 /**
  *
@@ -32,22 +31,23 @@ class ChownTest extends TestCase
 
     public function testOwnerIsSetOnTheFileObject()
     {
-        $file = $this->getMock(
-            "Pants\File",
+        $fileSystem = $this->getMock(
+            "Pile\FileSystem",
             array(),
             array(),
             '',
             false
         );
 
-        $file->expects($this->once())
-             ->method("setOwner")
-             ->with("test")
-             ->will($this->returnValue($file));
+        $fileSystem->expects($this->once())
+                   ->method("chown")
+                   ->with("file", "owner")
+                   ->will($this->returnValue($fileSystem));
 
         $this->_chown
-             ->setFile($file)
-             ->setOwner("test")
+             ->setFileSystem($fileSystem)
+             ->setFile("file")
+             ->setOwner("owner")
              ->execute();
     }
 

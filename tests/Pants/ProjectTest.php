@@ -40,20 +40,9 @@ class ProjectTest extends TestCase
         $this->assertInstanceOf("Pants\Properties", $this->_project->getProperties());
     }
 
-    public function testTasksAreAutomaticallyExecuted()
+    public function testTasksAreExecutedBeforeTargets()
     {
-        $task = $this->getMock("Pants\Task");
-
-        $task->expects($this->once())
-             ->method("setProject")
-             ->with($this->_project)
-             ->will($this->returnValue($task));
-
-        $task->expects($this->once())
-             ->method("execute")
-             ->will($this->returnValue($task));
-
-        $this->_project->addTask($task);
+        $this->markTestIncomplete();
     }
 
 }

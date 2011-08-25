@@ -5,10 +5,9 @@
 
 namespace PantsTest\Task;
 
-use Pants\File,
-    Pants\File\RuntimeException,
-    Pants\Task\Delete,
-    PHPUnit_Framework_TestCase as TestCase;
+use Pants\Task\Delete,
+    PHPUnit_Framework_TestCase as TestCase,
+    Pile\FileSystem;
 
 /**
  *
@@ -32,19 +31,22 @@ class DeleteTest extends TestCase
 
     public function testOwnerIsSetOnTheFileObject()
     {
-        $file = $this->getMock(
-            "Pants\File",
+        $fileSystem = $this->getMock(
+            "Pile\FileSystem",
             array(),
             array(),
             '',
             false
         );
 
-        $file->expects($this->once())
-             ->method("delete");
+        $fileSystem->expects($this->once())
+                   ->method("delete")
+                   ->with("file")
+                   ->will($this->returnValue($fileSystem));
 
         $this->_delete
-             ->setFile($file)
+             ->setFileSystem($fileSystem)
+             ->setFile("file")
              ->execute();
     }
 

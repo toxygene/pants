@@ -11,7 +11,8 @@ require_once "../../pile/library/Pile/Autoloader.php";
 $pileAutoloader = new Pile\Autoloader();
 $pileAutoloader->register();
 
-// PantsTest autoloader
 spl_autoload_register(function ($className) {
-    require_once str_replace("_", "/", $className) . ".php";
+    if (preg_match("#^PHPUnit_#", $className)) {
+        require_once str_replace("_", DIRECTORY_SEPARATOR, $className) . ".php";
+    }
 });

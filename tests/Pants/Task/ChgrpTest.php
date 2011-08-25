@@ -19,14 +19,14 @@ class ChgrpTest extends TestCase
      * Chgrp task
      * @var Chgrp
      */
-    protected $_chown;
+    protected $_chgrp;
 
     /**
      * Setup the test
      */
     public function setUp()
     {
-        $this->_chown = new Chgrp();
+        $this->_chgrp = new Chgrp();
     }
 
     public function testOwnerIsSetOnTheFileObject()
@@ -41,13 +41,13 @@ class ChgrpTest extends TestCase
 
         $fileSystem->expects($this->once())
                    ->method("chgrp")
-                   ->with("one", "two")
+                   ->with("file", "group")
                    ->will($this->returnValue($file));
 
-        $this->_chown
+        $this->_chgrp
              ->setFileSystem($fileSystem)
-             ->setFile("one")
-             ->setGroup("two")
+             ->setFile("file")
+             ->setGroup("group")
              ->execute();
     }
 

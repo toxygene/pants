@@ -53,7 +53,7 @@ class Chmod extends AbstractFileTask
     public function execute()
     {
         $this->getFileSystem()
-             ->chown($this->getFile(), $this->getMode());
+             ->chmod($this->getFile(), $this->getMode());
 
         return $this;
     }
