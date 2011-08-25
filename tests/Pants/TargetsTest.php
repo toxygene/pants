@@ -15,12 +15,6 @@ class TargetsTest extends TestCase
 {
 
     /**
-     * Project
-     * @var \Pants\Project
-     */
-    protected $_project;
-
-    /**
      * Targets
      * @var Targets
      */
@@ -33,17 +27,12 @@ class TargetsTest extends TestCase
     {
         $this->_project = $this->getMock("\Pants\Project");
 
-        $this->_targets = new Targets($this->_project);
+        $this->_targets = new Targets();
     }
 
     public function testAddingATargetSetsTheProject()
     {
         $target = $this->getMock("\Pants\Target");
-
-        $target->expects($this->once())
-               ->method("setProject")
-               ->with($this->equalTo($this->_project))
-               ->will($this->returnValue($target));
 
         $target->expects($this->exactly(2))
                ->method("getName")
@@ -55,11 +44,6 @@ class TargetsTest extends TestCase
     public function testTargetsCanBeCheckedForExistance()
     {
         $target = $this->getMock("\Pants\Target");
-
-        $target->expects($this->once())
-               ->method("setProject")
-               ->with($this->equalTo($this->_project))
-               ->will($this->returnValue($target));
 
         $target->expects($this->exactly(2))
                ->method("getName")
@@ -75,11 +59,6 @@ class TargetsTest extends TestCase
     {
         $target = $this->getMock("\Pants\Target");
 
-        $target->expects($this->once())
-               ->method("setProject")
-               ->with($this->equalTo($this->_project))
-               ->will($this->returnValue($target));
-
         $target->expects($this->exactly(2))
                ->method("getName")
                ->will($this->returnValue("test"));
@@ -91,11 +70,6 @@ class TargetsTest extends TestCase
         unset($this->_targets->test);
 
         $this->assertFalse(isset($this->_targets->test));
-    }
-
-    public function testProjectCanBeRetrieved()
-    {
-        $this->assertSame($this->_project, $this->_targets->getProject());
     }
 
 }
