@@ -1,0 +1,116 @@
+<?xml version="1.0"?>
+<package version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+    <name>Pants</name>
+    <uri>http://pear.superglobals.com/pants</uri>
+    <summary>A PHP build tool</summary>
+    <description>A PHP build tool based on Apache Ant</description>
+    <lead>
+        <name>Justin Henderickson</name>
+        <user>jhendric</user>
+        <email>justin.hendrickson@gmail.com</email>
+        <active>yes</active>
+    </lead>
+    <date>2011-08-25</date>
+    <version>
+        <release>0.0.1</release>
+        <api>0.0.0</api>
+    </version>
+    <stability>
+        <release>alpha</release>
+        <api>alpha</api>
+    </stability>
+    <license uri="http://www.opensource.org/licenses/BSD-3-Clause">BSD 3-Clause</license>
+    <notes>Initial Release</notes>
+    <contents>
+        <dir name="/">
+            <dir name="library">
+                <dir name="Pants">
+                    <dir name="Properties">
+                        <file name="PropertyNameCycleException.php" role="php" />
+                    </dir>
+                    <dir name="Task">
+                        <file name="AbstractFileTask.php" role="php" />
+                        <file name="AbstractTask.php" role="php" />
+                        <file name="Call.php" role="php" />
+                        <file name="Chgrp.php" role="php" />
+                        <file name="Chmod.php" role="php" />
+                        <file name="Chown.php" role="php" />
+                        <file name="Copy.php" role="php" />
+                        <file name="Delete.php" role="php" />
+                        <file name="Exception.php" role="php" />
+                        <file name="Exec.php" role="php" />
+                        <file name="Move.php" role="php" />
+                        <file name="Output.php" role="php" />
+                        <file name="PhpScript.php" role="php" />
+                        <file name="Property.php" role="php" />
+                    </dir>
+                    <file name="Autoloader.php" role="php" />
+                    <file name="Project.php" role="php" />
+                    <file name="Properties.php" role="php" />
+                    <file name="Target.php" role="php" />
+                    <file name="Targets.php" role="php" />
+                    <file name="Task.php" role="php" />
+                    <file name="Tasks.php" role="php" />
+                </dir>
+            </dir>
+            <dir name="tests">
+                <dir name="Pants">
+                    <dir name="Task">
+                        <file name="CallTest.php" role="test" />
+                        <file name="ChgrpTest.php" role="test" />
+                        <file name="ChmodTest.php" role="test" />
+                        <file name="ChownTest.php" role="test" />
+                        <file name="CopyTest.php" role="test" />
+                        <file name="DeleteTest.php" role="test" />
+                        <file name="MoveTest.php" role="test" />
+                        <file name="OutputTest.php" role="test" />
+                        <file name="PhpScriptTest.php" role="test" />
+                        <file name="PropertyTest.php" role="test" />
+                    </dir>
+                    <file name="ProjectTest.php" role="test" />
+                    <file name="PropertiesTest.php" role="test" />
+                    <file name="TargetsTest.php" role="test" />
+                    <file name="TargetTest.php" role="test" />
+                </dir>
+            </dir>
+            <file name="cli-interface.php" role="script" />
+            <file name="README" role="doc" />
+        </dir>
+    </contents>
+    <dependencies>
+        <required>
+            <php>
+                <min>5.3.0</min>
+            </php>
+            <pearinstaller>
+                <min>1.4.8</min>
+            </pearinstaller>
+        </required>
+    </dependencies>
+    <phprelease>
+        <filelist>
+            <install name="library/Pants/Properties/PropertyNameCycleException.php" as="Pants/Property/PropertyNameCycleException.php" />
+            <install name="library/Pants/Task/AbstractFileTask.php" as="Pants/Task/AbstractFileTask.php" />
+            <install name="library/Pants/Task/AbstractTask.php" as="Pants/Task/AbstractTask.php" />
+            <install name="library/Pants/Task/Call.php" as="Pants/Task/Call.php" />
+            <install name="library/Pants/Task/Chgrp.php" as="Pants/Task/Chgrp.php" />
+            <install name="library/Pants/Task/Chmod.php" as="Pants/Task/Chmod.php" />
+            <install name="library/Pants/Task/Chown.php" as="Pants/Task/Chown.php" />
+            <install name="library/Pants/Task/Copy.php" as="Pants/Task/Copy.php" />
+            <install name="library/Pants/Task/Delete.php" as="Pants/Task/Delete.php" />
+            <install name="library/Pants/Task/Exception.php" as="Pants/Task/Exception.php" />
+            <install name="library/Pants/Task/Exec.php" as="Pants/Task/Exec.php" />
+            <install name="library/Pants/Task/Move.php" as="Pants/Task/Move.php" />
+            <install name="library/Pants/Task/Output.php" as="Pants/Task/Output.php" />
+            <install name="library/Pants/Task/PhpScript.php" as="Pants/Task/PhpScript.php" />
+            <install name="library/Pants/Task/Property.php" as="Pants/Task/Property.php" />
+            <install name="library/Pants/Autoloader.php" as="Pants/Autoloader.php" />
+            <install name="library/Pants/Project.php" as="Pants/Project.php" />
+            <install name="library/Pants/Properties.php" as="Pants/Properties.php" />
+            <install name="library/Pants/Target.php" as="Pants/Target.php" />
+            <install name="library/Pants/Targets.php" as="Pants/Targets.php" />
+            <install name="library/Pants/Task.php" as="Pants/Task.php" />
+            <install name="library/Pants/Tasks.php" as="Pants/Tasks.php" />
+        </filelist>
+    </phprelease>
+</package>
