@@ -40,7 +40,7 @@ class DeleteTest extends TestCase
         );
 
         $fileSystem->expects($this->once())
-                   ->method("delete")
+                   ->method("unlink")
                    ->with("file")
                    ->will($this->returnValue($fileSystem));
 

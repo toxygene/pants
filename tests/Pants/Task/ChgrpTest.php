@@ -42,7 +42,7 @@ class ChgrpTest extends TestCase
         $fileSystem->expects($this->once())
                    ->method("chgrp")
                    ->with("file", "group")
-                   ->will($this->returnValue($file));
+                   ->will($this->returnValue($fileSystem));
 
         $this->_chgrp
              ->setFileSystem($fileSystem)

@@ -5,7 +5,8 @@
 
 namespace PantsTest\Task;
 
-use Pants\Task\Output,
+use Pants\Project,
+    Pants\Task\Output,
     PHPUnit_Framework_TestCase as TestCase;
 
 /**
@@ -26,6 +27,7 @@ class OutputTest extends TestCase
     public function setUp()
     {
         $this->_task = new Output();
+        $this->_task->setProject(new Project());
     }
 
     public function testMessageCanBeSet()
