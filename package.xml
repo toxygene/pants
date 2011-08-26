@@ -72,6 +72,8 @@
                     <file name="TargetsTest.php" role="test" />
                     <file name="TargetTest.php" role="test" />
                 </dir>
+                <file name="bootstrap.php" role="test" />
+                <file name="phpunit.xml" role="test" />
             </dir>
             <file name="cli-interface.php" role="script" />
             <file name="README" role="doc" />
