@@ -68,7 +68,49 @@ class ProjectTest extends TestCase
 
     public function testTasksAreExecutedBeforeTargets()
     {
-        $this->markTestIncomplete();
+        $task = $this->getMock("\Pants\Task\AbstractTask");
+
+        $task->expects($this->once())
+             ->method("setProject")
+             ->with($this->_project)
+             ->will($this->returnValue($task));
+
+        $task->expects($this->once())
+             ->method("execute")
+             ->will($this->returnValue($task));
+
+        $this->_project
+             ->getTasks()
+             ->add($task);
+
+        $this->_project
+             ->execute();
+    }
+
+    public function testDefaultTargetIsExecutedIfNoTargetsAreSpecified()
+    {
+        $target = $this->getMock("\Pants\Target");
+
+        $target->expects($this->once())
+               ->method("getName")
+               ->will($this->returnValue("default"));
+
+        $target->expects($this->once())
+               ->method("setProject")
+               ->with($this->_project)
+               ->will($this->returnValue($target));
+
+        $target->expects($this->once())
+               ->method("execute")
+               ->will($this->returnValue($target));
+
+        $this->_project
+             ->setDefault("default")
+             ->getTargets()
+             ->add($target);
+
+        $this->_project
+             ->execute();
     }
 
 }

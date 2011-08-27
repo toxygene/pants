@@ -89,6 +89,10 @@ class Project
         }
 
         if (!$targets) {
+            if (!$this->getDefault()) {
+                return $this;
+            }
+
             $targets = array($this->getDefault());
         } else {
             $targets = (array) $targets;
