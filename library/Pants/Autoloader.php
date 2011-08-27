@@ -63,6 +63,7 @@ class Autoloader
         "Pants\Task\Output",
         "Pants\Task\PhpScript",
         "Pants\Task\Property",
+        "Pants\Task\Touch",
         "Pants\Tasks"
     );
 
