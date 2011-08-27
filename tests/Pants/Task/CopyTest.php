@@ -31,7 +31,8 @@
 
 namespace PantsTest\Task;
 
-use Pants\Task\Copy,
+use Pants\Project,
+    Pants\Task\Copy,
     PHPUnit_Framework_TestCase as TestCase,
     Pile\FileSystem;
 
@@ -53,6 +54,7 @@ class CopyTest extends TestCase
     public function setUp()
     {
         $this->_copy = new Copy();
+        $this->_copy->setProject(new Project());
     }
 
     public function testOwnerIsSetOnTheFileObject()

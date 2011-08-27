@@ -32,7 +32,8 @@
 namespace Pants\Task;
 
 use Pants\Project,
-    Pants\Task;
+    Pants\Task,
+    Pants\Task\Exception;
 
 /**
  *
@@ -55,7 +56,7 @@ abstract class AbstractTask implements Task
     public function filterProperties($string)
     {
         if (!$this->getProject()) {
-            throw new Exception("Fail");
+            throw new Exception("The project has not been set");
         }
 
         return $this->getProject()

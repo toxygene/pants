@@ -31,7 +31,8 @@
 
 namespace PantsTest\Task;
 
-use Pants\Task\Chmod,
+use Pants\Project,
+    Pants\Task\Chmod,
     PHPUnit_Framework_TestCase as TestCase,
     Pile\FileSystem;
 
@@ -53,6 +54,7 @@ class ChmodTest extends TestCase
     public function setUp()
     {
         $this->_chmod = new Chmod();
+        $this->_chmod->setProject(new Project());
     }
 
     public function testPermissionsIsSetOnTheFileObject()

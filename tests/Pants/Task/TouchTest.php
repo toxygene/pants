@@ -31,7 +31,8 @@
 
 namespace PantsTest\Task;
 
-use Pants\Task\Touch,
+use Pants\Project,
+    Pants\Task\Touch,
     PHPUnit_Framework_TestCase as TestCase,
     Pile\FileSystem;
 
@@ -53,6 +54,7 @@ class TouchTest extends TestCase
     public function setUp()
     {
         $this->_touch = new Touch();
+        $this->_touch->setProject(new Project());
     }
 
     public function testTouchesTheFile()

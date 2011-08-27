@@ -31,7 +31,8 @@
 
 namespace PantsTest\Task;
 
-use Pants\Task\Chgrp,
+use Pants\Project,
+    Pants\Task\Chgrp,
     PHPUnit_Framework_TestCase as TestCase,
     Pile\FileSystem;
 
@@ -53,6 +54,7 @@ class ChgrpTest extends TestCase
     public function setUp()
     {
         $this->_chgrp = new Chgrp();
+        $this->_chgrp->setProject(new Project());
     }
 
     public function testOwnerIsSetOnTheFileObject()

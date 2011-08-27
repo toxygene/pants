@@ -31,7 +31,8 @@
 
 namespace PantsTest\Task;
 
-use Pants\Task\Move,
+use Pants\Project,
+    Pants\Task\Move,
     PHPUnit_Framework_TestCase as TestCase,
     Pile\FileSystem;
 
@@ -53,6 +54,7 @@ class MoveTest extends TestCase
     public function setUp()
     {
         $this->_move = new Move();
+        $this->_move->setProject(new Project());
     }
 
     public function testOwnerIsSetOnTheFileObject()
@@ -61,7 +63,7 @@ class MoveTest extends TestCase
             "Pile\FileSystem",
             array(),
             array(),
-            '',
+            "",
             false
         );
 

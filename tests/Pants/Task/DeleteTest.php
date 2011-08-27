@@ -31,7 +31,8 @@
 
 namespace PantsTest\Task;
 
-use Pants\Task\Delete,
+use Pants\Project,
+    Pants\Task\Delete,
     PHPUnit_Framework_TestCase as TestCase,
     Pile\FileSystem;
 
@@ -53,6 +54,7 @@ class DeleteTest extends TestCase
     public function setUp()
     {
         $this->_delete = new Delete();
+        $this->_delete->setProject(new Project());
     }
 
     public function testOwnerIsSetOnTheFileObject()

@@ -53,6 +53,7 @@ class CallTest extends TestCase
     public function setUp()
     {
         $this->_call = new Call();
+        $this->_call->setProject(new Project());
     }
 
     public function testTargetCanBeSet()
@@ -67,7 +68,6 @@ class CallTest extends TestCase
         $this->setExpectedException("\InvalidArgumentException");
 
         $this->_call
-             ->setProject(new Project())
              ->setTarget("asdf")
              ->execute();
     }
@@ -95,7 +95,6 @@ class CallTest extends TestCase
                 ->add($mock);
 
         $this->_call
-             ->setProject($project)
              ->setTarget("asdf")
              ->execute();
     }

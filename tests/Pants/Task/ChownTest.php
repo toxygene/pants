@@ -31,7 +31,8 @@
 
 namespace PantsTest\Task;
 
-use Pants\Task\Chown,
+use Pants\Project,
+    Pants\Task\Chown,
     PHPUnit_Framework_TestCase as TestCase,
     Pile\FileSystem;
 
@@ -53,6 +54,7 @@ class ChownTest extends TestCase
     public function setUp()
     {
         $this->_chown = new Chown();
+        $this->_chown->setProject(new Project());
     }
 
     public function testOwnerIsSetOnTheFileObject()
