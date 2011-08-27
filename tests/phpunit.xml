@@ -4,4 +4,9 @@
             <directory>.</directory>
         </testsuite>
     </testsuites>
+    <filter>
+        <whitelist addUncoveredFilesFromWhitelist="true">
+            <directory>../library</directory>
+        </whitelist>
+    </filter>
 </phpunit>
