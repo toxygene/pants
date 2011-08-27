@@ -31,7 +31,8 @@
 
 namespace PantsTest\Task;
 
-use Pants\Task\PhpScript,
+use Pants\Project,
+    Pants\Task\PhpScript,
     PHPUnit_Framework_TestCase as TestCase;
 
 /**
@@ -52,6 +53,19 @@ class PhpScriptTest extends TestCase
     public function setUp()
     {
         $this->_task = new PhpScript();
+        $this->_task->setProject(new Project());
+    }
+
+    public function testScriptIsIncludedOnExecute()
+    {
+        $this->_task->setFile(__DIR__ . "/_files/php-script-1.php");
+
+        ob_start();
+        $this->_task->execute();
+        $output = ob_get_contents();
+        ob_end_clean();
+
+        $this->assertEquals("PhpScript executed", $output);
     }
 
 }
