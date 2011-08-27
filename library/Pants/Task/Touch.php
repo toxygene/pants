@@ -36,7 +36,7 @@ use Pants\Task\AbstractFileTask;
 /**
  *
  */
-class Move extends AbstractFileTask
+class Touch extends AbstractFileTask
 {
 
     /**
@@ -44,22 +44,6 @@ class Move extends AbstractFileTask
      * @var string
      */
     protected $_file;
-
-    /**
-     * Destination file
-     * @var string
-     */
-    protected $_destination;
-
-    /**
-     * Get the destination
-     *
-     * @return string
-     */
-    public function getDestination()
-    {
-        return $this->_destination;
-    }
 
     /**
      * Get the target file
@@ -74,27 +58,17 @@ class Move extends AbstractFileTask
     /**
      * Execute the task
      *
-     * @return Move
+     * @return Touch
      */
     public function execute()
     {
-        $this->getFileSystem()->move(
-            $this->filterProperty($this->getFile()),
-            $this->filterProperty($this->getDestination())
-        );
+        $file = $this->getProject()
+                     ->getProperties()
+                     ->filter($this->getFile());
 
-        return $this;
-    }
+        $this->getFileSystem()
+             ->touch($this->filterProperty($this->getFile()));
 
-    /**
-     * Set the destination file
-     *
-     * @param string $destination
-     * @return Move
-     */
-    public function setDestination($destination)
-    {
-        $this->_destination = $destination;
         return $this;
     }
 
@@ -102,7 +76,7 @@ class Move extends AbstractFileTask
      * Set the target file
      *
      * @param string $file
-     * @return Move
+     * @return Chgrp
      */
     public function setFile($file)
     {

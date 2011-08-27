@@ -29,85 +29,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Pants\Task;
+namespace PantsTest\Task;
 
-use Pants\Task\AbstractFileTask;
+use Pants\Task\Touch,
+    PHPUnit_Framework_TestCase as TestCase,
+    Pile\FileSystem;
 
 /**
  *
  */
-class Move extends AbstractFileTask
+class TouchTest extends TestCase
 {
 
     /**
-     * Target file
-     * @var string
+     * Touch task
+     * @var Touch
      */
-    protected $_file;
+    protected $_touch;
 
     /**
-     * Destination file
-     * @var string
+     * Setup the test
      */
-    protected $_destination;
-
-    /**
-     * Get the destination
-     *
-     * @return string
-     */
-    public function getDestination()
+    public function setUp()
     {
-        return $this->_destination;
+        $this->_touch = new Touch();
     }
 
-    /**
-     * Get the target file
-     *
-     * @return string
-     */
-    public function getFile()
+    public function testTouchesTheFile()
     {
-        return $this->_file;
-    }
-
-    /**
-     * Execute the task
-     *
-     * @return Move
-     */
-    public function execute()
-    {
-        $this->getFileSystem()->move(
-            $this->filterProperty($this->getFile()),
-            $this->filterProperty($this->getDestination())
+        $fileSystem = $this->getMock(
+            "Pile\FileSystem",
+            array(),
+            array(),
+            '',
+            false
         );
 
-        return $this;
-    }
+        $fileSystem->expects($this->once())
+                   ->method("touch")
+                   ->with("file")
+                   ->will($this->returnValue($fileSystem));
 
-    /**
-     * Set the destination file
-     *
-     * @param string $destination
-     * @return Move
-     */
-    public function setDestination($destination)
-    {
-        $this->_destination = $destination;
-        return $this;
-    }
-
-    /**
-     * Set the target file
-     *
-     * @param string $file
-     * @return Move
-     */
-    public function setFile($file)
-    {
-        $this->_file = $file;
-        return $this;
+        $this->_touch
+             ->setFileSystem($fileSystem)
+             ->setFile("file")
+             ->execute();
     }
 
 }

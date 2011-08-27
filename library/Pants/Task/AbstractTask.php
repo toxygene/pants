@@ -47,6 +47,19 @@ abstract class AbstractTask implements Task
     protected $_project;
 
     /**
+     * Filter a string for any properties
+     *
+     * @param string $string
+     * @return string
+     */
+    public function filterProperty($string)
+    {
+        return $this->getProject()
+                    ->getProperties()
+                    ->filter($string);
+    }
+
+    /**
      * Get the project
      *
      * @return Project
