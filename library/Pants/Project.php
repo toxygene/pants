@@ -90,11 +90,13 @@ class Project
 
         if (!$targets) {
             $targets = array($this->getDefault());
+        } else {
+            $targets = (array) $targets;
         }
 
         foreach ($targets as $target) {
             $this->getTargets()
-                 ->$target
+                 ->{$target}
                  ->setProject($this)
                  ->execute();
         }

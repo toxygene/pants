@@ -75,7 +75,8 @@ class Target extends AbstractTask
     public function execute()
     {
         foreach ($this->getTasks() as $task) {
-            $task->execute();
+            $task->setProject($this->getProject())
+                 ->execute();
         }
 
         return $this;

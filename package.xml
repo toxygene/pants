@@ -43,6 +43,7 @@
                         <file name="Output.php" role="php" />
                         <file name="PhpScript.php" role="php" />
                         <file name="Property.php" role="php" />
+                        <file name="Touch.php" role="php" />
                     </dir>
                     <file name="Autoloader.php" role="php" />
                     <file name="Project.php" role="php" />
@@ -62,10 +63,12 @@
                         <file name="ChownTest.php" role="test" />
                         <file name="CopyTest.php" role="test" />
                         <file name="DeleteTest.php" role="test" />
+                        <file name="ExecTest.php" role="test" />
                         <file name="MoveTest.php" role="test" />
                         <file name="OutputTest.php" role="test" />
                         <file name="PhpScriptTest.php" role="test" />
                         <file name="PropertyTest.php" role="test" />
+                        <file name="TouchTest.php" role="test" />
                     </dir>
                     <file name="ProjectTest.php" role="test" />
                     <file name="PropertiesTest.php" role="test" />
@@ -106,6 +109,7 @@
             <install name="library/Pants/Task/Output.php" as="Pants/Task/Output.php" />
             <install name="library/Pants/Task/PhpScript.php" as="Pants/Task/PhpScript.php" />
             <install name="library/Pants/Task/Property.php" as="Pants/Task/Property.php" />
+            <install name="library/Pants/Task/Touch.php" as="Pants/Task/Touch.php" />
             <install name="library/Pants/Autoloader.php" as="Pants/Autoloader.php" />
             <install name="library/Pants/Project.php" as="Pants/Project.php" />
             <install name="library/Pants/Properties.php" as="Pants/Properties.php" />
@@ -113,6 +117,22 @@
             <install name="library/Pants/Targets.php" as="Pants/Targets.php" />
             <install name="library/Pants/Task.php" as="Pants/Task.php" />
             <install name="library/Pants/Tasks.php" as="Pants/Tasks.php" />
+            <!--
+            <install name="tests/Pants/Task/CallTest.php" as="Pants/Task/CallTest.php" />
+            <install name="tests/Pants/Task/ChgrpTest.php" as="Pants/Task/ChgrpTest.php" />
+            <install name="tests/Pants/Task/ChmodTest.php" as="Pants/Task/ChmodTest.php" />
+            <install name="tests/Pants/Task/ChownTest.php" as="Pants/Task/ChownTest.php" />
+            <install name="tests/Pants/Task/CopyTest.php" as="Pants/Task/ChownTest.php" />
+            <install name="tests/Pants/Task/DeleteTest.php" as="Pants/Task/DeleteTest.php" />
+            <install name="tests/Pants/Task/ExecTest.php" as="Pants/Task/ExecTest.php" />
+            <install name="tests/Pants/Task/MoveTest.php" as="Pants/Task/MoveTest.php" />
+            <install name="tests/Pants/Task/OutputTest.php" as="Pants/Task/MoveTest.php" />
+            <install name="tests/Pants/Task/PhpScriptTest.php" as="Pants/Task/PhpScriptTest.php" />
+            <install name="tests/Pants/Task/PropertyTest.php" as="Pants/Task/PropertyTest.php" />
+            <install name="tests/Pants/Task/TouchTest.php" as="Pants/Task/TouchTest.php" />
+            <install name="tests/bootstrap.php" as="bootstrap.php" />
+            <install name="tests/phpunit.xml" as="phpunit.xml" />
+            -->
         </filelist>
     </phprelease>
 </package>

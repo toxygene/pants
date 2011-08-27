@@ -29,14 +29,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-set_include_path(".:/usr/share/php");
-
-require_once "../library/Pants/Autoloader.php";
+require_once "Pants/Autoloader.php";
 
 $pantsAutoloader = new Pants\Autoloader();
 $pantsAutoloader->register();
 
-require_once "../../pile/library/Pile/Autoloader.php";
+require_once "Pile/Autoloader.php";
 
 $pileAutoloader = new Pile\Autoloader();
 $pileAutoloader->register();

@@ -48,6 +48,7 @@ abstract class AbstractTask implements Task
 
     /**
      * Get the project
+     *
      * @return Project
      */
     public function getProject()
