@@ -31,7 +31,8 @@
 
 namespace PantsTest;
 
-use Pants\Target,
+use Pants\Project,
+    Pants\Target,
     PHPUnit_Framework_TestCase as TestCase;
 
 /**
@@ -39,6 +40,12 @@ use Pants\Target,
  */
 class TargetTest extends TestCase
 {
+
+    /**
+     * Project
+     * @var Project
+     */
+    protected $_project;
 
     /**
      * Target
@@ -51,7 +58,10 @@ class TargetTest extends TestCase
      */
     public function setUp()
     {
-        $this->_target = new Target;
+        $this->_target = new Target();
+        $this->_project = new Project();
+
+        $this->_target->setProject($this->_project);
     }
 
     public function testNameCanBeSet()
@@ -76,6 +86,11 @@ class TargetTest extends TestCase
     public function testTasksAreExecutedOnTargetExecute()
     {
         $task = $this->getMock("\Pants\Task");
+
+        $task->expects($this->exactly(2))
+             ->method("setProject")
+             ->with($this->_project)
+             ->will($this->returnValue($task));
 
         $task->expects($this->exactly(2))
              ->method("execute")

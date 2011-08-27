@@ -95,6 +95,7 @@ class CallTest extends TestCase
                 ->add($mock);
 
         $this->_call
+             ->setProject($project)
              ->setTarget("asdf")
              ->execute();
     }
