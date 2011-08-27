@@ -31,12 +31,14 @@
 
 namespace Pants\Task;
 
-use Pants\Task\AbstractFileTask;
+use Pants\BuildException,
+    Pants\Task\AbstractFileSystemTask,
+    Pile\Exception as PileException;
 
 /**
  *
  */
-class Touch extends AbstractFileTask
+class Touch extends AbstractFileSystemTask
 {
 
     /**
@@ -62,9 +64,13 @@ class Touch extends AbstractFileTask
      */
     public function execute()
     {
-        $this->getFileSystem()->touch(
-            $this->filterProperties($this->getFile())
-        );
+        $file = $this->filterProperties($this->getFile());
+
+        try {
+            $this->getFileSystem()->touch($file);
+        } catch (PileException $e) {
+            throw new BuildException("Could not touch '{$file}'", null, $e);
+        }
 
         return $this;
     }

@@ -52,9 +52,13 @@ class Call extends AbstractTask
      */
     public function execute()
     {
-        $this->getProject()->execute(
-            $this->filterProperties($this->getTarget())
-        );
+        $target = $this->filterProperties($this->getTarget());
+
+        try {
+            $this->getProject()->execute($target);
+        } catch (InvalidArgumentException $e) {
+            throw new BuildException("Could not execute '{$target}'", null, $e);
+        }
 
         return $this;
     }

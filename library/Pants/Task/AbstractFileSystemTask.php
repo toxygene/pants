@@ -31,59 +31,43 @@
 
 namespace Pants\Task;
 
-use Pants\BuildException,
-    Pants\Task\AbstractFileSystemTask,
-    Pile\Exception as PileException;
+use Pants\Task\AbstractTask,
+    Pile\FileSystem;
 
 /**
  *
  */
-class Delete extends AbstractFileSystemTask
+abstract class AbstractFileSystemTask extends AbstractTask
 {
 
     /**
-     * Target file
-     * @var string
+     * FileSystem object
+     * @var FileSystem
      */
-    protected $_file;
+    private $_fileSystem;
 
     /**
-     * Get the target file
+     * Get the file system
      *
-     * @return string
+     * @return FileSystem
      */
-    public function getFile()
+    public function getFileSystem()
     {
-        return $this->_file;
-    }
-
-    /**
-     * Execute the task
-     *
-     * @return Delete
-     */
-    public function execute()
-    {
-        $file = $this->filterProperties($this->getFile());
-
-        try {
-            $this->getFileSystem()->unlink($file);
-        } catch (PileException $e) {
-            throw new BuildException("Could not delete '{$file}'", null, $e);
+        if (!$this->_fileSystem) {
+            $this->_fileSystem = new FileSystem();
         }
-
-        return $this;
+        return $this->_fileSystem;
     }
 
     /**
-     * Set the target file
+     * Set the file system
      *
-     * @param string $file
-     * @return Delete
+     * @param FileSystem $fileSystem
+     * @return AbstractFileTask
      */
-    public function setFile($file)
+    public function setFileSystem(FileSystem $fileSystem)
     {
-        $this->_file = $file;
+        $this->_fileSystem = $fileSystem;
         return $this;
     }
 

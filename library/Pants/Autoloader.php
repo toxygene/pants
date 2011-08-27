@@ -42,13 +42,14 @@ class Autoloader
      * @var array
      */
     private $_classes = array(
+        "Pants\BuildException",
         "Pants\Project",
         "Pants\Properties",
         "Pants\Properties\PropertyNameCycleException",
         "Pants\Target",
         "Pants\Targets",
         "Pants\Task",
-        "Pants\Task\AbstractFileTask",
+        "Pants\Task\AbstractFileSystemTask",
         "Pants\Task\AbstractTask",
         "Pants\Task\Call",
         "Pants\Task\Chgrp",

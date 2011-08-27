@@ -90,6 +90,10 @@
             <pearinstaller>
                 <min>1.4.8</min>
             </pearinstaller>
+            <package>
+                <name>Pile</name>
+                <channel>toxygene.pearfarm.org</channel>
+            </package>
         </required>
     </dependencies>
     <phprelease>

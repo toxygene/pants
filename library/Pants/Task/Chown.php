@@ -31,12 +31,14 @@
 
 namespace Pants\Task;
 
-use Pants\Task\AbstractFileTask;
+use Pants\BuildException,
+    Pants\Task\AbstractFileSystemTask,
+    Pile\Exception as PileException;
 
 /**
  *
  */
-class Chown extends AbstractFileTask
+class Chown extends AbstractFileSystemTask
 {
 
     /**
@@ -78,10 +80,14 @@ class Chown extends AbstractFileTask
      */
     public function execute()
     {
-        $this->getFileSystem()->chown(
-            $this->filterProperties($this->getFile()),
-            $this->filterProperties($this->getOwner())
-        );
+        $file  = $this->filterProperties($this->getFile());
+        $owner = $this->filterProperties($this->getOwner());
+
+        try {
+            $this->getFileSystem()->chown($file, $owner);
+        } catch (PileException $e) {
+            throw new BuildException("Could not chown '{$file}' to '{$owner}'", null, $e);
+        }
 
         return $this;
     }
