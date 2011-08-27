@@ -56,17 +56,6 @@ class TargetsTest extends TestCase
         $this->_targets = new Targets();
     }
 
-    public function testAddingATargetSetsTheProject()
-    {
-        $target = $this->getMock("\Pants\Target");
-
-        $target->expects($this->exactly(2))
-               ->method("getName")
-               ->will($this->returnValue("test"));
-
-        $this->_targets->add($target);
-    }
-
     public function testTargetsCanBeCheckedForExistance()
     {
         $target = $this->getMock("\Pants\Target");
@@ -96,6 +85,13 @@ class TargetsTest extends TestCase
         unset($this->_targets->test);
 
         $this->assertFalse(isset($this->_targets->test));
+    }
+
+    public function testUnsettingATargetThatDoesNotExistThrowsAnException()
+    {
+        $this->setExpectedException("InvalidArgumentException");
+
+        unset($this->_targets->invalid);
     }
 
 }

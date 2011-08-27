@@ -74,22 +74,6 @@ class Targets
     }
 
     /**
-     * Set a target
-     *
-     * @param string $name
-     * @param mixed $value
-     * @throws InvalidArgumentException
-     */
-    public function __set($name, $value)
-    {
-        if (!$value instanceof Target) {
-            throw new InvalidArgumentException("The value must be a target");
-        }
-
-        $this->_targets[$name] = $value;
-    }
-
-    /**
      * Unset a target
      *
      * @param string $name
@@ -113,11 +97,11 @@ class Targets
      */
     public function add(Target $target)
     {
-        if (isset($this->{$target->getName()})) {
-            throw new InvalidArgumentException("A target already exists with the name of '{$target->getName()}'");
+        if (isset($this->_targets[$target->getName()])) {
+            throw new InvalidArgumentException("A target already exists with the name of '{$name}'");
         }
 
-        $this->{$target->getName()} = $target;
+        $this->_targets[$target->getName()] = $target;
 
         return $this;
     }
