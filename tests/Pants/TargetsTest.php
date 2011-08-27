@@ -60,7 +60,7 @@ class TargetsTest extends TestCase
     {
         $target = $this->getMock("\Pants\Target");
 
-        $target->expects($this->exactly(2))
+        $target->expects($this->once())
                ->method("getName")
                ->will($this->returnValue("test"));
 
@@ -74,7 +74,7 @@ class TargetsTest extends TestCase
     {
         $target = $this->getMock("\Pants\Target");
 
-        $target->expects($this->exactly(2))
+        $target->expects($this->once())
                ->method("getName")
                ->will($this->returnValue("test"));
 
@@ -87,7 +87,22 @@ class TargetsTest extends TestCase
         $this->assertFalse(isset($this->_targets->test));
     }
 
-    public function testUnsettingATargetThatDoesNotExistThrowsAnException()
+    public function testCannotAddATargetWithTheSameNameAsAnExistingTarget()
+    {
+        $this->setExpectedException("InvalidArgumentException");
+
+        $target = $this->getMock("\Pants\Target");
+
+        $target->expects($this->any())
+               ->method("getName")
+               ->will($this->returnValue("test"));
+
+        $this->_targets
+             ->add($target)
+             ->add($target);
+    }
+
+    public function testCannotUnsetANonexistantTarget()
     {
         $this->setExpectedException("InvalidArgumentException");
 

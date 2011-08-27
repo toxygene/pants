@@ -97,11 +97,13 @@ class Targets
      */
     public function add(Target $target)
     {
-        if (isset($this->_targets[$target->getName()])) {
+        $name = $target->getName();
+
+        if (isset($this->{$name})) {
             throw new InvalidArgumentException("A target already exists with the name of '{$name}'");
         }
 
-        $this->_targets[$target->getName()] = $target;
+        $this->_targets[$name] = $target;
 
         return $this;
     }
