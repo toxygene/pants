@@ -52,6 +52,26 @@ class Exec extends AbstractTask
     protected $_directory;
 
     /**
+     * Get the command to execute
+     *
+     * @return string
+     */
+    public function getCommand()
+    {
+        return $this->_command;
+    }
+
+    /**
+     * Get the directory to execute the command in
+     *
+     * @param string
+     */
+    public function getDirectory()
+    {
+        return $this->_directory;
+    }
+
+    /**
      * Set the command to execute
      *
      * @param string $command
@@ -82,11 +102,11 @@ class Exec extends AbstractTask
      */
     public function exec()
     {
-        if ($this->getDirectory() && !chdir($this->getDirectory())) {
+        if ($this->getDirectory() && !chdir($this->filterProperties($this->getDirectory()))) {
             throw new BuildException("Could not change the directory to '{$this->getDirectory()}'");
         }
 
-        if (!exec($command)) {
+        if (!exec($this->filterProperties($command))) {
             throw new BuildException("Could not execute '{$command}'");
         }
 

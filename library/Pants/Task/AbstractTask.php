@@ -52,8 +52,12 @@ abstract class AbstractTask implements Task
      * @param string $string
      * @return string
      */
-    public function filterProperty($string)
+    public function filterProperties($string)
     {
+        if (!$this->getProject()) {
+            throw new Exception("Fail");
+        }
+
         return $this->getProject()
                     ->getProperties()
                     ->filter($string);

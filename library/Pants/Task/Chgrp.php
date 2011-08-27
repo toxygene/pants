@@ -78,8 +78,10 @@ class Chgrp extends AbstractFileTask
      */
     public function execute()
     {
-        $this->getFileSystem()
-             ->chgrp($this->getFile(), $this->getGroup());
+        $this->getFileSystem()->chgrp(
+            $this->filterProperties($this->getFile()),
+            $this->filterProperties($this->getGroup())
+        );
 
         return $this;
     }

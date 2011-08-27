@@ -62,9 +62,7 @@ class Output extends AbstractTask
      */
     public function execute()
     {
-        echo $this->getProject()
-                  ->getProperties()
-                  ->filter($this->getMessage());
+        echo $this->filterProperties($this->getMessage());
 
         return $this;
     }

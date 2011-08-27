@@ -79,8 +79,8 @@ class Move extends AbstractFileTask
     public function execute()
     {
         $this->getFileSystem()->move(
-            $this->filterProperty($this->getFile()),
-            $this->filterProperty($this->getDestination())
+            $this->filterProperties($this->getFile()),
+            $this->filterProperties($this->getDestination())
         );
 
         return $this;

@@ -29,12 +29,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-require_once "Pants/Autoloader.php";
+require_once "setup.php";
 
 $pantsAutoloader = new Pants\Autoloader();
 $pantsAutoloader->register();
-
-require_once "Pile/Autoloader.php";
 
 $pileAutoloader = new Pile\Autoloader();
 $pileAutoloader->register();

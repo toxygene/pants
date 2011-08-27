@@ -53,7 +53,7 @@ class PhpScript extends AbstractTask
      */
     public function execute()
     {
-        require $this->getFile();
+        require $this->filterProperties($this->getFile());
 
         return $this;
     }

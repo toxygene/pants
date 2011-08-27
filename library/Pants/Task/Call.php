@@ -52,8 +52,9 @@ class Call extends AbstractTask
      */
     public function execute()
     {
-        $this->getProject()
-             ->execute(array($this->getTarget()));
+        $this->getProject()->execute(
+            $this->filterProperties($this->getTarget())
+        );
 
         return $this;
     }

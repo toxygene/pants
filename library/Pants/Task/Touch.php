@@ -62,12 +62,9 @@ class Touch extends AbstractFileTask
      */
     public function execute()
     {
-        $file = $this->getProject()
-                     ->getProperties()
-                     ->filter($this->getFile());
-
-        $this->getFileSystem()
-             ->touch($this->filterProperty($this->getFile()));
+        $this->getFileSystem()->touch(
+            $this->filterProperties($this->getFile())
+        );
 
         return $this;
     }

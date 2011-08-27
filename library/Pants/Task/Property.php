@@ -58,10 +58,13 @@ class Property extends AbstractTask
      */
     public function execute()
     {
+        $name  = $this->filterProperties($this->getName());
+        $value = $this->filterProperties($this->getValue());
+
         $properties = $this->getProject()
                            ->getProperties();
 
-        $properties->{$this->getName()} = $this->getValue();
+        $this->getProject()->getProperties()->{$name} = $value;
 
         return $this;
     }

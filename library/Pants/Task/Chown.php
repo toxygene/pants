@@ -78,8 +78,10 @@ class Chown extends AbstractFileTask
      */
     public function execute()
     {
-        $this->getFileSystem()
-             ->chown($this->getFile(), $this->getOwner());
+        $this->getFileSystem()->chown(
+            $this->filterProperties($this->getFile()),
+            $this->filterProperties($this->getOwner())
+        );
 
         return $this;
     }

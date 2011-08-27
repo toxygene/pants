@@ -78,8 +78,10 @@ class Copy extends AbstractFileTask
      */
     public function execute()
     {
-        $this->getFileSystem()
-             ->copy($this->getFile(), $this->getDestination());
+        $this->getFileSystem()->copy(
+            $this->filterProperties($this->getFile()),
+            $this->filterProperties($this->getDestination())
+        );
 
         return $this;
     }
