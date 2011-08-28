@@ -3,6 +3,7 @@
 require_once "@php_dir@/Pants/Autoloader.php";
 
 $pantsAutoloader = new Pants\Autoloader();
+$pantsAutoloader->register();
 
 $cli = new Pants\Cli();
 $cli->run();

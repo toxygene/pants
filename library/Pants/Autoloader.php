@@ -43,6 +43,7 @@ class Autoloader
      */
     private $_classes = array(
         "Pants\BuildException",
+        "Pants\Cli",
         "Pants\Project",
         "Pants\Properties",
         "Pants\Properties\PropertyNameCycleException",
