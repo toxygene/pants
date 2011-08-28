@@ -1,0 +1,8 @@
+#!@php_bin@
+<?php
+require_once "@php_dir@/Pants/Autoloader.php";
+
+$pantsAutoloader = new Pants\Autoloader();
+
+$cli = new Pants\Cli();
+$cli->run();

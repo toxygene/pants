@@ -12,7 +12,7 @@
     </lead>
     <date>2011-08-25</date>
     <version>
-        <release>0.0.1</release>
+        <release>0.0.2</release>
         <api>0.0.1</api>
     </version>
     <stability>
@@ -23,6 +23,12 @@
     <notes>Initial Release</notes>
     <contents>
         <dir name="/">
+            <dir name="bin">
+                <file name="pants" role="script">
+                    <tasks:replace from="@php_dir@" to="php_dir" type="pear-config" />
+                    <tasks:replace from="@php_bin@" to="php_bin" type="pear-config" />
+                </file>
+            </dir>
             <dir name="library">
                 <dir name="Pants">
                     <dir name="Properties">
@@ -46,6 +52,7 @@
                         <file name="Touch.php" role="php" />
                     </dir>
                     <file name="Autoloader.php" role="php" />
+                    <file name="Cli.php" role="php" />
                     <file name="Project.php" role="php" />
                     <file name="Properties.php" role="php" />
                     <file name="Target.php" role="php" />
@@ -94,6 +101,10 @@
                 <name>Pile</name>
                 <channel>toxygene.pearfarm.org</channel>
             </package>
+            <package>
+                <name>Zend</name>
+                <channel>zend.googlecode.com/svn</channel>
+            </package>
         </required>
     </dependencies>
     <phprelease>
@@ -139,4 +150,19 @@
             -->
         </filelist>
     </phprelease>
+    <changelog>
+        <release>
+            <date>2011-08-25</date>
+            <version>
+                <release>0.0.1</release>
+                <api>0.0.1</api>
+            </version>
+            <stability>
+                <release>alpha</release>
+                <api>alpha</api>
+            </stability>
+            <license uri="http://www.opensource.org/licenses/BSD-3-Clause">BSD 3-Clause</license>
+            <notes>Initial Release</notes>
+        </release>
+    </changelog>
 </package>
