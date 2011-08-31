@@ -58,7 +58,7 @@ class Autoloader
      */
     public function autoload($className)
     {
-        if (preg_match("#^Pants\\#", $className)) {
+        if (preg_match("#^Pants\\\\#", $className)) {
             require_once $this->getPath() . str_replace("\\", DIRECTORY_SEPARATOR, $className) . ".php";
         }
     }
