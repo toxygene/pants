@@ -43,8 +43,6 @@ class Cli
 
     /**
      * Run the cli
-     *
-     * @param array $argv
      */
     public function run()
     {
@@ -79,6 +77,8 @@ class Cli
         require_once $file;
 
         if ($opts->getOption("h")) {
+            echo $opts->toString();
+            exit;
         }
 
         if ($opts->getOption("l")) {
