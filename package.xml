@@ -28,6 +28,7 @@
                     <tasks:replace from="@php_dir@" to="php_dir" type="pear-config" />
                     <tasks:replace from="@php_bin@" to="php_bin" type="pear-config" />
                 </file>
+                <file name="pants.php" role="script" />
             </dir>
             <dir name="library">
                 <dir name="Pants">
@@ -100,15 +101,12 @@
                 <name>Pile</name>
                 <channel>toxygene.pearfarm.org</channel>
             </package>
-            <package>
-                <name>Zend</name>
-                <channel>zend.googlecode.com/svn</channel>
-            </package>
         </required>
     </dependencies>
     <phprelease>
         <filelist>
             <install name="bin/pants" as="pants" />
+            <install name="bin/pants.php" as="pants.php" />
             <install name="library/Pants/Properties/PropertyNameCycleException.php" as="Pants/Property/PropertyNameCycleException.php" />
             <install name="library/Pants/Task/AbstractFileSystemTask.php" as="Pants/Task/AbstractFileSystemTask.php" />
             <install name="library/Pants/Task/AbstractTask.php" as="Pants/Task/AbstractTask.php" />
