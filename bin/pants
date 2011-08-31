@@ -1,9 +1,14 @@
 #!@php_bin@
 <?php
-require_once "@php_dir@/Pants/Autoloader.php";
+require_once "Pants/Autoloader.php";
 
 $pantsAutoloader = new Pants\Autoloader();
 $pantsAutoloader->register();
+
+require_once "Pile/Autoloader.php";
+
+$pileAutoloader = new Pile\Autoloader();
+$pileAutoloader->register();
 
 $cli = new Pants\Cli();
 $cli->run();
