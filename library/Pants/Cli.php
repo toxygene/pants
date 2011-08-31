@@ -31,11 +31,9 @@
 
 namespace Pants;
 
-use Pile\Autoloader as PileAutoloader,
-    Pants\Project,
+use Pants\Project,
     Zend_Console_Getopt as Getopt,
-    Zend_Console_Exception as ConsoleException,
-    Zend_Loader_Autoloader as ZendAutoloader;
+    Zend_Console_Exception as ConsoleException;
 
 /**
  *
@@ -50,13 +48,6 @@ class Cli
      */
     public function run()
     {
-        require_once "Zend/Loader/Autoloader.php";
-        ZendAutoloader::getInstance();
-
-        require_once "Pile/Autoloader.php";
-        $pileAutoloader = new PileAutoloader();
-        $pileAutoloader->register();
-
         try {
             $opts = new Getopt(
                 array(
