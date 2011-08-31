@@ -78,6 +78,19 @@ class Cli
 
         require_once $file;
 
+        if ($opts->getOption("h")) {
+        }
+
+        if ($opts->getOption("l")) {
+            foreach ($project->getTargets()->getDescriptions() as $name => $description) {
+                printf(
+                    "%s %s\n",
+                    $name,
+                    $description
+                );
+            }
+        }
+
         $project->execute($opts->getRemainingArgs());
     }
 

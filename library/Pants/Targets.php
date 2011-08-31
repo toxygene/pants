@@ -108,4 +108,18 @@ class Targets
         return $this;
     }
 
+    /**
+     * Get the names and descriptions of the targets
+     *
+     * @return array
+     */
+    public function getDescriptions()
+    {
+        $descriptions = array();
+        foreach ($this->_targets as $key => $value) {
+            $descriptions[$key] = $value->getDescription();
+        }
+        return $descriptions;
+    }
+
 }
