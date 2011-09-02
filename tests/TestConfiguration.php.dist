@@ -29,27 +29,4 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-// Load the configuration
-if (is_readable('TestConfiguration.php')) {
-    require_once 'TestConfiguration.php';
-} else {
-    require_once 'TestConfiguration.php.dist';
-}
-
-// Setup Pants autoloading
-require_once "../library/Pants/Autoloader.php";
-
-$pantsAutoloader = new Pants\Autoloader();
-$pantsAutoloader->register();
-
-// Setup Pile autoloading
-require_once PILE_PATH . "Pile/Autoloader.php";
-
-$pileAutoloader = new Pile\Autoloader();
-$pileAutoloader->register();
-
-// Setup PHPUnit autoloading
-require_once "PHPUnit/Autoload.php";
-
-// Set the error reporting
-error_reporting(E_ALL | E_STRICT);
+define("PILE_PATH", "");
