@@ -33,14 +33,19 @@ namespace PantsTest\Task;
 
 use Pants\Project,
     Pants\Task\Touch,
-    PHPUnit_Framework_TestCase as TestCase,
-    Pile\FileSystem;
+    PHPUnit_Framework_TestCase as TestCase;
 
 /**
  *
  */
 class TouchTest extends TestCase
 {
+
+    /**
+     * Temporary file
+     * @var string
+     */
+    protected $_file;
 
     /**
      * Touch task
@@ -55,27 +60,21 @@ class TouchTest extends TestCase
     {
         $this->_touch = new Touch();
         $this->_touch->setProject(new Project());
+
+        $this->_file = tempnam(sys_get_temp_dir(), "Pants_");
+    }
+
+    /**
+     * Tear down the test
+     */
+    public function tearDown()
+    {
+        unlink($this->_file);
     }
 
     public function testTouchesTheFile()
     {
-        $fileSystem = $this->getMock(
-            "Pile\FileSystem",
-            array(),
-            array(),
-            '',
-            false
-        );
-
-        $fileSystem->expects($this->once())
-                   ->method("touch")
-                   ->with("file")
-                   ->will($this->returnValue($fileSystem));
-
-        $this->_touch
-             ->setFileSystem($fileSystem)
-             ->setFile("file")
-             ->execute();
+        $this->markTestIncomplete();
     }
 
 }

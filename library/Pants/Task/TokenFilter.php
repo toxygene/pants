@@ -31,14 +31,10 @@
 
 namespace Pants\Task;
 
-use Pants\Task\AbstractFileSystemTask,
-    Pants\BuildException,
-    Pile\Exception as PileException;
-
 /**
  *
  */
-class TokenFilter extends AbstractFileSystemTask
+class TokenFilter extends AbstractTask
 {
 
     /**
@@ -52,6 +48,32 @@ class TokenFilter extends AbstractFileSystemTask
      * @var array
      */
     protected $_replacements = array();
+
+    /**
+     * Execute the task
+     *
+     * @return Chgrp
+     */
+    public function execute()
+    {
+        $file = $this->filterProperties($this->getFile());
+        $replacements = $this->getReplacements();
+
+        $this->_run(function() use ($file, $replacements) {
+            $contents = file_get_contents($file);
+
+            foreach ($replacements as $token => $value) {
+                $contents = str_replace("@{$token}@", $value, $contents);
+            }
+
+            return file_put_contents(
+                $file,
+                $contents
+            );
+        });
+
+        return $this;
+    }
 
     /**
      * Get the target file
@@ -83,35 +105,6 @@ class TokenFilter extends AbstractFileSystemTask
     public function getReplacements()
     {
         return $this->_replacements;
-    }
-
-    /**
-     * Execute the task
-     *
-     * @return Chgrp
-     */
-    public function execute()
-    {
-        $file = $this->filterProperties($this->getFile());
-
-        $contents = $this->getFileSystem()
-                         ->getContents($file);
-
-        foreach ($this->getReplacements() as $token => $value) {
-            $token = $this->filterProperties($token);
-            $value = $this->filterProperties($value);
-
-            $contents = str_replace(
-                "@{$token}@",
-                $value,
-                $contents
-            );
-        }
-
-        $this->getFileSystem()
-             ->putContents($file, $contents);
-
-        return $this;
     }
 
     /**

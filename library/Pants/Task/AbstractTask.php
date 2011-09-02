@@ -31,7 +31,8 @@
 
 namespace Pants\Task;
 
-use Pants\Project,
+use Pants\BuildException,
+    Pants\Project,
     Pants\Task,
     Pants\Task\Exception;
 
@@ -84,6 +85,31 @@ abstract class AbstractTask implements Task
     {
         $this->_project = $project;
         return $this;
+    }
+
+    /**
+     * Run a function
+     *
+     * @param function $function
+     * @return mixed
+     * @throws BuildException
+     */
+    protected function _run($function)
+    {
+        set_error_handler(function($errno, $errstr) {
+            throw new BuildException($errstr);
+        });
+
+        try {
+            $result = $function();
+        } catch (BuildException $e) {
+            restore_error_handler();
+            throw $e;
+        }
+
+        restore_error_handler();
+
+        return $result;
     }
 
 }

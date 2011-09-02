@@ -33,8 +33,7 @@ namespace PantsTest\Task;
 
 use Pants\Project,
     Pants\Task\Chown,
-    PHPUnit_Framework_TestCase as TestCase,
-    Pile\FileSystem;
+    PHPUnit_Framework_TestCase as TestCase;
 
 /**
  *
@@ -49,34 +48,33 @@ class ChownTest extends TestCase
     protected $_chown;
 
     /**
+     * Temporary file
+     * @var string
+     */
+    protected $_file;
+
+    /**
      * Setup the test
      */
     public function setUp()
     {
         $this->_chown = new Chown();
         $this->_chown->setProject(new Project());
+
+        $this->_file = tempnam(sys_get_temp_dir(), "Pants_");
+    }
+
+    /**
+     * Tear down the test
+     */
+    public function tearDown()
+    {
+        unlink($this->_file);
     }
 
     public function testOwnerIsSetOnTheFileObject()
     {
-        $fileSystem = $this->getMock(
-            "Pile\FileSystem",
-            array(),
-            array(),
-            '',
-            false
-        );
-
-        $fileSystem->expects($this->once())
-                   ->method("chown")
-                   ->with("file", "owner")
-                   ->will($this->returnValue($fileSystem));
-
-        $this->_chown
-             ->setFileSystem($fileSystem)
-             ->setFile("file")
-             ->setOwner("owner")
-             ->execute();
+        $this->markTestIncomplete();
     }
 
 }

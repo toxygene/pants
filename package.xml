@@ -20,7 +20,8 @@
         <api>alpha</api>
     </stability>
     <license uri="http://www.opensource.org/licenses/BSD-3-Clause">BSD 3-Clause</license>
-    <notes>Added CLI functionality</notes>
+    <notes> * Added CLI functionality
+ * Removed Pile dependency</notes>
     <contents>
         <dir name="/">
             <dir name="bin">
@@ -35,7 +36,6 @@
                         <file name="PropertyNameCycleException.php" role="php" />
                     </dir>
                     <dir name="Task">
-                        <file name="AbstractFileSystemTask.php" role="php" />
                         <file name="AbstractTask.php" role="php" />
                         <file name="Call.php" role="php" />
                         <file name="Chgrp.php" role="php" />
@@ -49,6 +49,7 @@
                         <file name="Output.php" role="php" />
                         <file name="PhpScript.php" role="php" />
                         <file name="Property.php" role="php" />
+                        <file name="TokenFilter.php" role="php" />
                         <file name="Touch.php" role="php" />
                     </dir>
                     <file name="Autoloader.php" role="php" />
@@ -61,31 +62,6 @@
                     <file name="Tasks.php" role="php" />
                 </dir>
             </dir>
-            <dir name="tests">
-                <dir name="Pants">
-                    <dir name="Task">
-                        <file name="CallTest.php" role="test" />
-                        <file name="ChgrpTest.php" role="test" />
-                        <file name="ChmodTest.php" role="test" />
-                        <file name="ChownTest.php" role="test" />
-                        <file name="CopyTest.php" role="test" />
-                        <file name="DeleteTest.php" role="test" />
-                        <file name="ExecuteTest.php" role="test" />
-                        <file name="MoveTest.php" role="test" />
-                        <file name="OutputTest.php" role="test" />
-                        <file name="PhpScriptTest.php" role="test" />
-                        <file name="PropertyTest.php" role="test" />
-                        <file name="TouchTest.php" role="test" />
-                    </dir>
-                    <file name="ProjectTest.php" role="test" />
-                    <file name="PropertiesTest.php" role="test" />
-                    <file name="TargetsTest.php" role="test" />
-                    <file name="TargetTest.php" role="test" />
-                </dir>
-                <file name="bootstrap.php" role="test" />
-                <file name="phpunit.xml" role="test" />
-            </dir>
-            <file name="README" role="doc" />
         </dir>
     </contents>
     <dependencies>
@@ -96,17 +72,12 @@
             <pearinstaller>
                 <min>1.4.8</min>
             </pearinstaller>
-            <package>
-                <name>Pile</name>
-                <channel>toxygene.pearfarm.org</channel>
-            </package>
         </required>
     </dependencies>
     <phprelease>
         <filelist>
             <install name="bin/pants" as="pants" />
             <install name="library/Pants/Properties/PropertyNameCycleException.php" as="Pants/Property/PropertyNameCycleException.php" />
-            <install name="library/Pants/Task/AbstractFileSystemTask.php" as="Pants/Task/AbstractFileSystemTask.php" />
             <install name="library/Pants/Task/AbstractTask.php" as="Pants/Task/AbstractTask.php" />
             <install name="library/Pants/Task/Call.php" as="Pants/Task/Call.php" />
             <install name="library/Pants/Task/Chgrp.php" as="Pants/Task/Chgrp.php" />
@@ -120,6 +91,7 @@
             <install name="library/Pants/Task/Output.php" as="Pants/Task/Output.php" />
             <install name="library/Pants/Task/PhpScript.php" as="Pants/Task/PhpScript.php" />
             <install name="library/Pants/Task/Property.php" as="Pants/Task/Property.php" />
+            <install name="library/Pants/Task/TokenFilter.php" as="Pants/Task/TokenFilter.php" />
             <install name="library/Pants/Task/Touch.php" as="Pants/Task/Touch.php" />
             <install name="library/Pants/Autoloader.php" as="Pants/Autoloader.php" />
             <install name="library/Pants/Cli.php" as="Pants/Cli.php" />
@@ -129,22 +101,6 @@
             <install name="library/Pants/Targets.php" as="Pants/Targets.php" />
             <install name="library/Pants/Task.php" as="Pants/Task.php" />
             <install name="library/Pants/Tasks.php" as="Pants/Tasks.php" />
-            <!--
-            <install name="tests/Pants/Task/CallTest.php" as="Pants/Task/CallTest.php" />
-            <install name="tests/Pants/Task/ChgrpTest.php" as="Pants/Task/ChgrpTest.php" />
-            <install name="tests/Pants/Task/ChmodTest.php" as="Pants/Task/ChmodTest.php" />
-            <install name="tests/Pants/Task/ChownTest.php" as="Pants/Task/ChownTest.php" />
-            <install name="tests/Pants/Task/CopyTest.php" as="Pants/Task/ChownTest.php" />
-            <install name="tests/Pants/Task/DeleteTest.php" as="Pants/Task/DeleteTest.php" />
-            <install name="tests/Pants/Task/ExecTest.php" as="Pants/Task/ExecTest.php" />
-            <install name="tests/Pants/Task/MoveTest.php" as="Pants/Task/MoveTest.php" />
-            <install name="tests/Pants/Task/OutputTest.php" as="Pants/Task/MoveTest.php" />
-            <install name="tests/Pants/Task/PhpScriptTest.php" as="Pants/Task/PhpScriptTest.php" />
-            <install name="tests/Pants/Task/PropertyTest.php" as="Pants/Task/PropertyTest.php" />
-            <install name="tests/Pants/Task/TouchTest.php" as="Pants/Task/TouchTest.php" />
-            <install name="tests/bootstrap.php" as="bootstrap.php" />
-            <install name="tests/phpunit.xml" as="phpunit.xml" />
-            -->
         </filelist>
     </phprelease>
     <changelog>

@@ -31,8 +31,6 @@
 
 namespace Pants\Task;
 
-use Pants\Task\AbstractTask;
-
 /**
  *
  */
@@ -46,16 +44,6 @@ class Output extends AbstractTask
     protected $_message;
 
     /**
-     * Get the message
-     *
-     * @return string
-     */
-    public function getMessage()
-    {
-        return $this->_message;
-    }
-
-    /**
      * Execute the task
      *
      * @return Output
@@ -65,6 +53,16 @@ class Output extends AbstractTask
         echo $this->filterProperties($this->getMessage());
 
         return $this;
+    }
+
+    /**
+     * Get the message
+     *
+     * @return string
+     */
+    public function getMessage()
+    {
+        return $this->_message;
     }
 
     /**

@@ -49,34 +49,33 @@ class CopyTest extends TestCase
     protected $_copy;
 
     /**
+     * Temporary file
+     * @var string
+     */
+    protected $_file;
+
+    /**
      * Setup the test
      */
     public function setUp()
     {
         $this->_copy = new Copy();
         $this->_copy->setProject(new Project());
+
+        $this->_file = tempnam(sys_get_temp_dir(), "Pants_");
+    }
+
+    /**
+     * Tear down the test
+     */
+    public function tearDown()
+    {
+        unlink($this->_file);
     }
 
     public function testOwnerIsSetOnTheFileObject()
     {
-        $fileSystem = $this->getMock(
-            "Pile\FileSystem",
-            array(),
-            array(),
-            '',
-            false
-        );
-
-        $fileSystem->expects($this->once())
-                   ->method("copy")
-                   ->with("file", "destination")
-                   ->will($this->returnValue($fileSystem));
-
-        $this->_copy
-             ->setFileSystem($fileSystem)
-             ->setFile("file")
-             ->setDestination("destination")
-             ->execute();
+        $this->markTestIncomplete();
     }
 
 }

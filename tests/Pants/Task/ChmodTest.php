@@ -33,8 +33,7 @@ namespace PantsTest\Task;
 
 use Pants\Project,
     Pants\Task\Chmod,
-    PHPUnit_Framework_TestCase as TestCase,
-    Pile\FileSystem;
+    PHPUnit_Framework_TestCase as TestCase;
 
 /**
  *
@@ -49,34 +48,33 @@ class ChmodTest extends TestCase
     protected $_chmod;
 
     /**
+     * Temporary file
+     * @var string
+     */
+    protected $_file;
+
+    /**
      * Setup the test
      */
     public function setUp()
     {
         $this->_chmod = new Chmod();
         $this->_chmod->setProject(new Project());
+
+        $this->_file = tempnam(sys_get_temp_dir(), "Pants_");
+    }
+
+    /**
+     * Tear down the test
+     */
+    public function tearDown()
+    {
+        unlink($this->_file);
     }
 
     public function testPermissionsIsSetOnTheFileObject()
     {
-        $fileSystem = $this->getMock(
-            "Pile\FileSystem",
-            array(),
-            array(),
-            '',
-            false
-        );
-
-        $fileSystem->expects($this->once())
-                   ->method("chmod")
-                   ->with("file", "0755")
-                   ->will($this->returnValue($fileSystem));
-
-        $this->_chmod
-             ->setFileSystem($fileSystem)
-             ->setFile("file")
-             ->setMode("0755")
-             ->execute();
+        $this->markTestIncomplete();
     }
 
 }

@@ -31,15 +31,17 @@
 
 namespace Pants\Task;
 
-use Pants\BuildException,
-    Pants\Task\AbstractFileSystemTask,
-    Pile\Exception as PileException;
-
 /**
  *
  */
-class Copy extends AbstractFileSystemTask
+class Copy extends AbstractTask
 {
+
+    /**
+     * Destination file
+     * @var string
+     */
+    protected $_destination;
 
     /**
      * Target file
@@ -48,10 +50,21 @@ class Copy extends AbstractFileSystemTask
     protected $_file;
 
     /**
-     * Destination file
-     * @var string
+     * Execute the task
+     *
+     * @return Copy
      */
-    protected $_destination;
+    public function execute()
+    {
+        $file        = $this->filterProperties($this->getFile());
+        $destination = $this->filterProperties($this->getDestination());
+
+        $this->_run(function() use($file, $destination) {
+            return copy($file, $destination);
+        });
+
+        return $this;
+    }
 
     /**
      * Get the destination
@@ -71,25 +84,6 @@ class Copy extends AbstractFileSystemTask
     public function getFile()
     {
         return $this->_file;
-    }
-
-    /**
-     * Execute the task
-     *
-     * @return Copy
-     */
-    public function execute()
-    {
-        $file        = $this->filterProperties($this->getFile());
-        $destination = $this->filterProperties($this->getDestination());
-
-        try {
-            $this->getFileSystem()->copy($file, $destination);
-        } catch (PileException $e) {
-            throw new BuildException("Could not copy '{$file}' to '{$destination}'", null, $e);
-        }
-
-        return $this;
     }
 
     /**

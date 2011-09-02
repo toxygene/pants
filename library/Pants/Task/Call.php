@@ -31,7 +31,8 @@
 
 namespace Pants\Task;
 
-use Pants\Task\AbstractTask;
+use InvalidArgumentException,
+    Pants\BuildException;
 
 /**
  *
@@ -49,6 +50,7 @@ class Call extends AbstractTask
      * Execute the task
      *
      * @return Call
+     * @throws BuildException
      */
     public function execute()
     {

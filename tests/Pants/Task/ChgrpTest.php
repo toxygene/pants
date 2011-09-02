@@ -33,8 +33,7 @@ namespace PantsTest\Task;
 
 use Pants\Project,
     Pants\Task\Chgrp,
-    PHPUnit_Framework_TestCase as TestCase,
-    Pile\FileSystem;
+    PHPUnit_Framework_TestCase as TestCase;
 
 /**
  *
@@ -49,34 +48,57 @@ class ChgrpTest extends TestCase
     protected $_chgrp;
 
     /**
+     * Temporary file
+     * @var string
+     */
+    protected $_file;
+
+    /**
      * Setup the test
      */
     public function setUp()
     {
+        if (!PANTS_CHGRP_VALID_GROUP_NAME) {
+            $this->markTestSkipped("PANTS_CHGRP_VALID_GROUP_NAME constant is not set");
+        }
+
+        if (!PANTS_CHGRP_INVALID_GROUP_NAME) {
+            $this->markTestSkipped("PANTS_CHGRP_INVALID_GROUP_NAME constant is not set");
+        }
+
         $this->_chgrp = new Chgrp();
         $this->_chgrp->setProject(new Project());
+
+        $this->_file = tempnam(sys_get_temp_dir(), "Pants_");
     }
 
-    public function testOwnerIsSetOnTheFileObject()
+    /**
+     * Tear down the test
+     */
+    public function tearDown()
     {
-        $fileSystem = $this->getMock(
-            "Pile\FileSystem",
-            array(),
-            array(),
-            '',
-            false
-        );
+        unlink($this->_file);
+    }
 
-        $fileSystem->expects($this->once())
-                   ->method("chgrp")
-                   ->with("file", "group")
-                   ->will($this->returnValue($fileSystem));
+    public function testInvalidGroupNameFails()
+    {
+        $this->setExpectedException("\Pants\BuildException");
 
         $this->_chgrp
-             ->setFileSystem($fileSystem)
-             ->setFile("file")
-             ->setGroup("group")
+             ->setFile($this->_file)
+             ->setGroup(PANTS_CHGRP_INVALID_GROUP_NAME)
              ->execute();
+    }
+
+    public function testGroupIsSetOnExecute()
+    {
+        $this->_chgrp
+             ->setFile($this->_file)
+             ->setGroup(PANTS_CHGRP_VALID_GROUP_NAME)
+             ->execute();
+
+        $group = posix_getgrgid(filegroup($this->_file));
+        $this->assertEquals(PANTS_CHGRP_VALID_GROUP_NAME, $group["name"]);
     }
 
 }

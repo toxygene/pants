@@ -42,12 +42,6 @@ require_once "../library/Pants/Autoloader.php";
 $pantsAutoloader = new Pants\Autoloader();
 $pantsAutoloader->register();
 
-// Setup Pile autoloading
-require_once PILE_PATH . "Pile/Autoloader.php";
-
-$pileAutoloader = new Pile\Autoloader();
-$pileAutoloader->register();
-
 // Setup PHPUnit autoloading
 require_once "PHPUnit/Autoload.php";
 

@@ -33,8 +33,7 @@ namespace PantsTest\Task;
 
 use Pants\Project,
     Pants\Task\Delete,
-    PHPUnit_Framework_TestCase as TestCase,
-    Pile\FileSystem;
+    PHPUnit_Framework_TestCase as TestCase;
 
 /**
  *
@@ -49,33 +48,33 @@ class DeleteTest extends TestCase
     protected $_delete;
 
     /**
+     * Temporary file
+     * @var string
+     */
+    protected $_file;
+
+    /**
      * Setup the test
      */
     public function setUp()
     {
         $this->_delete = new Delete();
         $this->_delete->setProject(new Project());
+
+        $this->_file = tempnam(sys_get_temp_dir(), "Pants_");
+    }
+
+    /**
+     * Tear down the test
+     */
+    public function tearDown()
+    {
+        unlink($this->_file);
     }
 
     public function testOwnerIsSetOnTheFileObject()
     {
-        $fileSystem = $this->getMock(
-            "Pile\FileSystem",
-            array(),
-            array(),
-            '',
-            false
-        );
-
-        $fileSystem->expects($this->once())
-                   ->method("unlink")
-                   ->with("file")
-                   ->will($this->returnValue($fileSystem));
-
-        $this->_delete
-             ->setFileSystem($fileSystem)
-             ->setFile("file")
-             ->execute();
+        $this->markTestIncomplete();
     }
 
 }

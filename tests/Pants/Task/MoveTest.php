@@ -33,14 +33,19 @@ namespace PantsTest\Task;
 
 use Pants\Project,
     Pants\Task\Move,
-    PHPUnit_Framework_TestCase as TestCase,
-    Pile\FileSystem;
+    PHPUnit_Framework_TestCase as TestCase;
 
 /**
  *
  */
 class MoveTest extends TestCase
 {
+
+    /**
+     * Temporary file
+     * @var string
+     */
+    protected $_file;
 
     /**
      * Move task
@@ -55,28 +60,21 @@ class MoveTest extends TestCase
     {
         $this->_move = new Move();
         $this->_move->setProject(new Project());
+
+        $this->_file = tempnam(sys_get_temp_dir(), "Pants_");
+    }
+
+    /**
+     * Tear down the test
+     */
+    public function tearDown()
+    {
+        unlink($this->_file);
     }
 
     public function testOwnerIsSetOnTheFileObject()
     {
-        $fileSystem = $this->getMock(
-            "Pile\FileSystem",
-            array(),
-            array(),
-            "",
-            false
-        );
-
-        $fileSystem->expects($this->once())
-                   ->method("move")
-                   ->with("file", "destination")
-                   ->will($this->returnValue($fileSystem));
-
-        $this->_move
-             ->setFileSystem($fileSystem)
-             ->setFile("file")
-             ->setDestination("destination")
-             ->execute();
+        $this->markTestIncomplete();
     }
 
 }

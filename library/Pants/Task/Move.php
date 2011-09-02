@@ -31,14 +31,10 @@
 
 namespace Pants\Task;
 
-use Pants\BuildException,
-    Pants\Task\AbstractFileSystemTask,
-    Pile\Exception as PileException;
-
 /**
  *
  */
-class Move extends AbstractFileSystemTask
+class Move extends AbstractTask
 {
 
     /**
@@ -52,6 +48,23 @@ class Move extends AbstractFileSystemTask
      * @var string
      */
     protected $_destination;
+
+    /**
+     * Execute the task
+     *
+     * @return Move
+     */
+    public function execute()
+    {
+        $file        = $this->filterProperties($this->getFile());
+        $destination = $this->filterProperties($this->getDestination());
+
+        $this->_run(function() use ($file, $destination) {
+            return rename($file, $destination);
+        });
+
+        return $this;
+    }
 
     /**
      * Get the destination
@@ -71,25 +84,6 @@ class Move extends AbstractFileSystemTask
     public function getFile()
     {
         return $this->_file;
-    }
-
-    /**
-     * Execute the task
-     *
-     * @return Move
-     */
-    public function execute()
-    {
-        $file        = $this->filterProperties($this->getFile());
-        $destination = $this->filterProperties($this->getDestination());
-
-        try {
-            $this->getFileSystem()->move($file, $destination);
-        } catch (PileException $e) {
-            throw new BuildException("Could not move '{$file}' to '{$destination}'", null, $e);
-        }
-
-        return $this;
     }
 
     /**

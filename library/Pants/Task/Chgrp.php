@@ -31,14 +31,10 @@
 
 namespace Pants\Task;
 
-use Pants\Task\AbstractFileSystemTask,
-    Pants\BuildException,
-    Pile\Exception as PileException;
-
 /**
  *
  */
-class Chgrp extends AbstractFileSystemTask
+class Chgrp extends AbstractTask
 {
 
     /**
@@ -83,11 +79,9 @@ class Chgrp extends AbstractFileSystemTask
         $file = $this->filterProperties($this->getFile());
         $group = $this->filterProperties($this->getGroup());
 
-        try {
-            $this->getFileSystem()->chgrp($file, $group);
-        } catch (PileException $e) {
-            throw new BuildException("Could not chgrp '{$file}' to '{$group}'", null, $e);
-        }
+        $this->_run(function() use ($file, $group) {
+            return chgrp($file, $group);
+        });
 
         return $this;
     }

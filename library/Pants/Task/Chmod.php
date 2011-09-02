@@ -31,14 +31,10 @@
 
 namespace Pants\Task;
 
-use Pants\BuildException,
-    Pants\Task\AbstractFileSystemTask,
-    Pile\Exception as PileException;
-
 /**
  *
  */
-class Chmod extends AbstractFileSystemTask
+class Chmod extends AbstractTask
 {
 
     /**
@@ -52,6 +48,23 @@ class Chmod extends AbstractFileSystemTask
      * @var string
      */
     protected $_mode;
+
+    /**
+     * Execute the task
+     *
+     * @return Chmod
+     */
+    public function execute()
+    {
+        $file = $this->filterProperties($this->getFile());
+        $mode = $this->filterProperties($this->getMode());
+
+        $this->_run(function() use ($file, $mode) {
+            return chmod($file, $mode);
+        });
+
+        return $this;
+    }
 
     /**
      * Get the target file
@@ -71,25 +84,6 @@ class Chmod extends AbstractFileSystemTask
     public function getMode()
     {
         return $this->_mode;
-    }
-
-    /**
-     * Execute the task
-     *
-     * @return Chmod
-     */
-    public function execute()
-    {
-        $file = $this->filterProperties($this->getFile());
-        $mode = $this->filterProperties($this->getMode());
-
-        try {
-            $this->getFileSystem()->chmod($file, $mode);
-        } catch (PileException $e) {
-            throw new BuildException("Could not chmod '{$file}' to '{$mode}'", null, $e);
-        }
-
-        return $this;
     }
 
     /**

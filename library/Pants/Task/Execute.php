@@ -31,14 +31,10 @@
 
 namespace Pants\Task;
 
-use Pants\BuildException,
-    Pants\Task\AbstractFileSystemTask,
-    Pile\Exception as PileException;
-
 /**
  *
  */
-class Execute extends AbstractFileSystemTask
+class Execute extends AbstractTask
 {
 
     /**
@@ -64,18 +60,14 @@ class Execute extends AbstractFileSystemTask
         $directory = $this->filterProperties($this->getDirectory());
 
         if ($directory) {
-            try {
-                $this->getFileSystem()->chdir($directory);
-            } catch (PileException $e) {
-                throw new BuildException("Could not chdir to '{$directory}'");
-            }
+            $this->_run(function() use ($directory) {
+                chdir($directory);
+            });
         }
 
-        try {
-            $this->getFileSystem()->execute($command);
-        } catch (PileException $e) {
-            throw new BuildException("Could not exec '{$command}'", null, $e);
-        }
+        $this->_run(function() use ($command) {
+            exec($command);
+        });
 
         return $this;
     }

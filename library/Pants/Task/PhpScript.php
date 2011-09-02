@@ -31,9 +31,6 @@
 
 namespace Pants\Task;
 
-use Pants\File,
-    Pants\Task\AbstractTask;
-
 /**
  *
  */

@@ -65,7 +65,7 @@ class CallTest extends TestCase
 
     public function testCallingAnInvalidTargetThrowsAnInvalidArgumentException()
     {
-        $this->setExpectedException("\InvalidArgumentException");
+        $this->setExpectedException("\Pants\BuildException");
 
         $this->_call
              ->setTarget("asdf")
