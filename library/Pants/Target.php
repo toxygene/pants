@@ -42,10 +42,22 @@ class Target extends AbstractTask
 {
 
     /**
+     * Depends
+     * @var array
+     */
+    protected $_depends = array();
+
+    /**
      * Description
      * @var string
      */
     protected $_description;
+
+    /**
+     * If conditions
+     * @var array
+     */
+    protected $_if = array();
 
     /**
      * Name
@@ -58,6 +70,12 @@ class Target extends AbstractTask
      * @var Tasks
      */
     protected $_tasks;
+
+    /**
+     * Unless conditions
+     * @var array
+     */
+    protected $_unless = array();
 
     /**
      * Constructor
@@ -74,12 +92,42 @@ class Target extends AbstractTask
      */
     public function execute()
     {
+        foreach ($this->getDepends() as $depends) {
+            $this->getProject()
+                 ->execute($depends);
+        }
+
+        $properties = $this->getProject()
+                           ->getProperties();
+
+        foreach ($this->getIf() as $if) {
+            if (!isset($properties->$if) || !$properties->$if) {
+                return $this;
+            }
+        }
+
+        foreach ($this->getUnless() as $unless) {
+            if (isset($properties->$unless) || $properties->$unless) {
+                return $this;
+            }
+        }
+
         foreach ($this->getTasks() as $task) {
             $task->setProject($this->getProject())
                  ->execute();
         }
 
         return $this;
+    }
+
+    /**
+     * Get the depends
+     *
+     * @return array
+     */
+    public function getDepends()
+    {
+        return $this->_depends;
     }
 
     /**
@@ -110,6 +158,18 @@ class Target extends AbstractTask
     public function getTasks()
     {
         return $this->_tasks;
+    }
+
+    /**
+     * Set the depends
+     *
+     * @param array $depends
+     * @return Target
+     */
+    public function setDepends(array $depends)
+    {
+        $this->_depends = $depends;
+        return $this;
     }
 
     /**
