@@ -48,33 +48,38 @@ class DeleteTest extends TestCase
     protected $_delete;
 
     /**
-     * Temporary file
-     * @var string
-     */
-    protected $_file;
-
-    /**
      * Setup the test
      */
     public function setUp()
     {
         $this->_delete = new Delete();
         $this->_delete->setProject(new Project());
-
-        $this->_file = tempnam(sys_get_temp_dir(), "Pants_");
     }
 
-    /**
-     * Tear down the test
-     */
-    public function tearDown()
+    public function testFileIsRequired()
     {
-        unlink($this->_file);
+        $this->setExpectedException("\Pants\BuildException");
+
+        $this->_delete
+             ->execute();
     }
 
-    public function testOwnerIsSetOnTheFileObject()
+    public function testFailureThrowsABuildException()
     {
-        $this->markTestIncomplete();
+        $this->setExpectedException("\Pants\BuildException");
+
+        $this->_delete
+             ->setFile("something-that-does-not-exist")
+             ->execute();
+    }
+
+    public function testFileIsDeleted()
+    {
+        $file = tempnam(sys_get_temp_dir(), "Pants_");
+
+        $this->_delete
+             ->setFile($file)
+             ->execute();
     }
 
 }

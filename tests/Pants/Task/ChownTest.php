@@ -80,7 +80,25 @@ class ChownTest extends TestCase
         unlink($this->_file);
     }
 
-    public function testFailureRaisesABuildException()
+    public function testFileIsRequired()
+    {
+        $this->setExpectedException("\Pants\BuildException");
+
+        $this->_chown
+             ->setOwner(PANTS_CHOWN_VALID_USER_NAME)
+             ->execute();
+    }
+
+    public function testOwnerIsRequired()
+    {
+        $this->setExpectedException("\Pants\BuildException");
+
+        $this->_chown
+             ->setFile($this->_file)
+             ->execute();
+    }
+
+    public function testFailureThrowsABuildException()
     {
         $this->setExpectedException("\Pants\BuildException");
 
@@ -90,14 +108,16 @@ class ChownTest extends TestCase
              ->execute();
     }
 
-    public function testOwnerIsSetOnTheFileObject()
+    public function testOwnerIsSet()
     {
         $this->_chown
              ->setFile($this->_file)
              ->setOwner(PANTS_CHOWN_VALID_USER_NAME)
              ->execute();
 
-        $this->markTestIncomplete();
+        $owner = posix_getpwuid(fileowner($this->_file));
+
+        $this->assertEquals(PANTS_CHOWN_VALID_USER_NAME, $owner["name"]);
     }
 
 }

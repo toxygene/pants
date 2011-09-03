@@ -72,6 +72,14 @@ class TokenFilterTest extends TestCase
         unlink($this->_file);
     }
 
+    public function testFileIsRequired()
+    {
+        $this->setExpectedException("\Pants\BuildException");
+
+        $this->_tokenFilter
+             ->execute();
+    }
+
     public function testTokensCanBeAdded()
     {
         $this->_tokenFilter
@@ -83,7 +91,15 @@ class TokenFilterTest extends TestCase
 
     public function testTokensAreReplacedInTheFileOnExecute()
     {
-        $this->markTestIncomplete();
+        file_put_contents($this->_file, "@asdf@ @qwer@");
+
+        $this->_tokenFilter
+             ->setFile($this->_file)
+             ->addReplacement("asdf", "fdsa")
+             ->addReplacement("qwer", "rewq")
+             ->execute();
+
+        $this->assertEquals("fdsa rewq", file_get_contents($this->_file));
     }
 
 }

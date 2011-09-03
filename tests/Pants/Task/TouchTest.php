@@ -42,12 +42,6 @@ class TouchTest extends TestCase
 {
 
     /**
-     * Temporary file
-     * @var string
-     */
-    protected $_file;
-
-    /**
      * Touch task
      * @var Touch
      */
@@ -60,21 +54,25 @@ class TouchTest extends TestCase
     {
         $this->_touch = new Touch();
         $this->_touch->setProject(new Project());
-
-        $this->_file = tempnam(sys_get_temp_dir(), "Pants_");
     }
 
-    /**
-     * Tear down the test
-     */
-    public function tearDown()
+    public function testFileIsRequired()
     {
-        unlink($this->_file);
+        $this->setExpectedException("\Pants\BuildException");
+
+        $this->_touch
+             ->execute();
     }
 
     public function testTouchesTheFile()
     {
-        $this->markTestIncomplete();
+        $this->_touch
+             ->setFile("asdf")
+             ->execute();
+
+        $this->assertTrue(file_exists("asdf"));
+
+        unlink("asdf");
     }
 
 }

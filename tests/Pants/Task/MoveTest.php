@@ -42,12 +42,6 @@ class MoveTest extends TestCase
 {
 
     /**
-     * Temporary file
-     * @var string
-     */
-    protected $_file;
-
-    /**
      * Move task
      * @var Move
      */
@@ -60,21 +54,38 @@ class MoveTest extends TestCase
     {
         $this->_move = new Move();
         $this->_move->setProject(new Project());
-
-        $this->_file = tempnam(sys_get_temp_dir(), "Pants_");
     }
 
-    /**
-     * Tear down the test
-     */
-    public function tearDown()
+    public function testFileIsRequired()
     {
-        unlink($this->_file);
+        $this->setExpectedException("\Pants\BuildException");
+
+        $this->_move
+             ->setDestination("asdf")
+             ->execute();
     }
 
-    public function testOwnerIsSetOnTheFileObject()
+    public function testDestinationIsRequired()
     {
-        $this->markTestIncomplete();
+        $this->setExpectedException("\Pants\BuildException");
+
+        $this->_move
+             ->setFile("asdf")
+             ->execute();
+    }
+
+    public function testFileIsMoved()
+    {
+        $file = tempnam(sys_get_temp_dir(), "Pants_");
+
+        $this->_move
+             ->setFile($file)
+             ->setDestination($file . "_1")
+             ->execute();
+
+        $this->assertTrue(file_exists($file . "_1"));
+
+        unlink($file . "_1");
     }
 
 }

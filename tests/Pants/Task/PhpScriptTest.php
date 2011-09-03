@@ -56,12 +56,30 @@ class PhpScriptTest extends TestCase
         $this->_task->setProject(new Project());
     }
 
+    public function testFileCanBeSet()
+    {
+        $this->_task->setFile("asdf");
+        $this->assertEquals("asdf", $this->_task->getFile());
+    }
+
+    public function testFileIsRequired()
+    {
+        $this->setExpectedException("\Pants\BuildException");
+
+        $this->_task
+             ->execute();
+    }
+
     public function testScriptIsIncludedOnExecute()
     {
-        $this->_task->setFile(__DIR__ . "/_files/php-script-1.php");
+        $this->_task
+             ->setFile(__DIR__ . "/_files/php-script-1.php");
 
         ob_start();
-        $this->_task->execute();
+
+        $this->_task
+             ->execute();
+
         $output = ob_get_contents();
         ob_end_clean();
 

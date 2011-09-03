@@ -62,6 +62,14 @@ class OutputTest extends TestCase
         $this->assertEquals("one", $this->_task->getMessage());
     }
 
+    public function testMessageIsRequired()
+    {
+        $this->setExpectedException("\Pants\BuildException");
+
+        $this->_task
+             ->execute();
+    }
+
     public function testMessageIsPrintedOnExecute()
     {
         $this->_task->setMessage("one");

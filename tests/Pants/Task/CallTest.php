@@ -56,7 +56,7 @@ class CallTest extends TestCase
         $this->_call->setProject(new Project());
     }
 
-    public function testBuildExceptionIsThrownIfTargetIsMissing()
+    public function testTargetIsRequired()
     {
         $this->setExpectedException("\Pants\BuildException");
 
@@ -64,14 +64,14 @@ class CallTest extends TestCase
              ->execute();
     }
 
-    public function testTargetCanBeSet()
+    public function testTargetIsConfigurable()
     {
         $this->_call->setTarget("asdf");
 
         $this->assertEquals("asdf", $this->_call->getTarget());
     }
 
-    public function testCallingAnInvalidTargetThrowsAnInvalidArgumentException()
+    public function testAValidTargetIsRequired()
     {
         $this->setExpectedException("\Pants\BuildException");
 
@@ -80,10 +80,11 @@ class CallTest extends TestCase
              ->execute();
     }
 
-    public function testCallingAValidTargetExecutesTheTarget()
+    public function testRequestedTargetIsExecuted()
     {
         $project = new Project();
 
+        // Setup the mock target that will be called
         $mock = $this->getMock("Pants\Target");
 
         $mock->expects($this->any())
@@ -99,9 +100,11 @@ class CallTest extends TestCase
              ->method("execute")
              ->will($this->returnValue($mock));
 
+        // Add the mock target to the project
         $project->getTargets()
                 ->add($mock);
 
+        // Call the mock target in the project
         $this->_call
              ->setProject($project)
              ->setTarget("asdf")

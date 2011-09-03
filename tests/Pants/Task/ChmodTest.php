@@ -72,6 +72,24 @@ class ChmodTest extends TestCase
         unlink($this->_file);
     }
 
+    public function testFileIsRequired()
+    {
+        $this->setExpectedException("\Pants\BuildException");
+
+        $this->_chmod
+             ->setMode(0777)
+             ->execute();
+    }
+
+    public function testModeIsRequired()
+    {
+        $this->setExpectedException("\Pants\BuildException");
+
+        $this->_chmod
+             ->setFile($this->_file)
+             ->execute();
+    }
+
     public function testFailureThrowsABuildException()
     {
         $this->setExpectedException("\Pants\BuildException");
@@ -82,7 +100,7 @@ class ChmodTest extends TestCase
              ->execute();
     }
 
-    public function testPermissionsIsSetOnTheFileObject()
+    public function testPermissionsIsSet()
     {
         $this->_chmod
              ->setFile($this->_file)

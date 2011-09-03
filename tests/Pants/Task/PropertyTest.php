@@ -68,6 +68,15 @@ class PropertyTest extends TestCase
         $this->assertEquals("one", $this->_task->getValue());
     }
 
+    public function testNameIsRequired()
+    {
+        $this->setExpectedException("\Pants\BuildException");
+
+        $this->_task
+             ->setValue("value")
+             ->execute();
+    }
+
     public function testPropertiesAreSetOnTheProjectOnExecute()
     {
         $this->_task

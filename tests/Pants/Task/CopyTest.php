@@ -73,7 +73,25 @@ class CopyTest extends TestCase
         unlink($this->_file);
     }
 
-    public function testCopyFailureThrowsABuildException()
+    public function testFileIsRequired()
+    {
+        $this->setExpectedException("\Pants\BuildException");
+
+        $this->_copy
+             ->setDestination($this->_file . "_1")
+             ->execute();
+    }
+
+    public function testDestinationIsRequired()
+    {
+        $this->setExpectedException("\Pants\BuildException");
+
+        $this->_copy
+             ->setFile($this->_file)
+             ->execute();
+    }
+
+    public function testFailureThrowsABuildException()
     {
         if (!PANTS_COPY_INVALID_PATH) {
             $this->markTestSkipped("PANTS_COPY_INVALID_PATH not set");
