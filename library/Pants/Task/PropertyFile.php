@@ -36,82 +36,58 @@ use Pants\BuildException;
 /**
  *
  */
-class Property extends AbstractTask
+class PropertyFile extends AbstractTask
 {
 
     /**
-     * Name
+     * File
      * @var string
      */
-    protected $_name;
+    protected $_file;
 
     /**
-     * Value
-     * @var string
-     */
-    protected $_value;
-
-    /**
-     * Set the property
+     * Set the properties
      *
-     * @return Property
+     * @return PropertyFile
      * @throws BuildException
      */
     public function execute()
     {
-        if (!$this->getName()) {
-            throw new BuildException("Name not set");
+        if (!$this->getFile()) {
+            throw new BuildException("File not set");
         }
 
-        $name  = $this->filterProperties($this->getName());
-        $value = $this->filterProperties($this->getValue());
+        $file = $this->filterProperties($this->getFile());
 
-        $this->getProject()->getProperties()->{$name} = $value;
+        foreach (parse_ini_file($file, false, INI_SCANNER_RAW) as $name => $value) {
+            $name  = $this->filterProperties($name);
+            $value = $this->filterProperties($value);
+
+            $this->getProject()->getProperties()->{$name} = $value;
+        }
 
         return $this;
     }
 
     /**
-     * Get the name
+     * Get the file
      *
      * @return string
      */
-    public function getName()
+    public function getFile()
     {
-        return $this->_name;
+        return $this->_file;
     }
 
     /**
-     * Get the value
+     * Set the file
      *
-     * @return string
-     */
-    public function getValue()
-    {
-        return $this->_value;
-    }
-
-    /**
-     * Set the name
-     *
-     * @param string $name
+     * @param string $file
      * @return Property
      */
-    public function setName($name)
+    public function setFile($file)
     {
-        $this->_name = $name;
-        return $this;
-    }
-
-    /**
-     * Set the value
-     *
-     * @param string $value
-     * @return Property
-     */
-    public function setValue($value)
-    {
-        $this->_value = $value;
+        $this->_file = $file;
         return $this;
     }
 

@@ -29,90 +29,54 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Pants\Task;
+namespace PantsTest\Task;
 
-use Pants\BuildException;
+use Pants\Project,
+    Pants\Task\PropertyFile,
+    PHPUnit_Framework_TestCase as TestCase;
 
 /**
  *
  */
-class Property extends AbstractTask
+class PropertyFileTest extends TestCase
 {
 
     /**
-     * Name
-     * @var string
+     * PropertyFile task
+     * @var PropertyFile
      */
-    protected $_name;
+    protected $_task;
 
     /**
-     * Value
-     * @var string
+     * Setup the test case
      */
-    protected $_value;
-
-    /**
-     * Set the property
-     *
-     * @return Property
-     * @throws BuildException
-     */
-    public function execute()
+    public function setUp()
     {
-        if (!$this->getName()) {
-            throw new BuildException("Name not set");
-        }
-
-        $name  = $this->filterProperties($this->getName());
-        $value = $this->filterProperties($this->getValue());
-
-        $this->getProject()->getProperties()->{$name} = $value;
-
-        return $this;
+        $this->_task = new PropertyFile();
+        $this->_task->setProject(new Project());
     }
 
-    /**
-     * Get the name
-     *
-     * @return string
-     */
-    public function getName()
+    public function testFileIsRequired()
     {
-        return $this->_name;
+        $this->setExpectedException("\Pants\BuildException");
+
+        $this->_task
+             ->execute();
     }
 
-    /**
-     * Get the value
-     *
-     * @return string
-     */
-    public function getValue()
+    public function testPropertiesAreAdded()
     {
-        return $this->_value;
-    }
+        $this->_task
+             ->setFile(__DIR__ . "/_files/properties-1.ini")
+             ->execute();
 
-    /**
-     * Set the name
-     *
-     * @param string $name
-     * @return Property
-     */
-    public function setName($name)
-    {
-        $this->_name = $name;
-        return $this;
-    }
+        $properties = $this->_task
+                           ->getProject()
+                           ->getProperties();
 
-    /**
-     * Set the value
-     *
-     * @param string $value
-     * @return Property
-     */
-    public function setValue($value)
-    {
-        $this->_value = $value;
-        return $this;
+        $this->assertEquals("three", $properties->{"one.two"});
+        $this->assertEquals("six", $properties->{"four.five"});
+        $this->assertEquals("three", $properties->{"seven.eight"});
     }
 
 }

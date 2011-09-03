@@ -43,7 +43,7 @@ class PropertyTest extends TestCase
 
     /**
      * Properties task
-     * @var Properties
+     * @var Property
      */
     protected $_task;
 
