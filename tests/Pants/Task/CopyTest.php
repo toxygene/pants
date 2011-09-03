@@ -73,6 +73,20 @@ class CopyTest extends TestCase
         unlink($this->_file);
     }
 
+    public function testCopyFailureThrowsABuildException()
+    {
+        if (!PANTS_COPY_INVALID_PATH) {
+            $this->markTestSkipped("PANTS_COPY_INVALID_PATH not set");
+        }
+
+        $this->setExpectedException("\Pants\BuildException");
+
+        $this->_copy
+             ->setFile($this->_file)
+             ->setDestination(PANTS_COPY_INVALID_PATH)
+             ->execute();
+    }
+
     public function testFileIsCopied()
     {
         $this->_copy
@@ -82,6 +96,8 @@ class CopyTest extends TestCase
 
         $this->assertTrue(file_exists($this->_file . "_1"));
         $this->assertEquals("testing", file_get_contents($this->_file . "_1"));
+
+        unlink($this->_file . "_1");
     }
 
 }
