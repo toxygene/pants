@@ -31,3 +31,5 @@
 
 define("PANTS_CHGRP_VALID_GROUP_NAME", "");
 define("PANTS_CHGRP_INVALID_GROUP_NAME", "");
+
+define("PANTS_CHOWN_VALID_USER_NAME", "");

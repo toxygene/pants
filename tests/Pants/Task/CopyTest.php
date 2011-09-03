@@ -33,8 +33,7 @@ namespace PantsTest\Task;
 
 use Pants\Project,
     Pants\Task\Copy,
-    PHPUnit_Framework_TestCase as TestCase,
-    Pile\FileSystem;
+    PHPUnit_Framework_TestCase as TestCase;
 
 /**
  *
@@ -63,6 +62,7 @@ class CopyTest extends TestCase
         $this->_copy->setProject(new Project());
 
         $this->_file = tempnam(sys_get_temp_dir(), "Pants_");
+        file_put_contents($this->_file, "testing");
     }
 
     /**
@@ -73,9 +73,15 @@ class CopyTest extends TestCase
         unlink($this->_file);
     }
 
-    public function testOwnerIsSetOnTheFileObject()
+    public function testFileIsCopied()
     {
-        $this->markTestIncomplete();
+        $this->_copy
+             ->setFile($this->_file)
+             ->setDestination($this->_file . "_1")
+             ->execute();
+
+        $this->assertTrue(file_exists($this->_file . "_1"));
+        $this->assertEquals("testing", file_get_contents($this->_file . "_1"));
     }
 
 }

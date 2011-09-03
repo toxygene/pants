@@ -58,6 +58,14 @@ class ChownTest extends TestCase
      */
     public function setUp()
     {
+        if (!PANTS_CHOWN_VALID_USER_NAME) {
+            $this->markTestSkipped("PANTS_CHOWN_VALID_USER_NAME constant is not set");
+        }
+
+        if (!PANTS_CHOWN_INVALID_USER_NAME) {
+            $this->markTestSkipped("PANTS_CHOWN_INVALID_USER_NAME constant is not set");
+        }
+
         $this->_chown = new Chown();
         $this->_chown->setProject(new Project());
 
@@ -74,11 +82,21 @@ class ChownTest extends TestCase
 
     public function testFailureRaisesABuildException()
     {
-        $this->markTestIncomplete();
+        $this->setExpectedException("\Pants\BuildException");
+
+        $this->_chown
+             ->setFile($this->_file)
+             ->setOwner(PANTS_CHOWN_INVALID_USER_NAME)
+             ->execute();
     }
 
     public function testOwnerIsSetOnTheFileObject()
     {
+        $this->_chown
+             ->setFile($this->_file)
+             ->setOwner(PANTS_CHOWN_VALID_USER_NAME)
+             ->execute();
+
         $this->markTestIncomplete();
     }
 
