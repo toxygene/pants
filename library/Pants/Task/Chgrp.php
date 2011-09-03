@@ -75,6 +75,7 @@ class Chgrp extends AbstractTask
      * Execute the task
      *
      * @return Chgrp
+     * @throws BuildException
      */
     public function execute()
     {

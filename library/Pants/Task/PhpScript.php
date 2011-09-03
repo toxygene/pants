@@ -31,6 +31,8 @@
 
 namespace Pants\Task;
 
+use Pants\BuildException;
+
 /**
  *
  */
@@ -47,9 +49,14 @@ class PhpScript extends AbstractTask
      * Execute the task
      *
      * @return PhpScript
+     * @throws BuildException
      */
     public function execute()
     {
+        if (!$this->getFile()) {
+            throw new BuildException("File not set");
+        }
+
         require $this->filterProperties($this->getFile());
 
         return $this;

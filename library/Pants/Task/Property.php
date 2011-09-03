@@ -31,6 +31,8 @@
 
 namespace Pants\Task;
 
+use Pants\BuildException;
+
 /**
  *
  */
@@ -53,14 +55,16 @@ class Property extends AbstractTask
      * Set the properties
      *
      * @return Property
+     * @throws BuildException
      */
     public function execute()
     {
+        if (!$this->getName()) {
+            throw new BuildException("Name not set");
+        }
+
         $name  = $this->filterProperties($this->getName());
         $value = $this->filterProperties($this->getValue());
-
-        $properties = $this->getProject()
-                           ->getProperties();
 
         $this->getProject()->getProperties()->{$name} = $value;
 

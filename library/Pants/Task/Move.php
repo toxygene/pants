@@ -31,6 +31,8 @@
 
 namespace Pants\Task;
 
+use Pants\BuildException;
+
 /**
  *
  */
@@ -53,9 +55,18 @@ class Move extends AbstractTask
      * Execute the task
      *
      * @return Move
+     * @throw BuildException
      */
     public function execute()
     {
+        if (!$this->getFile()) {
+            throw new BuildException("File not set");
+        }
+
+        if (!$this->getDestination()) {
+            throw new BuildException("Destination not set");
+        }
+
         $file        = $this->filterProperties($this->getFile());
         $destination = $this->filterProperties($this->getDestination());
 

@@ -31,6 +31,8 @@
 
 namespace Pants\Task;
 
+use Pants\BuildException;
+
 /**
  *
  */
@@ -53,9 +55,18 @@ class Chown extends AbstractTask
      * Execute the task
      *
      * @return Chown
+     * @throws BuildException
      */
     public function execute()
     {
+        if (!$this->getFile()) {
+            throw new BuildException("File is not set");
+        }
+
+        if (!$this->getOwner()) {
+            throw new BuildException("Owner is not set");
+        }
+
         $file  = $this->filterProperties($this->getFile());
         $owner = $this->filterProperties($this->getOwner());
 

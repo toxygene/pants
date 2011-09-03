@@ -31,6 +31,8 @@
 
 namespace Pants\Task;
 
+use Pants\BuildException;
+
 /**
  *
  */
@@ -53,17 +55,23 @@ class Execute extends AbstractTask
      * Execute the task
      *
      * @return Exec
+     * @throws BuildException
      */
     public function execute()
     {
-        $command   = $this->filterProperties($this->getCommand());
-        $directory = $this->filterProperties($this->getDirectory());
+        if (!$this->getCommand()) {
+            throw new BuildException("Command is not set");
+        }
 
-        if ($directory) {
+        if ($this->getDirectory()) {
+            $directory = $this->filterProperties($this->getDirectory());
+
             $this->_run(function() use ($directory) {
                 chdir($directory);
             });
         }
+
+        $command = $this->filterProperties($this->getCommand());
 
         $this->_run(function() use ($command) {
             exec($command);

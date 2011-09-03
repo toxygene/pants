@@ -31,6 +31,8 @@
 
 namespace Pants\Task;
 
+use Pants\BuildException;
+
 /**
  *
  */
@@ -47,9 +49,14 @@ class Output extends AbstractTask
      * Execute the task
      *
      * @return Output
+     * @throws BuildException
      */
     public function execute()
     {
+        if (!$this->getMessage()) {
+            throw new BuildException("Message not set");
+        }
+
         echo $this->filterProperties($this->getMessage());
 
         return $this;

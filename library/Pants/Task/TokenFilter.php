@@ -31,6 +31,8 @@
 
 namespace Pants\Task;
 
+use Pants\BuildException;
+
 /**
  *
  */
@@ -52,10 +54,15 @@ class TokenFilter extends AbstractTask
     /**
      * Execute the task
      *
-     * @return Chgrp
+     * @return TokenFilter
+     * @throws BuildException
      */
     public function execute()
     {
+        if (!$this->getFile()) {
+            throw new BuildException("File not set");
+        }
+
         $file = $this->filterProperties($this->getFile());
         $replacements = $this->getReplacements();
 
@@ -90,6 +97,7 @@ class TokenFilter extends AbstractTask
      *
      * @param string $token
      * @param string $value
+     * @return TokenFilter
      */
     public function addReplacement($token, $value)
     {

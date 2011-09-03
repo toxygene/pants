@@ -31,6 +31,8 @@
 
 namespace Pants\Task;
 
+use Pants\BuildException;
+
 /**
  *
  */
@@ -47,9 +49,14 @@ class Delete extends AbstractTask
      * Execute the task
      *
      * @return Delete
+     * @throws BuildException
      */
     public function execute()
     {
+        if (!$this->getFile()) {
+            throw new BuildException("File is not set");
+        }
+
         $file = $this->filterProperties($this->getFile());
 
         $this->_run(function() use ($file) {
