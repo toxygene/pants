@@ -87,6 +87,20 @@ class Properties
     }
 
     /**
+     * To string
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        $properties = array();
+        foreach ($this->_items as $key => $value) {
+            $properties[] = "{$key} = {$value}";
+        }
+        return implode("\n", $properties);
+    }
+
+    /**
      * Unset a property
      *
      * @param string $name
@@ -121,6 +135,19 @@ class Properties
             $string = $matches[1] . $this->filter($this->{$matches[2]}, $encountered) . $matches[3];
         }
         return $string;
+    }
+
+    /**
+     * Set a property
+     *
+     * @param string $name
+     * @param string $value
+     * @return Properties
+     */
+    public function set($name, $value)
+    {
+        $this->$name = $value;
+        return $this;
     }
 
 }
