@@ -72,9 +72,24 @@ class ChmodTest extends TestCase
         unlink($this->_file);
     }
 
+    public function testFailureThrowsABuildException()
+    {
+        $this->setExpectedException("\Pants\BuildException");
+
+        $this->_chmod
+             ->setFile($this->_file)
+             ->setMode("asdf")
+             ->execute();
+    }
+
     public function testPermissionsIsSetOnTheFileObject()
     {
-        $this->markTestIncomplete();
+        $this->_chmod
+             ->setFile($this->_file)
+             ->setMode(0777)
+             ->execute();
+
+        $this->assertEquals(0777, fileperms($this->_file) & 0777);
     }
 
 }

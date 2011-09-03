@@ -31,6 +31,8 @@
 
 namespace Pants\Task;
 
+use Pants\BuildException;
+
 /**
  *
  */
@@ -53,9 +55,18 @@ class Chmod extends AbstractTask
      * Execute the task
      *
      * @return Chmod
+     * @throws BuildException
      */
     public function execute()
     {
+        if (!$this->getFile()) {
+            throw new BuildException("File is not set");
+        }
+
+        if (!$this->getMode()) {
+            throw new BuildException("Mode is not set");
+        }
+
         $file = $this->filterProperties($this->getFile());
         $mode = $this->filterProperties($this->getMode());
 

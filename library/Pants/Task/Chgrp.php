@@ -31,6 +31,8 @@
 
 namespace Pants\Task;
 
+use Pants\BuildException;
+
 /**
  *
  */
@@ -76,6 +78,14 @@ class Chgrp extends AbstractTask
      */
     public function execute()
     {
+        if (!$this->getFile()) {
+            throw new BuildException("File is not set");
+        }
+
+        if (!$this->getGroup()) {
+            throw new BuildException("Group is not set");
+        }
+
         $file = $this->filterProperties($this->getFile());
         $group = $this->filterProperties($this->getGroup());
 

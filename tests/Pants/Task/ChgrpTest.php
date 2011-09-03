@@ -80,7 +80,25 @@ class ChgrpTest extends TestCase
         unlink($this->_file);
     }
 
-    public function testInvalidGroupNameFails()
+    public function testBuildExceptionIsThrownIfFileIsMissing()
+    {
+        $this->setExpectedException("\Pants\BuildException");
+
+        $this->_chgrp
+             ->setGroup(PANTS_CHGRP_VALID_GROUP_NAME)
+             ->execute();
+    }
+
+    public function testBuildExceptionIsThrownIfGroupIsMissing()
+    {
+        $this->setExpectedException("\Pants\BuildException");
+
+        $this->_chgrp
+             ->setFile($this->_file)
+             ->execute();
+    }
+
+    public function testBuildExceptionIsThrownIfChangingTheGroupFails()
     {
         $this->setExpectedException("\Pants\BuildException");
 
@@ -90,7 +108,7 @@ class ChgrpTest extends TestCase
              ->execute();
     }
 
-    public function testGroupIsSetOnExecute()
+    public function testGroupIsSetOnFile()
     {
         $this->_chgrp
              ->setFile($this->_file)

@@ -56,6 +56,14 @@ class CallTest extends TestCase
         $this->_call->setProject(new Project());
     }
 
+    public function testBuildExceptionIsThrownIfTargetIsMissing()
+    {
+        $this->setExpectedException("\Pants\BuildException");
+
+        $this->_call
+             ->execute();
+    }
+
     public function testTargetCanBeSet()
     {
         $this->_call->setTarget("asdf");

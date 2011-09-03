@@ -33,8 +33,7 @@ namespace Pants\Task;
 
 use Pants\BuildException,
     Pants\Project,
-    Pants\Task,
-    Pants\Task\Exception;
+    Pants\Task;
 
 /**
  *
@@ -53,16 +52,21 @@ abstract class AbstractTask implements Task
      *
      * @param string $string
      * @return string
+     * @throw BuildException
      */
     public function filterProperties($string)
     {
         if (!$this->getProject()) {
-            throw new Exception("The project has not been set");
+            throw new BuildException("The project has not been set");
         }
 
-        return $this->getProject()
-                    ->getProperties()
-                    ->filter($string);
+        try {
+            return $this->getProject()
+                        ->getProperties()
+                        ->filter($string);
+        } catch(Exception $e) {
+            throw new BuildException("An error occurred while filtering the property", null, $e);
+        }
     }
 
     /**

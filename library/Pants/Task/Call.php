@@ -54,6 +54,10 @@ class Call extends AbstractTask
      */
     public function execute()
     {
+        if (!$this->getTarget()) {
+            throw new BuildException("No target set");
+        }
+
         $target = $this->filterProperties($this->getTarget());
 
         try {

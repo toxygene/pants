@@ -72,6 +72,11 @@ class ChownTest extends TestCase
         unlink($this->_file);
     }
 
+    public function testFailureRaisesABuildException()
+    {
+        $this->markTestIncomplete();
+    }
+
     public function testOwnerIsSetOnTheFileObject()
     {
         $this->markTestIncomplete();
