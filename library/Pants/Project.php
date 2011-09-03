@@ -33,6 +33,7 @@ namespace Pants;
 
 use Pants\Properties,
     Pants\Targets,
+    Pants\Task\Chdir,
     Pants\Tasks;
 
 /**
@@ -40,6 +41,12 @@ use Pants\Properties,
  */
 class Project
 {
+
+    /**
+     * Basedir
+     * @var string
+     */
+    protected $_basedir;
 
     /**
      * Default task name
@@ -76,6 +83,16 @@ class Project
     }
 
     /**
+     * Get the base directory
+     *
+     * @return string
+     */
+    public function getBaseDir()
+    {
+        return $this->_basedir;
+    }
+
+    /**
      * Execute targets
      *
      * @param array $targets
@@ -83,6 +100,9 @@ class Project
      */
     public function execute($targets = array())
     {
+        $this->_setupBaseDir()
+             ->_setupBuiltinProperties();
+
         foreach ($this->getTasks() as $task) {
             $task->setProject($this)
                  ->execute();
@@ -149,6 +169,18 @@ class Project
     }
 
     /**
+     * Set the basedir
+     *
+     * @param string $basedir
+     * @return Project
+     */
+    public function setBaseDir($basedir)
+    {
+        $this->_basedir = $basedir;
+        return $this;
+    }
+
+    /**
      * Set the default target name
      *
      * @param string $default
@@ -157,6 +189,38 @@ class Project
     public function setDefault($default)
     {
         $this->_default = $default;
+        return $this;
+    }
+
+    /**
+     * Setup the basedir
+     *
+     * @return Project
+     */
+    protected function _setupBaseDir()
+    {
+        $target = new Chdir();
+
+        $target->setDirectory($this->getBaseDir())
+               ->setProject($this)
+               ->execute();
+
+        return $this;
+    }
+
+    /**
+     * Setup the builtin properties
+     *
+     * @return Project
+     */
+    protected function _setupBuiltinProperties()
+    {
+        $properties = $this->getProperties();
+
+        foreach ($_SERVER as $key => $value) {
+            $properties->set("env.{$key}", $value);
+        }
+
         return $this;
     }
 
