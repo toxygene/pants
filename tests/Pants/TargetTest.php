@@ -105,4 +105,41 @@ class TargetTest extends TestCase
              ->execute();
     }
 
+    public function testTasksAreNotExecutedIfIfIsNotSet()
+    {
+        $task = $this->getMock("\Pants\Task");
+
+        $task->expects($this->never())
+             ->method("execute");
+
+        $this->_target
+             ->getTasks()
+             ->add($task);
+
+        $this->_target
+             ->setIf(array("one"))
+             ->execute();
+    }
+
+    public function testTasksAreNotExecutedIfUnlessIsSet()
+    {
+        $task = $this->getMock("\Pants\Task");
+
+        $task->expects($this->never())
+             ->method("execute");
+
+        $this->_target
+             ->getTasks()
+             ->add($task);
+
+        $this->_target
+             ->getProject()
+             ->getProperties()
+             ->one = true;
+
+        $this->_target
+             ->setUnless(array("one"))
+             ->execute();
+    }
+
 }

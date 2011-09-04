@@ -205,6 +205,18 @@ class Target extends AbstractTask
     }
 
     /**
+     * Set the if conditionals
+     *
+     * @param array $if
+     * @return Target
+     */
+    public function setIf(array $if)
+    {
+        $this->_if = $if;
+        return $this;
+    }
+
+    /**
      * Set the name
      *
      * @param string $name
@@ -213,6 +225,18 @@ class Target extends AbstractTask
     public function setName($name)
     {
         $this->_name = $name;
+        return $this;
+    }
+
+    /**
+     * Set the unless conditionals
+     *
+     * @param array $unless
+     * @return Target
+     */
+    public function setUnless(array $unless)
+    {
+        $this->_unless = $unless;
         return $this;
     }
 
