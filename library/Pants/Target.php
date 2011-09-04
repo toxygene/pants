@@ -141,6 +141,16 @@ class Target extends AbstractTask
     }
 
     /**
+     * Get the if conditionals
+     *
+     * @return array
+     */
+    public function getIf()
+    {
+        return $this->_if;
+    }
+
+    /**
      * Get the name
      *
      * @return string
@@ -158,6 +168,16 @@ class Target extends AbstractTask
     public function getTasks()
     {
         return $this->_tasks;
+    }
+
+    /**
+     * Get the unless conditionals
+     *
+     * @return array
+     */
+    public function getUnless()
+    {
+        return $this->_unless;
     }
 
     /**
