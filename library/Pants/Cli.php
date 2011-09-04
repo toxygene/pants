@@ -52,19 +52,25 @@ class Cli
                     "file|f=s"  => "Set the build file (defaults to build.php)",
                     "help|h"    => "Print help message",
                     "list|l"    => "Print a list of targets",
-                    "verbose|v" => "Make temp more verbose"
+                    "verbose"   => "Make temp more verbose",
+                    "version|v" => "Print the version"
                 )
             );
 
             $opts->parse();
         } catch (ConsoleException $e) {
             echo $opts->getUsageMessage();
-            die(255);
+            exit(255);
         }
 
         if ($opts->getOption("h")) {
             echo $opts->getUsageMessage();
-            die;
+            exit;
+        }
+
+        if ($opts->getOption("v") {
+            echo "Pants v@version@\n";
+            exit;
         }
 
         $project = new Project();
@@ -79,11 +85,6 @@ class Cli
 
         require_once $file;
 
-        if ($opts->getOption("h")) {
-            echo $opts->toString();
-            exit;
-        }
-
         if ($opts->getOption("l")) {
             foreach ($project->getTargets()->getDescriptions() as $name => $description) {
                 printf(
@@ -92,6 +93,7 @@ class Cli
                     $description
                 );
             }
+            exit;
         }
 
         $project->execute($opts->getRemainingArgs());
