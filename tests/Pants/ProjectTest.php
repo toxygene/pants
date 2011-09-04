@@ -113,4 +113,17 @@ class ProjectTest extends TestCase
              ->execute();
     }
 
+    public function testBaseDirChangesTheCurrentWorkingDirectory()
+    {
+        $cwd = getcwd();
+
+        $this->_project
+             ->setBaseDir("/")
+             ->execute();
+
+        $this->assertEquals("/", getcwd());
+
+        chdir($cwd);
+    }
+
 }

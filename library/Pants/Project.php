@@ -200,7 +200,7 @@ class Project
     protected function _setupBaseDir()
     {
         if ($this->getBaseDir()) {
-            chdir($this->getBaseDire());
+            chdir($this->getBaseDir());
         }
 
         return $this;
@@ -215,7 +215,8 @@ class Project
     {
         $properties = $this->getProperties();
 
-        $properties->set("host.os", PHP_OS)
+        $properties->set("basedir", getcwd())
+                   ->set("host.os", PHP_OS)
                    ->set("pants.version", "@version@")
                    ->set("php.version", PHP_VERSION);
 
