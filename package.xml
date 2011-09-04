@@ -57,7 +57,9 @@
                     <file name="Cli.php" role="php">
                         <tasks:replace from="@version@" to="version" type="package-info" />
                     </file>
-                    <file name="Project.php" role="php" />
+                    <file name="Project.php" role="php">
+                        <tasks:replace from="@verstion@" to="version" type="package-info" />
+                    </file>
                     <file name="Properties.php" role="php" />
                     <file name="Target.php" role="php" />
                     <file name="Targets.php" role="php" />
