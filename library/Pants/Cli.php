@@ -68,7 +68,7 @@ class Cli
             exit;
         }
 
-        if ($opts->getOption("v") {
+        if ($opts->getOption("v")) {
             echo "Pants v@version@\n";
             exit;
         }
