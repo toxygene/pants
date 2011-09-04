@@ -10,7 +10,7 @@
         <email>justin.hendrickson@gmail.com</email>
         <active>yes</active>
     </lead>
-    <date>2011-09-03</date>
+    <date>2011-09-04</date>
     <version>
         <release>0.0.2</release>
         <api>0.0.1</api>
@@ -43,17 +43,20 @@
                         <file name="Chown.php" role="php" />
                         <file name="Copy.php" role="php" />
                         <file name="Delete.php" role="php" />
-                        <file name="Exception.php" role="php" />
                         <file name="Execute.php" role="php" />
+                        <file name="Input.php" role="php" />
                         <file name="Move.php" role="php" />
                         <file name="Output.php" role="php" />
                         <file name="PhpScript.php" role="php" />
                         <file name="Property.php" role="php" />
+                        <file name="PropertyFile.php" role="php" />
                         <file name="TokenFilter.php" role="php" />
                         <file name="Touch.php" role="php" />
                     </dir>
                     <file name="Autoloader.php" role="php" />
-                    <file name="Cli.php" role="php" />
+                    <file name="Cli.php" role="php">
+                        <tasks:replace from="@version@" to="version" type="package-info" />
+                    </file>
                     <file name="Project.php" role="php" />
                     <file name="Properties.php" role="php" />
                     <file name="Target.php" role="php" />
@@ -85,12 +88,13 @@
             <install name="library/Pants/Task/Chown.php" as="Pants/Task/Chown.php" />
             <install name="library/Pants/Task/Copy.php" as="Pants/Task/Copy.php" />
             <install name="library/Pants/Task/Delete.php" as="Pants/Task/Delete.php" />
-            <install name="library/Pants/Task/Exception.php" as="Pants/Task/Exception.php" />
             <install name="library/Pants/Task/Execute.php" as="Pants/Task/Execute.php" />
+            <install name="library/Pants/Task/Input.php" as="Pants/Task/Input.php" />
             <install name="library/Pants/Task/Move.php" as="Pants/Task/Move.php" />
             <install name="library/Pants/Task/Output.php" as="Pants/Task/Output.php" />
             <install name="library/Pants/Task/PhpScript.php" as="Pants/Task/PhpScript.php" />
             <install name="library/Pants/Task/Property.php" as="Pants/Task/Property.php" />
+            <install name="library/Pants/Task/PropertyFile.php" as="Pants/Task/PropertyFile.php" />
             <install name="library/Pants/Task/TokenFilter.php" as="Pants/Task/TokenFilter.php" />
             <install name="library/Pants/Task/Touch.php" as="Pants/Task/Touch.php" />
             <install name="library/Pants/Autoloader.php" as="Pants/Autoloader.php" />
