@@ -57,7 +57,7 @@ abstract class AbstractTask implements Task
     public function filterProperties($string)
     {
         if (!$this->getProject()) {
-            throw new BuildException("The project has not been set");
+            throw new BuildException("Project not set");
         }
 
         try {
