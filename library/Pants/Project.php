@@ -199,11 +199,9 @@ class Project
      */
     protected function _setupBaseDir()
     {
-        $target = new Chdir();
-
-        $target->setDirectory($this->getBaseDir())
-               ->setProject($this)
-               ->execute();
+        if ($this->getBaseDir()) {
+            chdir($this->getBaseDire());
+        }
 
         return $this;
     }
@@ -217,9 +215,9 @@ class Project
     {
         $properties = $this->getProperties();
 
-        $propertyies->set("host.os", PHP_OS)
-                    ->set("pants.version", "@version@")
-                    ->set("php.version", PHP_VERSION);
+        $properties->set("host.os", PHP_OS)
+                   ->set("pants.version", "@version@")
+                   ->set("php.version", PHP_VERSION);
 
         foreach ($_SERVER as $key => $value) {
             $properties->set("env.{$key}", $value);
