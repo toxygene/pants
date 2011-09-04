@@ -217,11 +217,15 @@ class Project
     {
         $properties = $this->getProperties();
 
+        $propertyies->set("host.os", PHP_OS)
+                    ->set("pants.version", "@version@")
+                    ->set("php.version", PHP_VERSION);
+
         foreach ($_SERVER as $key => $value) {
             $properties->set("env.{$key}", $value);
         }
 
         return $this;
-    }
+    } 
 
 }

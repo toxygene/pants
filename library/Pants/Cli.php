@@ -74,6 +74,9 @@ class Cli
             $file = "build.php";
         }
 
+        $project->getProperties()
+                ->{"pants.file"} = $file;
+
         require_once $file;
 
         if ($opts->getOption("h")) {
