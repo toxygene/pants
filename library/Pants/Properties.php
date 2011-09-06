@@ -40,6 +40,7 @@ use InvalidArgumentException,
  * Properties container
  *
  * @package Pants
+ * @subpackage Properties
  */
 class Properties
 {

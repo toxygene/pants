@@ -33,6 +33,12 @@ namespace Pants\FileSet;
 
 use FilterIterator;
 
+/**
+ * Include/exclude pattern filter iterator
+ *
+ * @package Pants
+ * @subpackage FileSet
+ */
 class IncludeExcludeFilterIterator extends FilterIterator
 {
 
@@ -55,6 +61,7 @@ class IncludeExcludeFilterIterator extends FilterIterator
     protected $_includes = array();
 
     /**
+     * Check whether the current element of the iterator is acceptable
      *
      * @return boolean
      */

@@ -37,16 +37,29 @@ use RecursiveFilterIterator,
     RecursiveIterator;
 
 /**
+ * Default ignore filter iterator
  *
+ * @package Pants
+ * @subpackage FileSet
  */
 class DefaultIgnoreFilterIterator extends RecursiveFilterIterator
 {
 
+    /**
+     * Default patterns
+     * @var array
+     */
     protected $_patterns = array(
         "^\.git$",
         "^\.svn$"
     );
 
+    /**
+     * Constructor
+     *
+     * @param RecursiveIterator $iterator
+     * @param array $patterns
+     */
     public function __construct(RecursiveIterator $iterator, $patterns = array())
     {
         if ($patterns) {
@@ -56,6 +69,11 @@ class DefaultIgnoreFilterIterator extends RecursiveFilterIterator
         parent::__construct($iterator);
     }
 
+    /**
+     * Check whether the current element of the iterator is acceptable
+     *
+     * @return boolean
+     */
     public function accept()
     {
         $pattern = "";
@@ -70,6 +88,11 @@ class DefaultIgnoreFilterIterator extends RecursiveFilterIterator
         return preg_match("#{$pattern}#", $this->getInnerIterator()->current()->getFilename()) == 0;
     }
 
+    /**
+     * Get the patterns
+     *
+     * @return array
+     */
     public function getPatterns()
     {
         return $this->_patterns;
