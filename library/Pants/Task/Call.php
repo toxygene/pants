@@ -27,6 +27,8 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
+ *
+ * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
 namespace Pants\Task;
@@ -35,7 +37,10 @@ use InvalidArgumentException,
     Pants\BuildException;
 
 /**
+ * Call another target task
  *
+ * @package Pants
+ * @subpackage Task
  */
 class Call extends AbstractTask
 {

@@ -27,6 +27,8 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
+ *
+ * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
 namespace Pants\Properties;
@@ -34,7 +36,9 @@ namespace Pants\Properties;
 use RuntimeException;
 
 /**
+ * Property name cycle detected exception
  *
+ * @package Pants
  */
 class PropertyNameCycleException extends RuntimeException
 {
