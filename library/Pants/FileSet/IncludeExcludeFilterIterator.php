@@ -109,13 +109,25 @@ class IncludeExcludeFilterIterator extends FilterIterator
         return $this;
     }
 
-    public function setExcludes(array $excludes = array())
+    /**
+     * Set the exclude patterns
+     *
+     * @param array $excludes
+     * @return IncludeExcludeFilterIterator
+     */
+    public function setExcludes(array $excludes)
     {
         $this->_excludes = $excludes;
         return $this;
     }
 
-    public function setIncludes(array $includes = array())
+    /**
+     * Set the include patterns
+     *
+     * @param array $includes
+     * @return IncludeExcludeFilterIterator
+     */
+    public function setIncludes(array $includes)
     {
         $this->_includes = $includes;
         return $this;

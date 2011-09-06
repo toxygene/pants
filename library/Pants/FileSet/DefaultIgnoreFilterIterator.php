@@ -55,21 +55,6 @@ class DefaultIgnoreFilterIterator extends RecursiveFilterIterator
     );
 
     /**
-     * Constructor
-     *
-     * @param RecursiveIterator $iterator
-     * @param array $patterns
-     */
-    public function __construct(RecursiveIterator $iterator, $patterns = array())
-    {
-        if ($patterns) {
-            $this->_patterns = $patterns;
-        }
-
-        parent::__construct($iterator);
-    }
-
-    /**
      * Check whether the current element of the iterator is acceptable
      *
      * @return boolean
@@ -96,6 +81,18 @@ class DefaultIgnoreFilterIterator extends RecursiveFilterIterator
     public function getPatterns()
     {
         return $this->_patterns;
+    }
+
+    /**
+     * Set the patterns
+     *
+     * @param array $patterns
+     * @return DefaultIgnoreFilterIterator
+     */
+    public function setPatterns(array $patterns)
+    {
+        $this->_patterns = $patterns;
+        return $this;
     }
 
 }
