@@ -33,9 +33,8 @@
 
 namespace Pants;
 
-use Pants\Project,
-    Zend_Console_Getopt as Getopt,
-    Zend_Console_Exception as ConsoleException;
+use Pants\Getopt,
+    Pants\Project;
 
 /**
  * Command line interface
@@ -47,20 +46,24 @@ class Cli
 
     /**
      * Run the cli
+     *
+     * @var array $argv
      */
-    public function run()
+    public function run($argv)
     {
-        try {
-            $opts = new Getopt(
-                array(
-                    "file|f=s"  => "Set the build file (defaults to build.php)",
-                    "help|h"    => "Print help message",
-                    "list|l"    => "Print a list of targets",
-                    "verbose"   => "Make temp more verbose",
-                    "version|v" => "Print the version"
-                )
-            );
+        $opts = new Getopt(
+            array(
+                "file|f=s"  => "Set the build file (defaults to build.php)",
+                "help|h"    => "Print help message",
+                "list|l"    => "Print a list of targets",
+                "verbose"   => "Make temp more verbose",
+                "version|v" => "Print the version"
+            ),
+            $argv
+        );
 
+
+        try {
             $opts->parse();
         } catch (ConsoleException $e) {
             echo $opts->getUsageMessage();
@@ -87,6 +90,7 @@ class Cli
         $project->getProperties()
                 ->{"pants.file"} = $file;
 
+        // build the project here
         require_once $file;
 
         if ($opts->getOption("l")) {
