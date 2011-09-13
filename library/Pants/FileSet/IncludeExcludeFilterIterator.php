@@ -73,9 +73,9 @@ class IncludeExcludeFilterIterator extends FilterIterator
             $this->getInnerIterator()->current()->getPathname()
         );
 
-        foreach ($this->_includes as $include) {
+        foreach ($this->getIncludes() as $include) {
             if (preg_match($include, $path)) {
-                foreach ($this->_excludes as $exclude) {
+                foreach ($this->getExcludes() as $exclude) {
                     if (preg_match($exclude, $path)) {
                         return false;
                     }
@@ -95,6 +95,26 @@ class IncludeExcludeFilterIterator extends FilterIterator
     public function getBaseDirectory()
     {
         return $this->_baseDirectory;
+    }
+
+    /**
+     * Get the exclude patterns
+     *
+     * @return array
+     */
+    public function getExcludes()
+    {
+        return $this->_excludes;
+    }
+
+    /**
+     * Get the include patterns
+     *
+     * @return array
+     */
+    public function getIncludes()
+    {
+        return $this->_includes;
     }
 
     /**
