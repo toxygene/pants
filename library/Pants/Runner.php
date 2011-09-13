@@ -37,11 +37,11 @@ use Pants\Getopt,
     Pants\Project;
 
 /**
- * Command line interface
+ * Runner
  *
  * @package Pants
  */
-class Cli
+class Runner
 {
 
     /**
@@ -61,7 +61,6 @@ class Cli
             ),
             $argv
         );
-
 
         try {
             $opts->parse();

@@ -53,7 +53,6 @@
                         <file name="TokenFilter.php" role="php" />
                         <file name="Touch.php" role="php" />
                     </dir>
-                    <file name="Autoloader.php" role="php" />
                     <file name="Cli.php" role="php">
                         <tasks:replace from="@version@" to="version" type="package-info" />
                     </file>
