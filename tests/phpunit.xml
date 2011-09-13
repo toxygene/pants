@@ -7,6 +7,9 @@
     <filter>
         <whitelist addUncoveredFilesFromWhitelist="true">
             <directory>../library</directory>
+            <exclude>
+                <directory>../library/Zend</directory>
+            </exclude>
         </whitelist>
     </filter>
 </phpunit>

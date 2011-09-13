@@ -36,11 +36,13 @@ if (is_readable('TestConfiguration.php')) {
     require_once 'TestConfiguration.php.dist';
 }
 
-// Setup Pants autoloading
-require_once "../library/Pants/Autoloader.php";
+require_once "../library/Zend/Loader/StandardAutoloader.php";
 
-$pantsAutoloader = new Pants\Autoloader();
-$pantsAutoloader->register();
+use Zend\Loader\StandardAutoloader;
+
+$autoloader = new StandardAutoloader();
+$autoloader->registerNamespace("Pants", "../library/Pants")
+           ->register();
 
 // Setup PHPUnit autoloading
 require_once "PHPUnit/Autoload.php";

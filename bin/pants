@@ -1,13 +1,13 @@
 #!@php_bin@
 <?php
-require_once "Pants/Autoloader.php";
+use Pants\Runner,
+    Zend\Loader\StandardAutoloader;
 
-$pantsAutoloader = new Pants\Autoloader();
-$pantsAutoloader->register();
+require_once "Zend/Loader/StandardAutoloader.php";
 
-require_once "Zend/Loader/Autoloader.php";
+$autoloader = new StandardAutoloader();
+$autoloader->registerNamespace("Pants")
+           ->register();
 
-$zendAutoloader = Zend_Loader_Autoloader::getInstance();
-
-$cli = new Pants\Cli();
+$cli = new Runner();
 $cli->run($_SERVER['argv']);
