@@ -5,12 +5,12 @@
 
 namespace Pants\Getopt;
 
-use Exception;
+use Exception as PhpException;
 
 /**
  *
  */
-class Exception extends Exception
+class Exception extends PhpException
 {
 
     /**
