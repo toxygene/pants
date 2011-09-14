@@ -70,23 +70,57 @@ class IncludeExcludeFilterIteratorTest extends TestCase
 
     public function testEverythingIsIgnoredByDefault()
     {
-        $filter = new IncludeExcludeFilterIterator($this->_getIteratorOfMockFileObjects());
+        $mocks = $this->_getMockFileObjects();
+
+        $filter = new IncludeExcludeFilterIterator(new ArrayIterator($mocks));
 
         $this->assertEmpty(iterator_to_array($filter));
     }
 
     public function testFilesAreAcceptedIfTheyAreIncludedAndNotExcluded()
     {
+        $mocks = $this->_getMockFileObjects();
+
+        $filter = new IncludeExcludeFilterIterator(new ArrayIterator($mocks));
+        $filter->setBaseDirectory("/a/b")
+               ->setExcludes(array("#^t#"))
+               ->setIncludes(array("#o#"));
+
+        $results = iterator_to_array($filter);
+
+        $this->assertEquals(2, count($results));
+        $this->assertContains($mocks['one'], $results);
+        $this->assertContains($mocks['four'], $results);
     }
 
-    protected function _getIteratorOfMockFileObjects()
+    protected function _getMockFileObjects()
     {
         $one = $this->getMock("SplFileObject", array(), array(), '', false);
         $one->expects($this->once())
             ->method("getPathname")
-            ->will($this->returnValue("/a/b/cde"));
+            ->will($this->returnValue("/a/b/one"));
 
-        return new ArrayIterator(array($one));
+        $two = $this->getMock("SplFileObject", array(), array(), '', false);
+        $two->expects($this->once())
+            ->method("getPathname")
+            ->will($this->returnValue("/a/b/two"));
+
+        $three = $this->getMock("SplFileObject", array(), array(), '', false);
+        $three->expects($this->once())
+              ->method("getPathname")
+              ->will($this->returnValue("/a/b/three"));
+
+        $four = $this->getMock("SplFileObject", array(), array(), '', false);
+        $four->expects($this->once())
+             ->method("getPathname")
+             ->will($this->returnValue("/a/b/four"));
+
+        return array(
+            "one" => $one,
+            "two" => $two,
+            "three" => $three,
+            "four" => $four
+        );
     }
 
 }
