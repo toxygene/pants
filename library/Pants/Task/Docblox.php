@@ -33,8 +33,15 @@
 
 namespace Pants\Task;
 
-use Docblox_Parser as Parser,
-    Pants\BuildException;
+use DocBlox_Core_Abstract as CoreAbstract,
+    DocBlox_Parser as Parser,
+    DocBlox_Parser_Abstract as ParserAbstract,
+    DocBlox_Parser_Files as Files,
+    DocBlox_Transformer as Transformer,
+    Pants\BuildException,
+    Pants\FileSet,
+    sfEventDispatcher,
+    Zend\Loader\StandardAutoloader;
 
 /**
  * Docblox
@@ -46,10 +53,22 @@ class Docblox extends AbstractTask
 {
 
     /**
+     * FileSet
+     * @var FileSet
+     */
+    protected $_fileSet;
+
+    /**
      * Force documentation
      * @var boolean
      */
     protected $_force;
+
+    /**
+     * Library path
+     * @var string
+     */
+    protected $_libraryPath;
 
     /**
      * Markers
@@ -58,16 +77,28 @@ class Docblox extends AbstractTask
     protected $_markers;
 
     /**
+     * Parse private
+     * @var boolean
+     */
+    protected $_parsePrivate;
+
+    /**
      * Target
      * @var string
      */
     protected $_target;
 
     /**
-     * Template
+     * Templates
+     * @var array
+     */
+    protected $_templates;
+
+    /**
+     * Themes path
      * @var string
      */
-    protected $_template;
+    protected $_themesPath;
 
     /**
      * Title
@@ -89,43 +120,84 @@ class Docblox extends AbstractTask
      */
     public function execute()
     {
-        $task = new DocBlox_Task_Project_Run();
+        if (!$this->getLibraryPath()) {
+            throw new BuildException("No Docblox library path set");
+        }
+
+        set_include_path(get_include_path() . PATH_SEPARATOR . $this->getLibraryPath());
+
+        require_once 'markdown.php';
+
+        $autoloader = new StandardAutoloader();
+        $autoloader->registerPrefix("Zend", $this->getLibraryPath() . "/Zend")
+                   ->registerPrefix("DocBlox", $this->getLibraryPath() . "/DocBlox")
+                   ->setFallbackAutoloader(true)
+                   ->register();
+
+        $parser = new Parser();
+        ParserAbstract::$event_dispatcher = new sfEventDispatcher();
 
         if ($this->getForce()) {
-            $task->setForce($this->getForce());
+            $parser->setForced($this->getForce());
         }
 
         if ($this->getMarkers()) {
-            $task->setMarkers(implode(",", $this->getMarkers()));
-        }
-
-        if ($this->getTarget()) {
-            $task->setTarget($this->getTarget());
+            $parser->setMarkers($this->getMarkers());
         }
 
         if ($this->getTitle()) {
-            $task->setTitle($this->getTitle());
+            $parser->setTitle($this->getTitle());
         }
 
         if ($this->getValidate()) {
-            $task->setValidate($this->getValidate());
+            $parser->setValidate($this->getValidate());
         }
 
-        $task->execute();
+        $files = new Files();
 
-        $transform = new DocBlox_Task_Project_Transform();
-
-        if ($task->getTarget()) {
-            $transform->setTarget($task->getTarget());
+        foreach ($this->getFileSet() as $file) {
+            $files->addFile($file->getPathname());
         }
 
-        if ($this->getTemplate()) {
-            $transform->setTemplate($this->getTemplate());
+        $xml = $parser->parseFiles($files);
+
+        $transformer = new Transformer();
+
+        $transformer->setSource($xml);
+
+        if ($this->getParsePrivate()) {
+            $transformer->setParseprivate($this->getParsePrivate());
         }
 
-        $transform->execute();
+        if ($this->getTarget()) {
+            $transformer->setTarget($this->getTarget());
+        }
+
+        if ($this->getThemesPath()) {
+            $transformer->setThemesPath($this->getThemesPath());
+        } else {
+            $transformer->setThemesPath(CoreAbstract::config()->paths->themes);
+        }
+
+        if ($this->getTemplates()) {
+            $transformer->setTemplates($this->getTemplates());
+        } else {
+            $transformer->setTemplates(CoreAbstract::config()->transformations->template->name);
+        }
+
+        $transformer->execute();
 
         return $this;
+    }
+
+    /**
+     * Get the file set
+     *
+     * @return FileSet
+     */
+    public function getFileSet()
+    {
+        return $this->_fileSet;
     }
 
     /**
@@ -139,6 +211,16 @@ class Docblox extends AbstractTask
     }
 
     /**
+     * Get the path to the DocBlox library files
+     *
+     * @return string
+     */
+    public function getLibraryPath()
+    {
+        return $this->_libraryPath;
+    }
+
+    /**
      * Get the markers
      *
      * @return array
@@ -146,6 +228,16 @@ class Docblox extends AbstractTask
     public function getMarkers()
     {
         return $this->_markers;
+    }
+
+    /**
+     * Get the parse private flag
+     *
+     * @return string
+     */
+    public function getParsePrivate()
+    {
+        return $this->_parsePrivate;
     }
 
     /**
@@ -159,13 +251,23 @@ class Docblox extends AbstractTask
     }
 
     /**
-     * Get the template
+     * Get the templates
      *
      * @return string
      */
-    public function getTemplate()
+    public function getTemplates()
     {
-        return $this->_template;
+        return $this->_templates;
+    }
+
+    /**
+     * Get the themes path
+     *
+     * @return string
+     */
+    public function getThemesPath()
+    {
+        return $this->_themesPath;
     }
 
     /**
@@ -179,6 +281,28 @@ class Docblox extends AbstractTask
     }
 
     /**
+     * Get the validate flag
+     *
+     * @return boolean
+     */
+    public function getValidate()
+    {
+        return $this->_validate;
+    }
+
+    /**
+     * Set the file set
+     *
+     * @param FileSet $fileSet
+     * @return Docblox
+     */
+    public function setFileSet(FileSet $fileSet)
+    {
+        $this->_fileSet = $fileSet;
+        return $this;
+    }
+
+    /**
      * Set the force full documentation flag
      *
      * @param boolean $force
@@ -187,6 +311,18 @@ class Docblox extends AbstractTask
     public function setForce($force)
     {
         $this->_force = $force;
+        return $this;
+    }
+
+    /**
+     * Set the DocBlox library path
+     *
+     * @param string $libraryPath
+     * @return Docblox
+     */
+    public function setLibraryPath($libraryPath)
+    {
+        $this->_libraryPath = $libraryPath;
         return $this;
     }
 
@@ -203,6 +339,18 @@ class Docblox extends AbstractTask
     }
 
     /**
+     * Set the parse private flag
+     *
+     * @param boolean $parsePrivate
+     * @return Docblox
+     */
+    public function setParsePrivate($parsePrivate)
+    {
+        $this->_parsePrivate = $parsePrivate;
+        return $this;
+    }
+
+    /**
      * Set the target
      *
      * @param string $target
@@ -215,14 +363,26 @@ class Docblox extends AbstractTask
     }
 
     /**
-     * Set the template
+     * Set the templates
      *
-     * @param string $template
+     * @param string $templates
      * @return Docblox
      */
-    public function setTemplate($template)
+    public function setTemplates($templates)
     {
-        $this->_template = $template;
+        $this->_templates = $templates;
+        return $this;
+    }
+
+    /**
+     * Set the themes path
+     *
+     * @param string $themesPath
+     * @return Docblox
+     */
+    public function setThemesPath($themesPath)
+    {
+        $this->_themesPath = $themesPath;
         return $this;
     }
 
@@ -235,6 +395,18 @@ class Docblox extends AbstractTask
     public function setTitle($title)
     {
         $this->_title = $title;
+        return $this;
+    }
+
+    /**
+     * Set the validate flag
+     *
+     * @param boolean $validate
+     * @return Docblox
+     */
+    public function setValidate($validate)
+    {
+        $this->_validate = $validate;
         return $this;
     }
 
