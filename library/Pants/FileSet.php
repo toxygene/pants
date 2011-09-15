@@ -39,6 +39,7 @@ use Exception,
     RecursiveDirectoryIterator,
     RecursiveIteratorIterator,
     Pants\FileSet\DefaultIgnoreFilterIterator,
+    Pants\FileSet\DotFilterIterator,
     Pants\FileSet\IncludeExcludeFilterIterator;
 
 /**
@@ -122,7 +123,7 @@ class FileSet implements IteratorAggregate
     public function getIterator()
     {
         if (!$this->getBaseDirectory()) {
-            throw new Exception(); // TODO What should be thrown here?
+            throw new BuildException("No base directory is set");
         }
 
         // Create a recursive directory iterator
@@ -130,7 +131,7 @@ class FileSet implements IteratorAggregate
             $this->getBaseDirectory()
         );
 
-        $iterator->setFlags(FilesystemIterator::SKIP_DOTS);
+        $iterator->setFlags(FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO | FilesystemIterator::SKIP_DOTS);
 
         // Optionally wrap the iterator with a default ignore filter iterator
         if ($this->getAddDefaultIgnore()) {
@@ -143,6 +144,9 @@ class FileSet implements IteratorAggregate
         );
 
         $iterator->setFlags(RecursiveIteratorIterator::CHILD_FIRST);
+
+        // Wrap the iterator with a dot filter interator
+        $iterator = new DotFilterIterator($iterator);
 
         // Wrap the iterator with an include/exclude filter iterator
         $iterator = new IncludeExcludeFilterIterator(
