@@ -86,6 +86,18 @@ class Runner
             $file = "build.php";
         }
 
+        if (!file_exists($file)) {
+            echo "'{$file}' does not exist." . PHP_EOL;
+            echo $opts->getUsageMessage();
+            exit(255);
+        }
+
+        if (!is_readable($file)) {
+            echo "'{$file}' is not readable." . PHP_EOL;
+            echo $opts->getUsageMessage();
+            exit(255);
+        }
+
         $project->getProperties()
                 ->{"pants.file"} = $file;
 
