@@ -120,19 +120,21 @@ class Docblox extends AbstractTask
      */
     public function execute()
     {
-        if (!$this->getLibraryPath()) {
-            throw new BuildException("No Docblox library path set");
+        if (!class_exists("Parser")) {
+            if (!$this->getLibraryPath()) {
+                throw new BuildException("No Docblox library path set");
+            }
+
+            set_include_path(get_include_path() . PATH_SEPARATOR . $this->getLibraryPath());
+
+            require_once 'markdown.php';
+
+            $autoloader = new StandardAutoloader();
+            $autoloader->registerPrefix("Zend", $this->getLibraryPath() . "/Zend")
+                       ->registerPrefix("DocBlox", $this->getLibraryPath() . "/DocBlox")
+                       ->setFallbackAutoloader(true)
+                       ->register();
         }
-
-        set_include_path(get_include_path() . PATH_SEPARATOR . $this->getLibraryPath());
-
-        require_once 'markdown.php';
-
-        $autoloader = new StandardAutoloader();
-        $autoloader->registerPrefix("Zend", $this->getLibraryPath() . "/Zend")
-                   ->registerPrefix("DocBlox", $this->getLibraryPath() . "/DocBlox")
-                   ->setFallbackAutoloader(true)
-                   ->register();
 
         $parser = new Parser();
         ParserAbstract::$event_dispatcher = new sfEventDispatcher();
