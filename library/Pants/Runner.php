@@ -34,7 +34,8 @@
 namespace Pants;
 
 use Pants\Getopt,
-    Pants\Project;
+    Pants\Project,
+    Pants\Project\Factory;
 
 /**
  * Runner
@@ -101,8 +102,8 @@ class Runner
         $project->getProperties()
                 ->{"pants.file"} = $file;
 
-        // build the project here
-        require_once $file;
+        $factory = new Factory();
+        $project = $factory->build($project, $file);
 
         if ($opts->getOption("l")) {
             foreach ($project->getTargets()->getDescriptions() as $name => $description) {
