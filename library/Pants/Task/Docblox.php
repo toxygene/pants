@@ -48,6 +48,7 @@ use DocBlox_Core_Abstract as CoreAbstract,
  *
  * @package Pants
  * @subpackage Task
+ * @TODO figure out what needs to be filtered
  */
 class Docblox extends AbstractTask
 {
@@ -125,13 +126,15 @@ class Docblox extends AbstractTask
                 throw new BuildException("No Docblox library path set");
             }
 
-            set_include_path(get_include_path() . PATH_SEPARATOR . $this->getLibraryPath());
+            $libraryPath = $this->filterProperties($this->getLibraryPath());
+
+            set_include_path(get_include_path() . PATH_SEPARATOR . $libraryPath);
 
             require_once 'markdown.php';
 
             $autoloader = new StandardAutoloader();
-            $autoloader->registerPrefix("Zend", $this->getLibraryPath() . "/Zend")
-                       ->registerPrefix("DocBlox", $this->getLibraryPath() . "/DocBlox")
+            $autoloader->registerPrefix("Zend", "{$libraryPath}/Zend")
+                       ->registerPrefix("DocBlox", "{$libraryPath}/DocBlox")
                        ->setFallbackAutoloader(true)
                        ->register();
         }
@@ -148,7 +151,7 @@ class Docblox extends AbstractTask
         }
 
         if ($this->getTitle()) {
-            $parser->setTitle($this->getTitle());
+            $parser->setTitle($this->filterProperties($this->getTitle()));
         }
 
         if ($this->getValidate()) {
@@ -172,11 +175,11 @@ class Docblox extends AbstractTask
         }
 
         if ($this->getTarget()) {
-            $transformer->setTarget($this->getTarget());
+            $transformer->setTarget($this->filterProperties($this->getTarget()));
         }
 
         if ($this->getThemesPath()) {
-            $transformer->setThemesPath($this->getThemesPath());
+            $transformer->setThemesPath($this->filterProperties($this->getThemesPath()));
         } else {
             $transformer->setThemesPath(CoreAbstract::config()->paths->themes);
         }

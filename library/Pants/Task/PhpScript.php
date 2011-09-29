@@ -62,7 +62,11 @@ class PhpScript extends AbstractTask
             throw new BuildException("File not set");
         }
 
-        require $this->filterProperties($this->getFile());
+        $file = $this->filterProperties($this->getFile());
+
+        $this->_run(function() use ($file) {
+            require $file;
+        });
 
         return $this;
     }

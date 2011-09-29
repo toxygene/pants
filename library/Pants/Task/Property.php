@@ -71,7 +71,9 @@ class Property extends AbstractTask
         $name  = $this->filterProperties($this->getName());
         $value = $this->filterProperties($this->getValue());
 
-        $this->getProject()->getProperties()->{$name} = $value;
+        $this->getProject()
+             ->getProperties()
+             ->{$name} = $value;
 
         return $this;
     }

@@ -121,7 +121,9 @@ class Targets
     {
         $descriptions = array();
         foreach ($this->_targets as $key => $value) {
-            $descriptions[$key] = $value->getDescription();
+            if (!$value->getHidden()) {
+                $descriptions[$key] = $value->getDescription();
+            }
         }
         return $descriptions;
     }

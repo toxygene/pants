@@ -58,6 +58,12 @@ class Target extends AbstractTask
     protected $_description;
 
     /**
+     * Hidden
+     * @var boolean
+     */
+    protected $_hidden = false;
+
+    /**
      * If conditions
      * @var array
      */
@@ -145,6 +151,16 @@ class Target extends AbstractTask
     }
 
     /**
+     * Get the hidden flag
+     *
+     * @return boolean
+     */
+    public function getHidden()
+    {
+        return $this->_hidden;
+    }
+
+    /**
      * Get the if conditionals
      *
      * @return array
@@ -205,6 +221,18 @@ class Target extends AbstractTask
     public function setDescription($description)
     {
         $this->_description = $description;
+        return $this;
+    }
+
+    /**
+     * Set the hidden flag
+     *
+     * @param boolean $hidden
+     * @return Target
+     */
+    public function setHidden($hidden)
+    {
+        $this->_hidden = $hidden;
         return $this;
     }
 

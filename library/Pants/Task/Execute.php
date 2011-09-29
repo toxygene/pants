@@ -68,21 +68,52 @@ class Execute extends AbstractTask
             throw new BuildException("Command is not set");
         }
 
-        if ($this->getDirectory()) {
-            $directory = $this->filterProperties($this->getDirectory());
+        $command   = $this->filterProperties($this->getCommand());
+        $directory = $this->filterProperties($this->getDirectory());
 
-            $this->_run(function() use ($directory) {
-                chdir($directory);
-            });
-        }
-
-        $command = $this->filterProperties($this->getCommand());
-
-        $this->_run(function() use ($command) {
+        $this->_runInDirectory($this->getDirectory(), function() use ($command) {
             exec($command);
         });
 
         return $this;
+    }
+
+    /**
+     * Change the working directory
+     *
+     * @param string $directory
+     * @return boolean
+     */
+    protected function _chdir($directory)
+    {
+        if ($directory) {
+            return $this->_run(function() use ($directory) {
+                return chdir($directory);
+            });
+        }
+    }
+
+    /**
+     * Change the working directory and run the function
+     *
+     * @param string $directory
+     * @param function $function
+     */
+    protected function _runInDirectory($directory, $function)
+    {
+        $cwd = getcwd();
+
+        $this->_chdir($directory);
+
+        try {
+            $return = $this->_run($function);
+            $this->_chdir($cwd);
+        } catch (Exception $e) {
+            $this->_chdir($cwd);
+            throw $e;
+        }
+
+        return $return;
     }
 
     /**
@@ -109,7 +140,7 @@ class Execute extends AbstractTask
      * Set the command to execute
      *
      * @param string $command
-     * @return Exec
+     * @return Execute
      */
     public function setCommand($command)
     {
@@ -121,7 +152,7 @@ class Execute extends AbstractTask
      * Set the directory to execute the command in
      *
      * @param string $directory
-     * @return Exec
+     * @return Execute
      */
     public function setDirectory($directory)
     {

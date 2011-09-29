@@ -45,6 +45,12 @@ class TokenFilter extends AbstractTask
 {
 
     /**
+     * Ending character
+     * @var string
+     */
+    protected $_endingCharacter = "@";
+
+    /**
      * Target file
      * @var string
      */
@@ -57,45 +63,10 @@ class TokenFilter extends AbstractTask
     protected $_replacements = array();
 
     /**
-     * Execute the task
-     *
-     * @return TokenFilter
-     * @throws BuildException
+     * Starting character
+     * @var string
      */
-    public function execute()
-    {
-        if (!$this->getFile()) {
-            throw new BuildException("File not set");
-        }
-
-        $file = $this->filterProperties($this->getFile());
-        $replacements = $this->getReplacements();
-
-        $this->_run(function() use ($file, $replacements) {
-            $contents = file_get_contents($file);
-
-            foreach ($replacements as $token => $value) {
-                $contents = str_replace("@{$token}@", $value, $contents);
-            }
-
-            return file_put_contents(
-                $file,
-                $contents
-            );
-        });
-
-        return $this;
-    }
-
-    /**
-     * Get the target file
-     *
-     * @return string
-     */
-    public function getFile()
-    {
-        return $this->_file;
-    }
+    protected $_startingCharacter = "@";
 
     /**
      * Add a replacement
@@ -111,6 +82,64 @@ class TokenFilter extends AbstractTask
     }
 
     /**
+     * Execute the task
+     *
+     * @return TokenFilter
+     * @throws BuildException
+     */
+    public function execute()
+    {
+        if (!$this->getFile()) {
+            throw new BuildException("File not set");
+        }
+
+        $endingCharacter   = $this->filterProperties($this->getEndingCharacter());
+        $file              = $this->filterProperties($this->getFile());
+        $replacements      = $this->getReplacements();
+        $startingCharacter = $this->filterProperties($this->getStartingCharacter());
+
+
+        $this->_run(function() use ($file, $replacements, $endingCharacter, $startingCharacter) {
+            $contents = file_get_contents($file);
+
+            foreach ($replacements as $token => $value) {
+                $contents = str_replace(
+                    $endingCharacter . $token . $startingCharacter,
+                    $value,
+                    $contents
+                );
+            }
+
+            return file_put_contents(
+                $file,
+                $contents
+            );
+        });
+
+        return $this;
+    }
+
+    /**
+     * Get the ending character
+     *
+     * @return string
+     */
+    public function getEndingCharacter()
+    {
+        return $this->_endingCharacter;
+    }
+
+    /**
+     * Get the target file
+     *
+     * @return string
+     */
+    public function getFile()
+    {
+        return $this->_file;
+    }
+
+    /**
      * Get the replacements
      *
      * @return array
@@ -118,6 +147,28 @@ class TokenFilter extends AbstractTask
     public function getReplacements()
     {
         return $this->_replacements;
+    }
+
+    /**
+     * Get the starting character
+     *
+     * @return string
+     */
+    public function getStartingCharacter()
+    {
+        return $this->_startingCharacter;
+    }
+
+    /**
+     * Set the ending character
+     *
+     * @param string $endingCharacter
+     * @return TokenFilter
+     */
+    public function setEndingCharacter($endingCharacter)
+    {
+        $this->_endingCharacter = $endingCharacter;
+        return $this;
     }
 
     /**
@@ -129,6 +180,18 @@ class TokenFilter extends AbstractTask
     public function setFile($file)
     {
         $this->_file = $file;
+        return $this;
+    }
+
+    /**
+     * Set the starting character
+     *
+     * @param string $startingCharacter
+     * @return TokenFilter
+     */
+    public function setStartingCharacter($startingCharacter)
+    {
+        $this->_startingCharacter = $startingCharacter;
         return $this;
     }
 

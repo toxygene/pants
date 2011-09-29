@@ -44,41 +44,66 @@ use Pants\BuildException;
 class Input
 {
 
+    /**
+     * Property to set
+     * @var string
+     */
     protected $_propertyName;
 
+    /**
+     * Default value
+     * @var string
+     */
     protected $_defaultValue;
 
+    /**
+     * Message to display
+     * @var string
+     */
     protected $_message;
 
+    /**
+     * Prompt character
+     * @var string
+     */
     protected $_promptCharacter = "?";
 
-    protected $_validArgs;
+    /**
+     * Valid arguments
+     * @var array
+     */
+    protected $_validArgs = array();
 
+    /**
+     * Execute the task
+     *
+     * @return Input
+     */
     public function execute()
     {
         if (!$this->getPropertyName()) {
             throw new BuildException("Property name not set");
         }
 
-        if ($message) {
-            echo $message;
+        if ($this->getMessage()) {
+            echo $this->filterProperties($this->getMessages());
         }
-
-        echo $this->getPromptCharacter();
 
         if ($this->getValidArgs()) {
             echo " [" . implode("/", $this->getValidArgs()) . "]";
         }
 
-        echo " ";
+        echo $this->filterProperties($this->getPromptCharacter()) . " ";
 
         $value = fgets(STDIN);
 
         if (trim($value) == "") {
-            $value = $this->getDefaultValue();
+            $value = $this->filterProperties($this->getDefaultValue());
         }
 
-        $this->getProject()->getProperties()->{$this->getPropertyName()} = $value;
+        $this->getProject()
+             ->getProperties()
+             ->{$this->getPropertyName()} = $value;
 
         return $this;
     }

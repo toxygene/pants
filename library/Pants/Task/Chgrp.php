@@ -92,7 +92,7 @@ class Chgrp extends AbstractTask
             throw new BuildException("Group is not set");
         }
 
-        $file = $this->filterProperties($this->getFile());
+        $file  = $this->filterProperties($this->getFile());
         $group = $this->filterProperties($this->getGroup());
 
         $this->_run(function() use ($file, $group) {

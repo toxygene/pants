@@ -44,6 +44,7 @@ use Pants\BuildException,
  * @package Pants
  * @subpackage Task
  * @todo Support multiple formatters
+ * @todo Filter properties
  */
 class PhpCodeSniffer extends AbstractTask
 {
@@ -127,7 +128,7 @@ class PhpCodeSniffer extends AbstractTask
 
         $codeSniffer = new CodeSniffer(0, 0, "UTF-8");
 
-        $codeSniffer->process($files, $this->getStandard());
+        $codeSniffer->process($files, $this->filterProperties($this->getStandard()));
 
         // Restore the argv/c superglobals
         $_SERVER['argv'] = $oldArgv;

@@ -36,6 +36,7 @@ namespace Pants;
 use Pants\Properties,
     Pants\Targets,
     Pants\Task\Chdir,
+    Pants\TaskLoader,
     Pants\Tasks;
 
 /**
@@ -50,7 +51,7 @@ class Project
      * Basedir
      * @var string
      */
-    protected $_basedir;
+    protected $_baseDir;
 
     /**
      * Default task name
@@ -93,7 +94,7 @@ class Project
      */
     public function getBaseDir()
     {
-        return $this->_basedir;
+        return $this->_baseDir;
     }
 
     /**
@@ -173,14 +174,14 @@ class Project
     }
 
     /**
-     * Set the basedir
+     * Set the base directory
      *
-     * @param string $basedir
+     * @param string $baseDir
      * @return Project
      */
-    public function setBaseDir($basedir)
+    public function setBaseDir($baseDir)
     {
-        $this->_basedir = $basedir;
+        $this->_baseDir = $baseDir;
         return $this;
     }
 
@@ -197,7 +198,7 @@ class Project
     }
 
     /**
-     * Setup the basedir
+     * Setup the base directory
      *
      * @return Project
      */
