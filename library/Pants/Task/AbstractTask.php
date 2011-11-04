@@ -51,6 +51,19 @@ abstract class AbstractTask implements Task
      * @var Project
      */
     protected $_project;
+    
+    /**
+     * Constructor
+     *
+     * @param Traversable $options
+     */
+    public function __construct($options = array())
+    {
+        foreach ($options as $key => $value) {
+            $method = "set" . $key;
+            $this->$method($value);
+        }
+    }
 
     /**
      * Filter a string for any properties

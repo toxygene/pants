@@ -36,7 +36,6 @@ namespace Pants;
 use Pants\Properties,
     Pants\Targets,
     Pants\Task\Chdir,
-    Pants\TaskLoader,
     Pants\Tasks;
 
 /**

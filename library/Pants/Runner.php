@@ -33,8 +33,8 @@
 
 namespace Pants;
 
-use Pants\Getopt,
-    Pants\Project;
+use Pants\Builder,
+    Pants\Getopt;
 
 /**
  * Runner
@@ -53,7 +53,7 @@ class Runner
     {
         $opts = new Getopt(
             array(
-                "file|f=s"  => "Set the build file (defaults to build.php)",
+                "file|f=s"  => "Set the build file (defaults to build.xml)",
                 "help|h"    => "Print help message",
                 "list|l"    => "Print a list of targets",
                 "verbose"   => "Make temp more verbose",
@@ -79,30 +79,13 @@ class Runner
             exit;
         }
 
-        $project = new Project();
-
         $file = $opts->getOption("f");
         if (!$file) {
-            $file = "build.php";
+            $file = "build.xml";
         }
 
-        if (!file_exists($file)) {
-            echo "'{$file}' does not exist." . PHP_EOL;
-            echo $opts->getUsageMessage();
-            exit(255);
-        }
-
-        if (!is_readable($file)) {
-            echo "'{$file}' is not readable." . PHP_EOL;
-            echo $opts->getUsageMessage();
-            exit(255);
-        }
-
-        $project->getProperties()
-                ->{"pants.file"} = $file;
-
-        $factory = new Factory();
-        $factory->build($project, $file);
+        $builder = new Builder();
+        $project = $builder->build($file);
 
         if ($opts->getOption("l")) {
             foreach ($project->getTargets()->getDescriptions() as $name => $description) {

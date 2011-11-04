@@ -89,9 +89,13 @@ class Target extends AbstractTask
 
     /**
      * Constructor
+     *
+     * @param Traversable $options
      */
-    public function __construct()
+    public function __construct($options = array())
     {
+        parent::__construct($options);
+
         $this->_tasks = new Tasks();
     }
 
