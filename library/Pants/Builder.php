@@ -47,78 +47,168 @@ class Builder
 {
 
     /**
+     * Project being constructed
+     * @var Project
+     */
+    protected $_project;
+
+    /**
+     * Task loader for this builder
+     * @var TaskLoader
+     */
+    protected $_taskLoader;
+
+    /**
      * Build a project from an XML file
      *
      * @param string $file
      * @return Project
+     * @TODO segrate into type vs task loadering
      */
     public function build($file)
     {
-        $project    = new Project();
-        $taskLoader = new TaskLoader();
-
         $sxml = $this->_getSimpleXmlObjectFromFile($file);
 
         if (isset($sxml['baseDir'])) {
-            $project->setBaseDir($sxml['baseDir']);
+            $this->getProject()
+                 ->setBaseDir($sxml['baseDir']);
         }
 
         foreach ($sxml as $key => $element) {
             switch ($key) {
                 // Register task
                 case "register_task":
-                    $taskLoader->registerPlugin((string) $element['short_name'], (string) $element['class_name']);
+                    $this->getTaskLoader()
+                         ->registerPlugin((string) $element['short_name'], (string) $element['class_name']);
                     break;
 
                 // Targets
                 case "target":
-                    $options = array();
-                    foreach ($element->attributes() as $k => $v) {
-                        $options[(string) $k] = (string) $v;
-                    }
-
-                    $target = new Target($options);
-
-                    foreach ($element as $subkey => $subElement) {
-                        $options = array();
-                        foreach ($subElement->attributes() as $k => $v) {
-                            $options[(string) $k] = (string) $v;
-                        }
-
-                        $className = $taskLoader->load($subkey);
-                        $task = new $className($options);
-
-                        $target->getTasks()
-                                ->add($task);
-                    }
-
-                    $project->getTargets()
-                            ->add($target);
+                    $this->getProject()
+                         ->getTargets()
+                         ->add($this->_buildTarget($element));
                     break;
 
                 // Tasks
                 default:
-                    $options = array();
-                    foreach ($element->attributes() as $k => $v) {
-                        $options[(string) $k] = (string) $v;
-                    }
-
-                    $className = $taskLoader->load($key);
-                    $task = new $className($options);
-
-                    $project->getTasks()
-                            ->add($task);
+                    $this->getProject()
+                         ->getTasks()
+                         ->add($this->_buildTask($key, $element));
                     break;
             }
         }
 
-        var_dump($taskLoader);
-
-        return $project;
+        return $this->getProject();
     }
 
     /**
+     * Get the project
      *
+     * @return Project
+     */
+    public function getProject()
+    {
+        if (!$this->_project) {
+            $this->_project = new Project();
+        }
+        return $this->_project;
+    }
+
+    /**
+     * Get the task loader
+     *
+     * @return TaskLoader
+     */
+    public function getTaskLoader()
+    {
+        if (!$this->_taskLoader()) {
+            $this->_taskLoader = new TaskLoader();
+        }
+        return $this->_taskLoader;
+    }
+
+    /**
+     * Set the project
+     *
+     * @param Project $project
+     * @return Builder
+     */
+    public function setProject(Project $project)
+    {
+        $this->_project = $project;
+        return $this;
+    }
+
+    /**
+     * Set the task loader
+     *
+     * @param TaskLoader $taskLoader
+     * @return Builder
+     */
+    public function setTaskLoader(TaskLoader $taskLoader)
+    {
+        $this->_taskLoader = $taskLoader;
+        return $this;
+    }
+
+    /**
+     * Build a target from an XML element
+     *
+     * @param SimpleXMLElement $sxml
+     * @return Target
+     */
+    private function _buildTarget(SimpleXMLElement $sxml)
+    {
+        $options = array();
+        foreach ($sxml->attributes() as $k => $v) {
+            $options[(string) $k] = (string) $v;
+        }
+
+        $target = new Target($options);
+
+        foreach ($sxml as $key => $element) {
+            $target->getTasks()
+                   ->add($this->_buildTask($key, $element));
+        }
+
+        return $target;
+    }
+
+    /**
+     * Build a task from an XML element
+     *
+     * @param string $type
+     * @param SimpleXMLElement $sxml
+     * @return Task
+     */
+    private function _buildTask($type, SimpleXMLElement $sxml)
+    {
+        $options = array();
+        foreach ($sxml->attributes() as $k => $v) {
+            $options[(string) $k] = (string) $v;
+        }
+
+        $task = new {$this->getTaskLoader()->load($type)}($options);
+
+        foreach ($sxml as $key => $element) {
+            switch ($key) {
+                case "fileset":
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        return $task;
+    }
+
+    /**
+     * Create a SimpleXMLElement from a file
+     *
+     * @param string $file
+     * @return SimpleXMLElement
+     * @throws BuildException
      */
     private function _getSimpleXmlObjectFromFile($file)
     {
