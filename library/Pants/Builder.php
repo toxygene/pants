@@ -187,14 +187,26 @@ class Builder
             $options[(string) $k] = (string) $v;
         }
 
-        $className = $this->getTaskLoader()->load($type);
-        $task      = new $className($options);
+        $className = $this->getTaskLoader()
+                          ->load($type);
+
+        if (!$className) {
+            throw new BuildException("Unknown type '{$type}'");
+        }
+
+        $task = new $className($options);
 
         foreach ($sxml as $key => $element) {
-            $type = $task->{"create" . $key}();
+            if (isset($element["id"])) {
+                $task->{"add" . $key}(
+                    new LazyLoadedFileSet($this->getProject()->getTypes(), (string) $element["id"])
+                );
+            } else {
+                $type = $task->{"create" . $key}();
 
-            foreach ($element->attributes() as $k => $v) {
-                $type->{"set" . $k}((string) $v);
+                foreach ($element->attributes() as $k => $v) {
+                    $type->{"set" . $k}((string) $v);
+                }
             }
         }
 

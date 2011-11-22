@@ -33,7 +33,9 @@
 
 namespace Pants\Task;
 
-use Pants\BuildException;
+use Pants\BuildException,
+    Pants\Task\FileSetable,
+    Traversable;
 
 /**
  * Change file(s) permissions
@@ -41,7 +43,7 @@ use Pants\BuildException;
  * @package Pants
  * @subpackage Task
  */
-class Chmod extends AbstractTask
+class Chmod extends AbstractTask implements FileSetable
 {
 
     /**
@@ -61,6 +63,18 @@ class Chmod extends AbstractTask
      * @var string
      */
     protected $_mode;
+
+    /**
+     * Add a file set
+     *
+     * @param Traversable $fileSet
+     * @return Chmod
+     */
+    public function addFileSet(Traversable $fileSet)
+    {
+        $this->_fileSets[] = $fileSet;
+        return $this;
+    }
 
     /**
      * Create a file set tied to this task

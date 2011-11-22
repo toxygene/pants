@@ -33,7 +33,9 @@
 
 namespace Pants\Task;
 
-use Pants\BuildException;
+use Pants\BuildException,
+    Pants\Task\FileSetable,
+    Traversable;
 
 /**
  * Change file(s) owner
@@ -41,7 +43,7 @@ use Pants\BuildException;
  * @package Pants
  * @subpackage Task
  */
-class Chown extends AbstractTask
+class Chown extends AbstractTask implements FileSetable
 {
 
     /**
@@ -61,6 +63,18 @@ class Chown extends AbstractTask
      * @var string
      */
     protected $_owner;
+
+    /**
+     * Add a file set
+     *
+     * @param Traversable $fileSet
+     * @return Chown
+     */
+    public function addFileSet(Traversable $fileSet)
+    {
+        $this->_fileSets[] = $fileSet;
+        return $this;
+    }
 
     /**
      * Create a file set tied to this task

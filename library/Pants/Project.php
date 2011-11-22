@@ -36,7 +36,8 @@ namespace Pants;
 use Pants\Properties,
     Pants\Targets,
     Pants\Task\Chdir,
-    Pants\Tasks;
+    Pants\Tasks,
+    Pants\Types;
 
 /**
  * Project
@@ -77,6 +78,12 @@ class Project
     protected $_tasks;
 
     /**
+     * Types
+     * @var Types
+     */
+    protected $_types;
+
+    /**
      * Constructor
      */
     public function __construct()
@@ -84,16 +91,7 @@ class Project
         $this->_properties = new Properties();
         $this->_targets    = new Targets();
         $this->_tasks      = new Tasks();
-    }
-
-    /**
-     * Get the base directory
-     *
-     * @return string
-     */
-    public function getBaseDir()
-    {
-        return $this->_baseDir;
+        $this->_types      = new Types();
     }
 
     /**
@@ -130,6 +128,16 @@ class Project
         }
 
         return $this;
+    }
+
+    /**
+     * Get the base directory
+     *
+     * @return string
+     */
+    public function getBaseDir()
+    {
+        return $this->_baseDir;
     }
 
     /**
@@ -170,6 +178,16 @@ class Project
     public function getTasks()
     {
         return $this->_tasks;
+    }
+
+    /**
+     * Get the types
+     *
+     * @return Types
+     */
+    public function getTypes()
+    {
+        return $this->_types;
     }
 
     /**

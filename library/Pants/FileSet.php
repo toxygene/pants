@@ -145,7 +145,7 @@ class FileSet implements IteratorAggregate
 
         $iterator->setFlags(RecursiveIteratorIterator::CHILD_FIRST);
 
-        // Wrap the iterator with a dot filter interator
+        // Wrap the iterator with a dot filter iterator
         $iterator = new DotFilterIterator($iterator);
 
         // Wrap the iterator with an include/exclude filter iterator

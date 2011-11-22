@@ -34,7 +34,8 @@
 namespace Pants\Task;
 
 use Pants\BuildException,
-    Pants\FileSet;
+    Pants\Task\FileSetable,
+    Traversable;
 
 /**
  * Delete file(s) task
@@ -42,7 +43,7 @@ use Pants\BuildException,
  * @package Pants
  * @subpackage Task
  */
-class Delete extends AbstractTask
+class Delete extends AbstractTask implements FileSetable
 {
 
     /**
@@ -56,6 +57,18 @@ class Delete extends AbstractTask
      * @var array
      */
     protected $_fileSets = array();
+
+    /**
+     * Add a file set
+     *
+     * @param Traversable $fileSet
+     * @return Delete
+     */
+    public function addFileSet(Traversable $fileSet)
+    {
+        $this->_fileSets[] = $fileSet;
+        return $this;
+    }
 
     /**
      * Create a fileset tied to this task

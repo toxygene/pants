@@ -55,6 +55,8 @@ class TaskLoader extends PluginClassLoader
         "docblox"          => "Pants\Task\Docblox",
         "exec"             => "Pants\Task\Execute",
         "execute"          => "Pants\Task\Execute",
+        "fileset"          => "Pants\Task\FileSet",
+        "file_set"         => "Pants\Task\FileSet",
         "input"            => "Pants\Task\Input",
         "move"             => "Pants\Task\Move",
         "mv"               => "Pants\Task\Move",
