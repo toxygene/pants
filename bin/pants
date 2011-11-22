@@ -10,4 +10,10 @@ $autoloader->registerNamespace("Pants")
            ->register();
 
 $cli = new Runner();
-$cli->run($_SERVER['argv']);
+
+try {
+    $cli->run($_SERVER['argv']);
+} catch (Exception $e) {
+    echo $e->getMessage() . PHP_EOL;
+    exit(255);
+}
