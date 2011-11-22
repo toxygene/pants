@@ -39,7 +39,7 @@ use Pants\BuildException,
     SimpleXMLElement;
 
 /**
- * Builder
+ * Project builder
  *
  * @package Pants
  */
