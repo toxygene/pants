@@ -52,7 +52,7 @@ class PluginClassLoader implements PluginClassLocator
 
     /**
      * Constructor
-     * 
+     *
      * @param  null|array|Traversable $map If provided, seeds the loader with a map
      * @return void
      */
@@ -73,8 +73,8 @@ class PluginClassLoader implements PluginClassLocator
      * Add a static map of plugins
      *
      * A null value will clear the static map.
-     * 
-     * @param  null|array|Traversable $map 
+     *
+     * @param  null|array|Traversable $map
      * @return void
      */
     public static function addStaticMap($map)
@@ -94,9 +94,9 @@ class PluginClassLoader implements PluginClassLocator
 
     /**
      * Register a class to a given short name
-     * 
-     * @param  string $shortName 
-     * @param  string $className 
+     *
+     * @param  string $shortName
+     * @param  string $className
      * @return PluginClassLoader
      */
     public function registerPlugin($shortName, $className)
@@ -108,17 +108,17 @@ class PluginClassLoader implements PluginClassLocator
     /**
      * Register many plugins at once
      *
-     * If $map is a string, assumes that the map is the class name of a 
+     * If $map is a string, assumes that the map is the class name of a
      * Traversable object (likely a ShortNameLocator); it will then instantiate
      * this class and use it to register plugins.
      *
-     * If $map is an array or Traversable object, it will iterate it to 
+     * If $map is an array or Traversable object, it will iterate it to
      * register plugin names/classes.
      *
-     * For all other arguments, or if the string $map is not a class or not a 
+     * For all other arguments, or if the string $map is not a class or not a
      * Traversable class, an exception will be raised.
-     * 
-     * @param  string|array|Traversable $map 
+     *
+     * @param  string|array|Traversable $map
      * @return PluginClassLoader
      * @throws Exception\InvalidArgumentException
      */
@@ -142,20 +142,17 @@ class PluginClassLoader implements PluginClassLocator
             $map = $map->getIterator();
         }
 
-        // iterator_apply is faster than foreach
-        $loader = $this;
-        iterator_apply($map, function() use ($loader, $map) {
-            $loader->registerPlugin($map->key(), $map->current());
-            return true;
-        });
+        foreach ($map as $name => $class) {
+            $this->registerPlugin($name, $class);
+        }
 
         return $this;
     }
 
     /**
      * Unregister a short name lookup
-     * 
-     * @param mixed $shortName 
+     *
+     * @param mixed $shortName
      * @return PluginClassLoader
      */
     public function unregisterPlugin($shortName)
@@ -169,7 +166,7 @@ class PluginClassLoader implements PluginClassLocator
 
     /**
      * Get a list of all registered plugins
-     * 
+     *
      * @return array|Traversable
      */
     public function getRegisteredPlugins()
@@ -217,9 +214,9 @@ class PluginClassLoader implements PluginClassLocator
     /**
      * Defined by IteratorAggregate
      *
-     * Returns an instance of ArrayIterator, containing a map of 
+     * Returns an instance of ArrayIterator, containing a map of
      * all plugins
-     * 
+     *
      * @return Iterator
      */
     public function getIterator()
