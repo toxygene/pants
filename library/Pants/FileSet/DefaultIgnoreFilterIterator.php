@@ -61,8 +61,12 @@ class DefaultIgnoreFilterIterator extends RecursiveFilterIterator
      */
     public function accept()
     {
+        $delimiter = "#";
+
         $pattern = "";
         foreach ($this->getPatterns() as $p) {
+            $p = str_replace("{$delimiter}", "\{$delimiter}", $p);
+
             if ($pattern) {
                 $pattern .= "|";
             }
@@ -70,7 +74,7 @@ class DefaultIgnoreFilterIterator extends RecursiveFilterIterator
             $pattern .= "({$p})";
         }
 
-        return preg_match("#{$pattern}#", $this->getInnerIterator()->current()->getFilename()) == 0;
+        return preg_match("{$delimiter}{$pattern}{$delimiter}", $this->getInnerIterator()->current()->getFilename()) == 0;
     }
 
     /**

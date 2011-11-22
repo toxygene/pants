@@ -33,7 +33,8 @@
 
 namespace Pants\Task;
 
-use Pants\BuildException,
+use BadMethodCallException,
+    Pants\BuildException,
     Pants\Project,
     Pants\Task;
 
@@ -61,6 +62,9 @@ abstract class AbstractTask implements Task
     {
         foreach ($options as $key => $value) {
             $method = "set" . $key;
+            if (!method_exists($this, $method)) {
+                throw new BadMethodCallException("Method '{$method}' does not exist");
+            }
             $this->$method($value);
         }
     }

@@ -63,7 +63,6 @@ class Builder
      *
      * @param string $file
      * @return Project
-     * @TODO segrate into type vs task loadering
      */
     public function build($file)
     {
@@ -121,7 +120,7 @@ class Builder
      */
     public function getTaskLoader()
     {
-        if (!$this->_taskLoader()) {
+        if (!$this->_taskLoader) {
             $this->_taskLoader = new TaskLoader();
         }
         return $this->_taskLoader;
@@ -152,7 +151,7 @@ class Builder
     }
 
     /**
-     * Build a target from an XML element
+     * Build a target from an XML node
      *
      * @param SimpleXMLElement $sxml
      * @return Target
@@ -175,7 +174,7 @@ class Builder
     }
 
     /**
-     * Build a task from an XML element
+     * Build a task from an XML node
      *
      * @param string $type
      * @param SimpleXMLElement $sxml
@@ -188,15 +187,14 @@ class Builder
             $options[(string) $k] = (string) $v;
         }
 
-        $task = new {$this->getTaskLoader()->load($type)}($options);
+        $className = $this->getTaskLoader()->load($type);
+        $task      = new $className($options);
 
         foreach ($sxml as $key => $element) {
-            switch ($key) {
-                case "fileset":
-                    break;
+            $type = $task->{"create" . $key}();
 
-                default:
-                    break;
+            foreach ($element->attributes() as $k => $v) {
+                $type->{"set" . $k}((string) $v);
             }
         }
 

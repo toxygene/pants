@@ -33,7 +33,8 @@
 
 namespace Pants\Task;
 
-use Pants\BuildException;
+use Pants\BuildException,
+    Pants\FileSet;
 
 /**
  * Delete file(s) task
@@ -51,6 +52,24 @@ class Delete extends AbstractTask
     protected $_file;
 
     /**
+     * FileSets
+     * @var array
+     */
+    protected $_fileSets = array();
+
+    /**
+     * Create a fileset tied to this task
+     *
+     * @return FileSet
+     */
+    public function createFileset()
+    {
+        $fileSet = new FileSet();
+        $this->_fileSets[] = $fileSet;
+        return $fileSet;
+    }
+
+    /**
      * Execute the task
      *
      * @return Delete
@@ -58,15 +77,21 @@ class Delete extends AbstractTask
      */
     public function execute()
     {
-        if (!$this->getFile()) {
+        if (!$this->getFile() && !$this->getFileSets()) {
             throw new BuildException("File not set");
         }
 
         $file = $this->filterProperties($this->getFile());
 
-        $this->_run(function() use ($file) {
-            unlink($file);
-        });
+        if ($file) {
+            $this->_delete($file);
+        }
+
+        foreach ($this->_fileSets as $fileSet) {
+            foreach ($fileSet as $file) {
+                $this->_delete($file);
+            }
+        }
 
         return $this;
     }
@@ -82,6 +107,16 @@ class Delete extends AbstractTask
     }
 
     /**
+     * Get the file sets
+     *
+     * @return array
+     */
+    public function getFileSets()
+    {
+        return $this->_fileSets;
+    }
+
+    /**
      * Set the target file
      *
      * @param string $file
@@ -91,6 +126,19 @@ class Delete extends AbstractTask
     {
         $this->_file = $file;
         return $this;
+    }
+
+    /**
+     * Delete a file
+     *
+     * @param string $file
+     * @return boolean
+     */
+    protected function _delete($file)
+    {
+        return $this->_run(function() use ($file) {
+            unlink($file);
+        });
     }
 
 }

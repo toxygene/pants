@@ -51,10 +51,60 @@ class Chgrp extends AbstractTask
     protected $_file;
 
     /**
+     * FileSets
+     * @var array
+     */
+    protected $_fileSets = array();
+
+    /**
      * Group to set
      * @var string
      */
     protected $_group;
+
+    /**
+     * Create a file set tied to this task
+     *
+     * @return FileSet
+     */
+    public function createFileSet()
+    {
+        $fileSet = new FileSet();
+        $this->_fileSets[] = $fileSet;
+        return $fileSet;
+    }
+
+    /**
+     * Execute the task
+     *
+     * @return Chgrp
+     * @throws BuildException
+     */
+    public function execute()
+    {
+        if (!$this->getFile() && !$this->getFileSets()) {
+            throw new BuildException("File is not set");
+        }
+
+        if (!$this->getGroup()) {
+            throw new BuildException("Group is not set");
+        }
+
+        $file  = $this->filterProperties($this->getFile());
+        $group = $this->filterProperties($this->getGroup());
+
+        if ($file) {
+            $this->_chgrp($file, $group);
+        }
+
+        foreach ($this->getFileSets() as $fileSet) {
+            foreach ($fileSet as $file) {
+                $this->_chgrp($file, $mode);
+            }
+        }
+
+        return $this;
+    }
 
     /**
      * Get the target file
@@ -67,6 +117,16 @@ class Chgrp extends AbstractTask
     }
 
     /**
+     * Get the file sets
+     *
+     * @return array
+     */
+    public function getFileSets()
+    {
+        return $this->_fileSets;
+    }
+
+    /**
      * Get the group
      *
      * @return string
@@ -74,32 +134,6 @@ class Chgrp extends AbstractTask
     public function getGroup()
     {
         return $this->_group;
-    }
-
-    /**
-     * Execute the task
-     *
-     * @return Chgrp
-     * @throws BuildException
-     */
-    public function execute()
-    {
-        if (!$this->getFile()) {
-            throw new BuildException("File is not set");
-        }
-
-        if (!$this->getGroup()) {
-            throw new BuildException("Group is not set");
-        }
-
-        $file  = $this->filterProperties($this->getFile());
-        $group = $this->filterProperties($this->getGroup());
-
-        $this->_run(function() use ($file, $group) {
-            return chgrp($file, $group);
-        });
-
-        return $this;
     }
 
     /**
@@ -124,6 +158,20 @@ class Chgrp extends AbstractTask
     {
         $this->_group = $group;
         return $this;
+    }
+
+    /**
+     * Chgrp a file
+     *
+     * @param string $file
+     * @param string $group
+     * @return boolean
+     */
+    protected function _chgrp($file, $group)
+    {
+        return $this->_run(function() use ($file, $group) {
+            return chgrp($file, $group);
+        });
     }
 
 }

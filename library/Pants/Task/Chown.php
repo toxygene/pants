@@ -51,10 +51,28 @@ class Chown extends AbstractTask
     protected $_file;
 
     /**
+     * FileSets
+     * @var array
+     */
+    protected $_fileSets = array();
+
+    /**
      * Owner to set
      * @var string
      */
     protected $_owner;
+
+    /**
+     * Create a file set tied to this task
+     *
+     * @return FileSet
+     */
+    public function createFileSet()
+    {
+        $fileSet = new FileSet();
+        $this->_fileSets[] = $fileSet;
+        return $fileSet;
+    }
 
     /**
      * Execute the task
@@ -64,7 +82,7 @@ class Chown extends AbstractTask
      */
     public function execute()
     {
-        if (!$this->getFile()) {
+        if (!$this->getFile() && !$this->getFileSets()) {
             throw new BuildException("File is not set");
         }
 
@@ -75,9 +93,15 @@ class Chown extends AbstractTask
         $file  = $this->filterProperties($this->getFile());
         $owner = $this->filterProperties($this->getOwner());
 
-        $this->_run(function() use ($file, $owner) {
-            return chown($file, $owner);
-        });
+        if ($file) {
+            $this->_chown($file, $owner);
+        }
+
+        foreach ($this->getFileSets() as $fileSet) {
+            foreach ($fileSet as $file) {
+                $this->_chmod($file, $mode);
+            }
+        }
 
         return $this;
     }
@@ -90,6 +114,16 @@ class Chown extends AbstractTask
     public function getFile()
     {
         return $this->_file;
+    }
+
+    /**
+     * Get the file sets
+     *
+     * @return array
+     */
+    public function getFileSets()
+    {
+        return $this->_fileSets;
     }
 
     /**
@@ -124,6 +158,20 @@ class Chown extends AbstractTask
     {
         $this->_owner = $owner;
         return $this;
+    }
+
+    /**
+     * Chown a file
+     *
+     * @param string $file
+     * @param string $owner
+     * @return boolean
+     */
+    protected function _chown($file, $owner)
+    {
+        return $this->_run(function() use ($file, $owner) {
+            return chown($file, $owner);
+        });
     }
 
 }

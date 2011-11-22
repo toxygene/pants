@@ -51,10 +51,28 @@ class Chmod extends AbstractTask
     protected $_file;
 
     /**
+     * FileSets
+     * @var array
+     */
+    protected $_fileSets = array();
+
+    /**
      * Mode to set
      * @var string
      */
     protected $_mode;
+
+    /**
+     * Create a file set tied to this task
+     *
+     * @return FileSet
+     */
+    public function createFileSet()
+    {
+        $fileSet = new FileSet();
+        $this->_fileSets[] = $fileSet;
+        return $fileSet;
+    }
 
     /**
      * Execute the task
@@ -64,7 +82,7 @@ class Chmod extends AbstractTask
      */
     public function execute()
     {
-        if (!$this->getFile()) {
+        if (!$this->getFile() && !$this->getFileSets()) {
             throw new BuildException("File is not set");
         }
 
@@ -73,11 +91,21 @@ class Chmod extends AbstractTask
         }
 
         $file = $this->filterProperties($this->getFile());
-        $mode = $this->filterProperties($this->getMode());
+        $mode = base_convert(
+            $this->filterProperties($this->getMode()),
+            8,
+            10
+        );
 
-        $this->_run(function() use ($file, $mode) {
-            return chmod($file, $mode);
-        });
+        if ($file) {
+            $this->_chmod($file, $mode);
+        }
+
+        foreach ($this->getFileSets() as $fileSet) {
+            foreach ($fileSet as $file) {
+                $this->_chmod($file, $mode);
+            }
+        }
 
         return $this;
     }
@@ -90,6 +118,16 @@ class Chmod extends AbstractTask
     public function getFile()
     {
         return $this->_file;
+    }
+
+    /**
+     * Get the file sets
+     *
+     * @return array
+     */
+    public function getFileSets()
+    {
+        return $this->_fileSets;
     }
 
     /**
@@ -124,6 +162,19 @@ class Chmod extends AbstractTask
     {
         $this->_mode = $mode;
         return $this;
+    }
+
+    /**
+     * Chmod a file
+     *
+     * @param string $file
+     * @param integer $mode
+     */
+    protected function _chmod($file, $mode)
+    {
+        return $this->_run(function() use ($file, $mode) {
+            return chmod($file, $mode);
+        });
     }
 
 }
