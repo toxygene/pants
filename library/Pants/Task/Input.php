@@ -38,41 +38,45 @@ use Pants\BuildException;
 /**
  * Read input task
  *
- * @package Pants
- * @subpackage Task
+ * @package Pants\Task
  */
 class Input
 {
 
     /**
      * Property to set
+     *
      * @var string
      */
-    protected $_propertyName;
+    protected $propertyName;
 
     /**
      * Default value
+     *
      * @var string
      */
-    protected $_defaultValue;
+    protected $defaultValue;
 
     /**
      * Message to display
+     *
      * @var string
      */
-    protected $_message;
+    protected $message;
 
     /**
      * Prompt character
+     *
      * @var string
      */
-    protected $_promptCharacter = "?";
+    protected $promptCharacter = "?";
 
     /**
      * Valid arguments
+     *
      * @var array
      */
-    protected $_validArgs = array();
+    protected $validArgs = array();
 
     /**
      * Execute the task
@@ -110,50 +114,50 @@ class Input
 
     public function getDefaultValue()
     {
-        return $this->_defaultValue;
+        return $this->defaultValue;
     }
 
     public function getMessage()
     {
-        return $this->_message;
+        return $this->message;
     }
 
     public function getPromptCharacter()
     {
-        return $this->_promptCharacter;
+        return $this->promptCharacter;
     }
 
     public function getPropertyName()
     {
-        return $this->_propertyName;
+        return $this->propertyName;
     }
 
     public function getValidArgs()
     {
-        return $this->_validArgs;
+        return $this->validArgs;
     }
 
     public function setDefaultValue($defaultValue)
     {
-        $this->_defaultValue = $defaultValue;
+        $this->defaultValue = $defaultValue;
         return $this;
     }
 
     public function setMessage($message)
     {
-        $this->_message = $message;
+        $this->message = $message;
         return $this;
     }
 
     public function setPromptCharacter($promptCharacter)
     {
-        $this->_promptCharacter = $promptCharacter;
+        $this->promptCharacter = $promptCharacter;
         return $this;
     }
 
     public function setPropertyName($propertyName)
     {
-        $this->_propertyName = $propertyName;
+        $this->propertyName = $propertyName;
         return $this;
     }
 

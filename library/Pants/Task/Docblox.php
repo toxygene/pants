@@ -33,21 +33,20 @@
 
 namespace Pants\Task;
 
-use DocBlox_Core_Abstract as CoreAbstract,
-    DocBlox_Parser as Parser,
-    DocBlox_Parser_Abstract as ParserAbstract,
-    DocBlox_Parser_Files as Files,
-    DocBlox_Transformer as Transformer,
-    Pants\BuildException,
-    Pants\FileSet,
-    sfEventDispatcher,
-    Zend\Loader\StandardAutoloader;
+use DocBlox_Core_Abstract as CoreAbstract;
+use DocBlox_Parser as Parser;
+use DocBlox_Parser_Abstract as ParserAbstract;
+use DocBlox_Parser_Files as Files;
+use DocBlox_Transformer as Transformer;
+use Pants\BuildException;
+use Pants\FileSet\FileSet;
+use sfEventDispatcher;
+use Zend\Loader\StandardAutoloader;
 
 /**
  * Docblox
  *
- * @package Pants
- * @subpackage Task
+ * @package Pants\Task
  * @TODO figure out what needs to be filtered
  */
 class Docblox extends AbstractTask
@@ -55,63 +54,73 @@ class Docblox extends AbstractTask
 
     /**
      * FileSet
+     *
      * @var FileSet
      */
-    protected $_fileSet;
+    protected $fileSet;
 
     /**
      * Force documentation
+     *
      * @var boolean
      */
-    protected $_force;
+    protected $force;
 
     /**
      * Library path
+     *
      * @var string
      */
-    protected $_libraryPath;
+    protected $libraryPath;
 
     /**
      * Markers
+     *
      * @var array
      */
-    protected $_markers;
+    protected $markers;
 
     /**
      * Parse private
+     *
      * @var boolean
      */
-    protected $_parsePrivate;
+    protected $parsePrivate;
 
     /**
      * Target
+     *
      * @var string
      */
-    protected $_target;
+    protected $target;
 
     /**
      * Templates
+     *
      * @var array
      */
-    protected $_templates;
+    protected $templates;
 
     /**
      * Themes path
+     *
      * @var string
      */
-    protected $_themesPath;
+    protected $themesPath;
 
     /**
      * Title
+     *
      * @var string
      */
-    protected $_title;
+    protected $title;
 
     /**
      * Validate
+     *
      * @var boolean
      */
-    protected $_validate;
+    protected $validate;
 
     /**
      * Execute the task
@@ -202,7 +211,7 @@ class Docblox extends AbstractTask
      */
     public function getFileSet()
     {
-        return $this->_fileSet;
+        return $this->fileSet;
     }
 
     /**
@@ -212,7 +221,7 @@ class Docblox extends AbstractTask
      */
     public function getForce()
     {
-        return $this->_force;
+        return $this->force;
     }
 
     /**
@@ -222,7 +231,7 @@ class Docblox extends AbstractTask
      */
     public function getLibraryPath()
     {
-        return $this->_libraryPath;
+        return $this->libraryPath;
     }
 
     /**
@@ -232,7 +241,7 @@ class Docblox extends AbstractTask
      */
     public function getMarkers()
     {
-        return $this->_markers;
+        return $this->markers;
     }
 
     /**
@@ -242,7 +251,7 @@ class Docblox extends AbstractTask
      */
     public function getParsePrivate()
     {
-        return $this->_parsePrivate;
+        return $this->parsePrivate;
     }
 
     /**
@@ -252,7 +261,7 @@ class Docblox extends AbstractTask
      */
     public function getTarget()
     {
-        return $this->_target;
+        return $this->target;
     }
 
     /**
@@ -262,7 +271,7 @@ class Docblox extends AbstractTask
      */
     public function getTemplates()
     {
-        return $this->_templates;
+        return $this->templates;
     }
 
     /**
@@ -272,7 +281,7 @@ class Docblox extends AbstractTask
      */
     public function getThemesPath()
     {
-        return $this->_themesPath;
+        return $this->themesPath;
     }
 
     /**
@@ -282,7 +291,7 @@ class Docblox extends AbstractTask
      */
     public function getTitle()
     {
-        return $this->_title;
+        return $this->title;
     }
 
     /**
@@ -292,7 +301,7 @@ class Docblox extends AbstractTask
      */
     public function getValidate()
     {
-        return $this->_validate;
+        return $this->validate;
     }
 
     /**
@@ -303,7 +312,7 @@ class Docblox extends AbstractTask
      */
     public function setFileSet(FileSet $fileSet)
     {
-        $this->_fileSet = $fileSet;
+        $this->fileSet = $fileSet;
         return $this;
     }
 
@@ -315,7 +324,7 @@ class Docblox extends AbstractTask
      */
     public function setForce($force)
     {
-        $this->_force = $force;
+        $this->force = $force;
         return $this;
     }
 
@@ -327,7 +336,7 @@ class Docblox extends AbstractTask
      */
     public function setLibraryPath($libraryPath)
     {
-        $this->_libraryPath = $libraryPath;
+        $this->libraryPath = $libraryPath;
         return $this;
     }
 
@@ -339,7 +348,7 @@ class Docblox extends AbstractTask
      */
     public function setMarkers(array $markers)
     {
-        $this->_markers = $Markers;
+        $this->markers = $Markers;
         return $this;
     }
 
@@ -351,7 +360,7 @@ class Docblox extends AbstractTask
      */
     public function setParsePrivate($parsePrivate)
     {
-        $this->_parsePrivate = $parsePrivate;
+        $this->parsePrivate = $parsePrivate;
         return $this;
     }
 
@@ -363,7 +372,7 @@ class Docblox extends AbstractTask
      */
     public function setTarget($target)
     {
-        $this->_target = $target;
+        $this->target = $target;
         return $this;
     }
 
@@ -375,7 +384,7 @@ class Docblox extends AbstractTask
      */
     public function setTemplates($templates)
     {
-        $this->_templates = $templates;
+        $this->templates = $templates;
         return $this;
     }
 
@@ -387,7 +396,7 @@ class Docblox extends AbstractTask
      */
     public function setThemesPath($themesPath)
     {
-        $this->_themesPath = $themesPath;
+        $this->themesPath = $themesPath;
         return $this;
     }
 
@@ -399,7 +408,7 @@ class Docblox extends AbstractTask
      */
     public function setTitle($title)
     {
-        $this->_title = $title;
+        $this->title = $title;
         return $this;
     }
 
@@ -411,7 +420,7 @@ class Docblox extends AbstractTask
      */
     public function setValidate($validate)
     {
-        $this->_validate = $validate;
+        $this->validate = $validate;
         return $this;
     }
 

@@ -33,36 +33,38 @@
 
 namespace Pants\Task;
 
-use Pants\BuildException,
-    Pants\Task\FileSetable,
-    Traversable;
+use Pants\BuildException;
+use Pants\Task\FileSetable;
+use Traversable;
 
 /**
  * Change file(s) group task
  *
- * @package Pants
- * @subpackage Task
+ * @package Pants\Task
  */
 class Chgrp extends AbstractTask implements FileSetable
 {
 
     /**
      * Target file
+     *
      * @var string
      */
-    protected $_file;
+    protected $file;
 
     /**
      * FileSets
+     *
      * @var array
      */
-    protected $_fileSets = array();
+    protected $fileSets = array();
 
     /**
      * Group to set
+     *
      * @var string
      */
-    protected $_group;
+    protected $group;
 
     /**
      * Add a file set
@@ -72,7 +74,7 @@ class Chgrp extends AbstractTask implements FileSetable
      */
     public function addFileSet(Traversable $fileSet)
     {
-        $this->_fileSets[] = $fileSet;
+        $this->fileSets[] = $fileSet;
         return $this;
     }
 
@@ -84,7 +86,7 @@ class Chgrp extends AbstractTask implements FileSetable
     public function createFileSet()
     {
         $fileSet = new FileSet();
-        $this->_fileSets[] = $fileSet;
+        $this->fileSets[] = $fileSet;
         return $fileSet;
     }
 
@@ -108,12 +110,12 @@ class Chgrp extends AbstractTask implements FileSetable
         $group = $this->filterProperties($this->getGroup());
 
         if ($file) {
-            $this->_chgrp($file, $group);
+            $this->chgrp($file, $group);
         }
 
         foreach ($this->getFileSets() as $fileSet) {
             foreach ($fileSet as $file) {
-                $this->_chgrp($file, $mode);
+                $this->chgrp($file, $mode);
             }
         }
 
@@ -127,7 +129,7 @@ class Chgrp extends AbstractTask implements FileSetable
      */
     public function getFile()
     {
-        return $this->_file;
+        return $this->file;
     }
 
     /**
@@ -137,7 +139,7 @@ class Chgrp extends AbstractTask implements FileSetable
      */
     public function getFileSets()
     {
-        return $this->_fileSets;
+        return $this->fileSets;
     }
 
     /**
@@ -147,7 +149,7 @@ class Chgrp extends AbstractTask implements FileSetable
      */
     public function getGroup()
     {
-        return $this->_group;
+        return $this->group;
     }
 
     /**
@@ -158,7 +160,7 @@ class Chgrp extends AbstractTask implements FileSetable
      */
     public function setFile($file)
     {
-        $this->_file = $file;
+        $this->file = $file;
         return $this;
     }
 
@@ -170,7 +172,7 @@ class Chgrp extends AbstractTask implements FileSetable
      */
     public function setGroup($group)
     {
-        $this->_group = $group;
+        $this->group = $group;
         return $this;
     }
 
@@ -183,7 +185,7 @@ class Chgrp extends AbstractTask implements FileSetable
      */
     protected function _chgrp($file, $group)
     {
-        return $this->_run(function() use ($file, $group) {
+        return $this->run(function() use ($file, $group) {
             return chgrp($file, $group);
         });
     }

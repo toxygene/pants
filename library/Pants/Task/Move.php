@@ -38,23 +38,24 @@ use Pants\BuildException;
 /**
  * Move file(s) task
  *
- * @package Pants
- * @subpackage Task
+ * @package Pants\Task
  */
 class Move extends AbstractTask
 {
 
     /**
      * Target file
+     *
      * @var string
      */
-    protected $_file;
+    protected $file;
 
     /**
      * Destination file
+     *
      * @var string
      */
-    protected $_destination;
+    protected $destination;
 
     /**
      * Execute the task
@@ -75,7 +76,7 @@ class Move extends AbstractTask
         $file        = $this->filterProperties($this->getFile());
         $destination = $this->filterProperties($this->getDestination());
 
-        $this->_run(function() use ($file, $destination) {
+        $this->run(function() use ($file, $destination) {
             return rename($file, $destination);
         });
 
@@ -89,7 +90,7 @@ class Move extends AbstractTask
      */
     public function getDestination()
     {
-        return $this->_destination;
+        return $this->destination;
     }
 
     /**
@@ -99,7 +100,7 @@ class Move extends AbstractTask
      */
     public function getFile()
     {
-        return $this->_file;
+        return $this->file;
     }
 
     /**
@@ -110,7 +111,7 @@ class Move extends AbstractTask
      */
     public function setDestination($destination)
     {
-        $this->_destination = $destination;
+        $this->destination = $destination;
         return $this;
     }
 
@@ -122,7 +123,7 @@ class Move extends AbstractTask
      */
     public function setFile($file)
     {
-        $this->_file = $file;
+        $this->file = $file;
         return $this;
     }
 

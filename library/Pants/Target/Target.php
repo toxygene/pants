@@ -31,72 +31,79 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
-namespace Pants;
+namespace Pants\Target;
 
-use Pants\Task,
-    Pants\Task\AbstractTask,
-    Pants\Tasks;
+use Pants\Task\Task;
+use Pants\Task\AbstractTask;
+use Pants\Task\Tasks;
 
 /**
  * Target
  *
- * @package Pants
+ * @package Pants\Target
  */
 class Target extends AbstractTask
 {
 
     /**
      * Depends
+     *
      * @var array
      */
-    protected $_depends = array();
+    protected $depends = array();
 
     /**
      * Description
+     *
      * @var string
      */
-    protected $_description;
+    protected $description;
 
     /**
      * Hidden
+     *
      * @var boolean
      */
-    protected $_hidden = false;
+    protected $hidden = false;
 
     /**
      * If conditions
+     *
      * @var array
      */
-    protected $_if = array();
+    protected $if = array();
 
     /**
      * Name
+     *
      * @var string
      */
-    protected $_name;
+    protected $name;
 
     /**
      * Tasks
+     *
      * @var Tasks
      */
-    protected $_tasks;
+    protected $tasks;
 
     /**
      * Unless conditions
+     *
      * @var array
      */
-    protected $_unless = array();
+    protected $unless = array();
 
     /**
      * Constructor
      *
-     * @param Traversable $options
+     * @param array|Traversable $options
      */
     public function __construct($options = array())
     {
         parent::__construct($options);
 
-        $this->_tasks = new Tasks();
+        $this->tasks = new Tasks();
     }
 
     /**
@@ -141,7 +148,7 @@ class Target extends AbstractTask
      */
     public function getDepends()
     {
-        return $this->_depends;
+        return $this->depends;
     }
 
     /**
@@ -151,7 +158,7 @@ class Target extends AbstractTask
      */
     public function getDescription()
     {
-        return $this->_description;
+        return $this->description;
     }
 
     /**
@@ -161,7 +168,7 @@ class Target extends AbstractTask
      */
     public function getHidden()
     {
-        return $this->_hidden;
+        return $this->hidden;
     }
 
     /**
@@ -171,7 +178,7 @@ class Target extends AbstractTask
      */
     public function getIf()
     {
-        return $this->_if;
+        return $this->if;
     }
 
     /**
@@ -181,7 +188,7 @@ class Target extends AbstractTask
      */
     public function getName()
     {
-        return $this->_name;
+        return $this->name;
     }
 
     /**
@@ -191,7 +198,7 @@ class Target extends AbstractTask
      */
     public function getTasks()
     {
-        return $this->_tasks;
+        return $this->tasks;
     }
 
     /**
@@ -201,7 +208,7 @@ class Target extends AbstractTask
      */
     public function getUnless()
     {
-        return $this->_unless;
+        return $this->unless;
     }
 
     /**
@@ -212,7 +219,7 @@ class Target extends AbstractTask
      */
     public function setDepends(array $depends)
     {
-        $this->_depends = $depends;
+        $this->depends = $depends;
         return $this;
     }
 
@@ -224,7 +231,7 @@ class Target extends AbstractTask
      */
     public function setDescription($description)
     {
-        $this->_description = $description;
+        $this->description = $description;
         return $this;
     }
 
@@ -236,7 +243,7 @@ class Target extends AbstractTask
      */
     public function setHidden($hidden)
     {
-        $this->_hidden = $hidden;
+        $this->hidden = $hidden;
         return $this;
     }
 
@@ -248,7 +255,7 @@ class Target extends AbstractTask
      */
     public function setIf(array $if)
     {
-        $this->_if = $if;
+        $this->if = $if;
         return $this;
     }
 
@@ -260,7 +267,7 @@ class Target extends AbstractTask
      */
     public function setName($name)
     {
-        $this->_name = $name;
+        $this->name = $name;
         return $this;
     }
 
@@ -272,7 +279,7 @@ class Target extends AbstractTask
      */
     public function setUnless(array $unless)
     {
-        $this->_unless = $unless;
+        $this->unless = $unless;
         return $this;
     }
 

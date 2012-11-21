@@ -38,35 +38,38 @@ use Pants\BuildException;
 /**
  * Replace tokens in file(s) task
  *
- * @package Pants
- * @subpackage Task
+ * @package Pants\Task
  */
 class TokenFilter extends AbstractTask
 {
 
     /**
      * Ending character
+     *
      * @var string
      */
-    protected $_endingCharacter = "@";
+    protected $endingCharacter = "@";
 
     /**
      * Target file
+     *
      * @var string
      */
-    protected $_file;
+    protected $file;
 
     /**
      * Replacements
+     *
      * @var array
      */
-    protected $_replacements = array();
+    protected $replacements = array();
 
     /**
      * Starting character
+     *
      * @var string
      */
-    protected $_startingCharacter = "@";
+    protected $startingCharacter = "@";
 
     /**
      * Add a replacement
@@ -77,7 +80,7 @@ class TokenFilter extends AbstractTask
      */
     public function addReplacement($token, $value)
     {
-        $this->_replacements[$token] = $value;
+        $this->replacements[$token] = $value;
         return $this;
     }
 
@@ -99,7 +102,7 @@ class TokenFilter extends AbstractTask
         $startingCharacter = $this->filterProperties($this->getStartingCharacter());
 
 
-        $this->_run(function() use ($file, $replacements, $endingCharacter, $startingCharacter) {
+        $this->run(function() use ($file, $replacements, $endingCharacter, $startingCharacter) {
             $contents = file_get_contents($file);
 
             foreach ($replacements as $token => $value) {
@@ -126,7 +129,7 @@ class TokenFilter extends AbstractTask
      */
     public function getEndingCharacter()
     {
-        return $this->_endingCharacter;
+        return $this->endingCharacter;
     }
 
     /**
@@ -136,7 +139,7 @@ class TokenFilter extends AbstractTask
      */
     public function getFile()
     {
-        return $this->_file;
+        return $this->file;
     }
 
     /**
@@ -146,7 +149,7 @@ class TokenFilter extends AbstractTask
      */
     public function getReplacements()
     {
-        return $this->_replacements;
+        return $this->replacements;
     }
 
     /**
@@ -156,7 +159,7 @@ class TokenFilter extends AbstractTask
      */
     public function getStartingCharacter()
     {
-        return $this->_startingCharacter;
+        return $this->startingCharacter;
     }
 
     /**
@@ -167,7 +170,7 @@ class TokenFilter extends AbstractTask
      */
     public function setEndingCharacter($endingCharacter)
     {
-        $this->_endingCharacter = $endingCharacter;
+        $this->endingCharacter = $endingCharacter;
         return $this;
     }
 
@@ -179,7 +182,7 @@ class TokenFilter extends AbstractTask
      */
     public function setFile($file)
     {
-        $this->_file = $file;
+        $this->file = $file;
         return $this;
     }
 
@@ -191,7 +194,7 @@ class TokenFilter extends AbstractTask
      */
     public function setStartingCharacter($startingCharacter)
     {
-        $this->_startingCharacter = $startingCharacter;
+        $this->startingCharacter = $startingCharacter;
         return $this;
     }
 

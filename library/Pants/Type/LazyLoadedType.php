@@ -33,30 +33,92 @@
 
 namespace Pants;
 
-use Pants\Project;
+use Pants\Types;
 
 /**
- * Task interface
+ * Lazy loaded file set
  *
- * @package Pants
- * @subpackage Task
+ * @package Pants\Types
  */
-interface Task
+class LazyLoadedType
 {
 
     /**
-     * Execute the task
+     * Name of the type to be lazy loaded
      *
-     * @return Task
+     * @var string
      */
-    public function execute();
+    protected $name;
 
     /**
-     * Set the project
+     * Types collection to lazy load the type from
      *
-     * @param Project $project
-     * @return Task
+     * @var Types
      */
-    public function setProject(Project $project);
+    protected $types;
+
+    /**
+     * Method overloading
+     *
+     * @param string $name
+     * @param array $arguments
+     * @return mixed
+     */
+    public function __call($name, array $arguments)
+    {
+        return call_user_func_array(
+            array($this->getType(), $name),
+            $arguments
+        );
+    }
+
+    /**
+     * Get the name of the type to be lazy loaded
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Get the type
+     *
+     * @return Type
+     */
+    public function getType()
+    {
+        if (!$this->type) {
+            $this->type = $this->getTypes()
+                               ->{$this->getName()};
+        }
+
+        return $this->type;
+    }
+
+    /**
+     * Set the name of the type to lazy load
+     *
+     * @param string $name
+     * @return self
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+        return $this;
+    }
+
+    /**
+     * Set the types
+     *
+     * @param Types $types
+     * @return self
+     */
+    public function setTypes(Types $types)
+    {
+        $this->types = $types;
+        return $this;
+    }
 
 }

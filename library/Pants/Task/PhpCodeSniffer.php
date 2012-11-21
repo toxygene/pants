@@ -33,16 +33,15 @@
 
 namespace Pants\Task;
 
-use Pants\BuildException,
-    Pants\FileSet,
-    PHP_CodeSniffer as CodeSniffer,
-    PHP_CodeSniffer_Reporting as Reporting;
+use Pants\BuildException;
+use Pants\FileSet\FileSet;
+use PHP_CodeSniffer as CodeSniffer;
+use PHP_CodeSniffer_Reporting as Reporting;
 
 /**
  * PHP CodeSniffer
  *
- * @package Pants
- * @subpackage Task
+ * @package Pants\Task
  * @todo Support multiple formatters
  * @todo Filter properties
  */
@@ -51,45 +50,52 @@ class PhpCodeSniffer extends AbstractTask
 
     /**
      * FileSet
+     *
      * @var FileSet
      */
-    protected $_fileSet;
+    protected $fileSet;
 
     /**
      * Report file
+     *
      * @var string
      */
-    protected $_reportFile;
+    protected $reportFile;
 
     /**
      * Report type
+     *
      * @var string
      */
-    protected $_reportType = 'summary';
+    protected $reportType = "summary";
 
     /**
      * Report width
+     *
      * @var integer
      */
-    protected $_reportWidth = 80;
+    protected $reportWidth = 80;
 
     /**
      * Show sources flag
+     *
      * @var boolean
      */
-    protected $_showSources = false;
+    protected $showSources = false;
 
     /**
      * Show warnings flag
+     *
      * @var boolean
      */
-    protected $_showWarnings = false;
+    protected $showWarnings = false;
 
     /**
      * Standard
+     *
      * @var string
      */
-    protected $_standard;
+    protected $standard;
 
     /**
      * Execute the task
@@ -104,7 +110,7 @@ class PhpCodeSniffer extends AbstractTask
         }
 
         if (!class_exists("CodeSniffer")) {
-            $this->_run(function() {
+            $this->run(function() {
                 require_once "PHP/CodeSniffer.php";
             });
         }
@@ -118,10 +124,10 @@ class PhpCodeSniffer extends AbstractTask
             $files[] = $file->getRealPath();
         }
 
-        // Clear out argv so PHP_CodeSniffer doesn't freak out
-        $oldArgv = $_SERVER['argv'];
-        $_SERVER['argv'] = array();
-        $_SERVER['argc'] = 0;
+        // Clear out argv so PHP_CodeSniffer doesn"t freak out
+        $oldArgv = $SERVER["argv"];
+        $SERVER["argv"] = array();
+        $SERVER["argc"] = 0;
 
         // Get the current working directory because PHP_CodeSniffer will change it
         $cwd = getcwd();
@@ -131,8 +137,8 @@ class PhpCodeSniffer extends AbstractTask
         $codeSniffer->process($files, $this->filterProperties($this->getStandard()));
 
         // Restore the argv/c superglobals
-        $_SERVER['argv'] = $oldArgv;
-        $_SERVER['argc'] = count($oldArgv);
+        $SERVER["argv"] = $oldArgv;
+        $SERVER["argc"] = count($oldArgv);
 
         // Reset the current working directory
         chdir($cwd);
@@ -159,7 +165,7 @@ class PhpCodeSniffer extends AbstractTask
      */
     public function getFileSet()
     {
-        return $this->_fileSet;
+        return $this->fileSet;
     }
 
     /**
@@ -169,7 +175,7 @@ class PhpCodeSniffer extends AbstractTask
      */
     public function getReportFile()
     {
-        return $this->_reportFile;
+        return $this->reportFile;
     }
 
     /**
@@ -179,7 +185,7 @@ class PhpCodeSniffer extends AbstractTask
      */
     public function getReportType()
     {
-        return $this->_reportType;
+        return $this->reportType;
     }
 
     /**
@@ -189,7 +195,7 @@ class PhpCodeSniffer extends AbstractTask
      */
     public function getReportWidth()
     {
-        return $this->_reportWidth;
+        return $this->reportWidth;
     }
 
     /**
@@ -199,7 +205,7 @@ class PhpCodeSniffer extends AbstractTask
      */
     public function getShowSources()
     {
-        return $this->_showSources;
+        return $this->showSources;
     }
 
     /**
@@ -209,7 +215,7 @@ class PhpCodeSniffer extends AbstractTask
      */
     public function getShowWarnings()
     {
-        return $this->_showWarnings;
+        return $this->showWarnings;
     }
 
     /**
@@ -219,7 +225,7 @@ class PhpCodeSniffer extends AbstractTask
      */
     public function getStandard()
     {
-        return $this->_standard;
+        return $this->standard;
     }
 
     /**
@@ -230,7 +236,7 @@ class PhpCodeSniffer extends AbstractTask
      */
     public function setFileSet(FileSet $fileSet)
     {
-        $this->_fileSet = $fileSet;
+        $this->fileSet = $fileSet;
         return $this;
     }
 
@@ -242,7 +248,7 @@ class PhpCodeSniffer extends AbstractTask
      */
     public function setReportFile($reportFile)
     {
-        $this->_reportFile = $reportFile;
+        $this->reportFile = $reportFile;
         return $this;
     }
 
@@ -254,7 +260,7 @@ class PhpCodeSniffer extends AbstractTask
      */
     public function setReportType($reportType)
     {
-        $this->_reportType = $reportType;
+        $this->reportType = $reportType;
         return $this;
     }
 
@@ -266,7 +272,7 @@ class PhpCodeSniffer extends AbstractTask
      */
     public function setReportWidth($reportWidth)
     {
-        $this->_reportWidth = $reportWidth;
+        $this->reportWidth = $reportWidth;
         return $this;
     }
 
@@ -278,7 +284,7 @@ class PhpCodeSniffer extends AbstractTask
      */
     public function setShowSources($showSources)
     {
-        $this->_showSources = $showSources;
+        $this->showSources = $showSources;
         return $this;
     }
 
@@ -290,7 +296,7 @@ class PhpCodeSniffer extends AbstractTask
      */
     public function setShowWarnings($showWarnings)
     {
-        $this->_showWarnings = $showWarnings;
+        $this->showWarnings = $showWarnings;
         return $this;
     }
 
@@ -302,7 +308,7 @@ class PhpCodeSniffer extends AbstractTask
      */
     public function setStandard($standard)
     {
-        $this->_standard = $standard;
+        $this->standard = $standard;
         return $this;
     }
 

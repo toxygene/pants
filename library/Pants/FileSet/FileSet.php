@@ -31,49 +31,52 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
-namespace Pants;
+namespace Pants\FileSet;
 
-use Exception,
-    FilesystemIterator,
-    IteratorAggregate,
-    RecursiveDirectoryIterator,
-    RecursiveIteratorIterator,
-    Pants\FileSet\DefaultIgnoreFilterIterator,
-    Pants\FileSet\DotFilterIterator,
-    Pants\FileSet\IncludeExcludeFilterIterator;
+use Exception;
+use FilesystemIterator;
+use IteratorAggregate;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use Pants\FileSet\DefaultIgnoreFilterIterator;
+use Pants\FileSet\DotFilterIterator;
+use Pants\FileSet\IncludeExcludeFilterIterator;
 
 /**
  * Abstraction of a set of files
  *
- * @package Pants
- * @subpackage FileSet
+ * @package Pants\FileSet
  */
 class FileSet implements IteratorAggregate
 {
 
     /**
      * Add default ignore flag
+     *
      * @var boolean
      */
-    protected $_addDefaultIgnore = true;
+    protected $addDefaultIgnore = true;
 
     /**
      * Base directory
+     *
      * @var string
      */
-    protected $_baseDirectory;
+    protected $baseDirectory;
 
     /**
      * Exclude patterns
+     *
      * @var array
      */
-    protected $_excludes = array();
+    protected $excludes = array();
 
     /**
      * Include patterns
+     *
      * @var array
      */
-    protected $_includes = array();
+    protected $includes = array();
 
     /**
      * Get the add default ignore flag
@@ -82,7 +85,7 @@ class FileSet implements IteratorAggregate
      */
     public function getAddDefaultIgnore()
     {
-        return $this->_addDefaultIgnore;
+        return $this->addDefaultIgnore;
     }
 
     /**
@@ -92,7 +95,7 @@ class FileSet implements IteratorAggregate
      */
     public function getBaseDirectory()
     {
-        return $this->_baseDirectory;
+        return $this->baseDirectory;
     }
 
     /**
@@ -102,7 +105,7 @@ class FileSet implements IteratorAggregate
      */
     public function getExcludes()
     {
-        return $this->_excludes;
+        return $this->excludes;
     }
 
     /**
@@ -112,7 +115,7 @@ class FileSet implements IteratorAggregate
      */
     public function getIncludes()
     {
-        return $this->_includes;
+        return $this->includes;
     }
 
     /**
@@ -168,7 +171,7 @@ class FileSet implements IteratorAggregate
      */
     public function setAddDefaultIgnore($addDefaultIgnore)
     {
-        $this->_addDefaultIgnore = $addDefaultIgnore;
+        $this->addDefaultIgnore = $addDefaultIgnore;
         return $this;
     }
 
@@ -180,7 +183,7 @@ class FileSet implements IteratorAggregate
      */
     public function setBaseDirectory($baseDirectory)
     {
-        $this->_baseDirectory = $baseDirectory;
+        $this->baseDirectory = $baseDirectory;
         return $this;
     }
 
@@ -192,7 +195,7 @@ class FileSet implements IteratorAggregate
      */
     public function setExcludes(array $excludes = array())
     {
-        $this->_excludes = $excludes;
+        $this->excludes = $excludes;
         return $this;
     }
 
@@ -204,7 +207,7 @@ class FileSet implements IteratorAggregate
      */
     public function setIncludes(array $includes = array())
     {
-        $this->_includes = $includes;
+        $this->includes = $includes;
         return $this;
     }
 

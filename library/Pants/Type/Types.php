@@ -31,47 +31,76 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
-namespace Pants;
+namespace Pants\Types;
 
-use Zend\Loader\PluginClassLoader;
+use InvalidArgumentException;
 
 /**
+ * Types container
  *
+ * @package Pants\Types
  */
-class TaskLoader extends PluginClassLoader
+class Types
 {
 
     /**
-     * Pre-aliased tasks
+     * Types
+     *
      * @var array
      */
-    protected $plugins = array(
-        "call"             => "Pants\Task\Call",
-        "chgrp"            => "Pants\Task\Chgrp",
-        "chmod"            => "Pants\Task\Chmod",
-        "copy"             => "Pants\Task\Copy",
-        "cp"               => "Pants\Task\Copy",
-        "delete"           => "Pants\Task\Delete",
-        "docblox"          => "Pants\Task\Docblox",
-        "exec"             => "Pants\Task\Execute",
-        "execute"          => "Pants\Task\Execute",
-        "fileset"          => "Pants\Task\FileSet",
-        "file_set"         => "Pants\Task\FileSet",
-        "input"            => "Pants\Task\Input",
-        "move"             => "Pants\Task\Move",
-        "mv"               => "Pants\Task\Move",
-        "output"           => "Pants\Task\Output",
-        "phpcodesniffer"   => "Pants\Task\PhpCodeSniffer",
-        "php_code_sniffer" => "Pants\Task\PhpCodeSniffer",
-        "phpscript"        => "Pants\Task\PhpScript",
-        "php_script"       => "Pants\Task\PhpScript",
-        "property"         => "Pants\Task\Property",
-        "propertyfile"     => "Pants\Task\PropertyFile",
-        "property_file"    => "Pants\Task\PropertyFile",
-        "rm"               => "Pants\Task\Delete",
-        "tokenfilter"      => "Pants\Task\TokenFilter",
-        "token_filter"     => "Pants\Task\TokenFilter",
-        "touch"            => "Pants\Task\Touch"
-    );
+    protected $types = array();
+
+    /**
+     * Get a type
+     *
+     * @param string $name
+     * @return mixed
+     * @throws InvalidArgumentException
+     */
+    public function __get($name)
+    {
+        if (!isset($this->$name)) {
+            throw new InvalidArgumentException("There is no type with the name of '{$name}'");
+        }
+
+        return $this->types[$name];
+    }
+
+    /**
+     * Check if a type exists
+     *
+     * @param string $name
+     * @return boolean
+     */
+    public function __isset($name)
+    {
+        return isset($this->types[$name]);
+    }
+
+    /**
+     * Set a type
+     *
+     * @param string $name
+     * @param mixed $type
+     */
+    public function __set($name, $type)
+    {
+        $this->types[$name] = $type;
+    }
+
+    /**
+     * Unset a types
+     *
+     * @param string $name
+     * @throws InvalidArgumentException
+     */
+    public function __unset($name)
+    {
+        if (!isset($this->$name)) {
+            throw new InvalidArgumentException("There is no type with the name of '{$name}'");
+        }
+
+        unset($this->types[$name]);
+    }
 
 }

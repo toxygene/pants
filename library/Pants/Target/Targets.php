@@ -31,24 +31,25 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
-namespace Pants;
+namespace Pants\Target;
 
-use InvalidArgumentException,
-    Pants\Target;
+use InvalidArgumentException;
+use Pants\Target\Target;
 
 /**
  * Targets container
  *
- * @package Pants
+ * @package Pants\Target
  */
 class Targets
 {
 
     /**
      * Targets
+     *
      * @var array
      */
-    protected $_targets = array();
+    protected $targets = array();
 
     /**
      * Get a target
@@ -63,7 +64,7 @@ class Targets
             throw new InvalidArgumentException("There is no target with the name of '{$name}'");
         }
 
-        return $this->_targets[$name];
+        return $this->targets[$name];
     }
 
     /**
@@ -74,7 +75,7 @@ class Targets
      */
     public function __isset($name)
     {
-        return isset($this->_targets[$name]);
+        return isset($this->targets[$name]);
     }
 
     /**
@@ -89,7 +90,7 @@ class Targets
             throw new InvalidArgumentException("There is no target with the name of '{$name}'");
         }
 
-        unset($this->_targets[$name]);
+        unset($this->targets[$name]);
     }
 
     /**
@@ -107,7 +108,7 @@ class Targets
             throw new InvalidArgumentException("A target already exists with the name of '{$name}'");
         }
 
-        $this->_targets[$name] = $target;
+        $this->targets[$name] = $target;
 
         return $this;
     }
@@ -120,7 +121,7 @@ class Targets
     public function getDescriptions()
     {
         $descriptions = array();
-        foreach ($this->_targets as $key => $value) {
+        foreach ($this->targets as $key => $value) {
             if (!$value->getHidden()) {
                 $descriptions[$key] = $value->getDescription();
             }

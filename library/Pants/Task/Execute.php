@@ -38,23 +38,24 @@ use Pants\BuildException;
 /**
  * Execute a shell command task
  *
- * @package Pants
- * @subpackage Task
+ * @package Pants\Task
  */
 class Execute extends AbstractTask
 {
 
     /**
      * Command to execute
+     *
      * @var string
      */
-    protected $_command;
+    protected $command;
 
     /**
      * Directory to execute the command in
+     *
      * @var string
      */
-    protected $_directory;
+    protected $directory;
 
     /**
      * Execute the task
@@ -71,7 +72,7 @@ class Execute extends AbstractTask
         $command   = $this->filterProperties($this->getCommand());
         $directory = $this->filterProperties($this->getDirectory());
 
-        $this->_runInDirectory($this->getDirectory(), function() use ($command) {
+        $this->runInDirectory($this->getDirectory(), function() use ($command) {
             exec($command);
         });
 
@@ -87,7 +88,7 @@ class Execute extends AbstractTask
     protected function _chdir($directory)
     {
         if ($directory) {
-            return $this->_run(function() use ($directory) {
+            return $this->run(function() use ($directory) {
                 return chdir($directory);
             });
         }
@@ -103,15 +104,16 @@ class Execute extends AbstractTask
     {
         $cwd = getcwd();
 
-        $this->_chdir($directory);
+        $this->chdir($directory);
 
         try {
-            $return = $this->_run($function);
-            $this->_chdir($cwd);
+            $return = $this->run($function);
         } catch (Exception $e) {
-            $this->_chdir($cwd);
+            $this->chdir($cwd);
             throw $e;
         }
+
+        $this->chdir($cwd);
 
         return $return;
     }
@@ -123,7 +125,7 @@ class Execute extends AbstractTask
      */
     public function getCommand()
     {
-        return $this->_command;
+        return $this->command;
     }
 
     /**
@@ -133,7 +135,7 @@ class Execute extends AbstractTask
      */
     public function getDirectory()
     {
-        return $this->_directory;
+        return $this->directory;
     }
 
     /**
@@ -144,7 +146,7 @@ class Execute extends AbstractTask
      */
     public function setCommand($command)
     {
-        $this->_command = $command;
+        $this->command = $command;
         return $this;
     }
 
@@ -156,7 +158,7 @@ class Execute extends AbstractTask
      */
     public function setDirectory($directory)
     {
-        $this->_directory = $directory;
+        $this->directory = $directory;
         return $this;
     }
 

@@ -33,36 +33,38 @@
 
 namespace Pants\Task;
 
-use Pants\BuildException,
-    Pants\Task\FileSetable,
-    Traversable;
+use Pants\BuildException;
+use Pants\Task\FileSetable;
+use Traversable;
 
 /**
  * Change file(s) owner
  *
- * @package Pants
- * @subpackage Task
+ * @package Pants\Task
  */
 class Chown extends AbstractTask implements FileSetable
 {
 
     /**
      * Target file
+     *
      * @var string
      */
-    protected $_file;
+    protected $file;
 
     /**
      * FileSets
+     *
      * @var array
      */
-    protected $_fileSets = array();
+    protected $fileSets = array();
 
     /**
      * Owner to set
+     *
      * @var string
      */
-    protected $_owner;
+    protected $owner;
 
     /**
      * Add a file set
@@ -72,7 +74,7 @@ class Chown extends AbstractTask implements FileSetable
      */
     public function addFileSet(Traversable $fileSet)
     {
-        $this->_fileSets[] = $fileSet;
+        $this->fileSets[] = $fileSet;
         return $this;
     }
 
@@ -84,7 +86,7 @@ class Chown extends AbstractTask implements FileSetable
     public function createFileSet()
     {
         $fileSet = new FileSet();
-        $this->_fileSets[] = $fileSet;
+        $this->fileSets[] = $fileSet;
         return $fileSet;
     }
 
@@ -108,12 +110,12 @@ class Chown extends AbstractTask implements FileSetable
         $owner = $this->filterProperties($this->getOwner());
 
         if ($file) {
-            $this->_chown($file, $owner);
+            $this->chown($file, $owner);
         }
 
         foreach ($this->getFileSets() as $fileSet) {
             foreach ($fileSet as $file) {
-                $this->_chmod($file, $mode);
+                $this->chmod($file, $mode);
             }
         }
 
@@ -127,7 +129,7 @@ class Chown extends AbstractTask implements FileSetable
      */
     public function getFile()
     {
-        return $this->_file;
+        return $this->file;
     }
 
     /**
@@ -137,7 +139,7 @@ class Chown extends AbstractTask implements FileSetable
      */
     public function getFileSets()
     {
-        return $this->_fileSets;
+        return $this->fileSets;
     }
 
     /**
@@ -147,7 +149,7 @@ class Chown extends AbstractTask implements FileSetable
      */
     public function getOwner()
     {
-        return $this->_owner;
+        return $this->owner;
     }
 
     /**
@@ -158,7 +160,7 @@ class Chown extends AbstractTask implements FileSetable
      */
     public function setFile($file)
     {
-        $this->_file = $file;
+        $this->file = $file;
         return $this;
     }
 
@@ -170,7 +172,7 @@ class Chown extends AbstractTask implements FileSetable
      */
     public function setOwner($owner)
     {
-        $this->_owner = $owner;
+        $this->owner = $owner;
         return $this;
     }
 
@@ -183,7 +185,7 @@ class Chown extends AbstractTask implements FileSetable
      */
     protected function _chown($file, $owner)
     {
-        return $this->_run(function() use ($file, $owner) {
+        return $this->run(function() use ($file, $owner) {
             return chown($file, $owner);
         });
     }

@@ -33,10 +33,10 @@
 
 namespace Pants\Task;
 
-use BadMethodCallException,
-    Pants\BuildException,
-    Pants\Project,
-    Pants\Task;
+use BadMethodCallException;
+use Pants\BuildException;
+use Pants\Project;
+use Pants\Task\Task;
 
 /**
  * Abstract base task
@@ -49,10 +49,11 @@ abstract class AbstractTask implements Task
 
     /**
      * Project
+     *
      * @var Project
      */
-    protected $_project;
-    
+    protected $project;
+
     /**
      * Constructor
      *
@@ -98,7 +99,7 @@ abstract class AbstractTask implements Task
      */
     public function getProject()
     {
-        return $this->_project;
+        return $this->project;
     }
 
     /**
@@ -109,7 +110,7 @@ abstract class AbstractTask implements Task
      */
     public function setProject(Project $project)
     {
-        $this->_project = $project;
+        $this->project = $project;
         return $this;
     }
 

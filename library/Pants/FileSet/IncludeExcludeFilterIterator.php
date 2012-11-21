@@ -36,29 +36,31 @@ use FilterIterator;
 /**
  * Include/exclude pattern filter iterator
  *
- * @package Pants
- * @subpackage FileSet
+ * @package Pants\FileSet
  */
 class IncludeExcludeFilterIterator extends FilterIterator
 {
 
     /**
      * Base directory
+     *
      * @var string
      */
-    protected $_baseDirectory;
+    protected $baseDirectory;
 
     /**
      * Exclude patterns
+     *
      * @var array
      */
-    protected $_excludes = array();
+    protected $excludes = array();
 
     /**
      * Include patterns
+     *
      * @var array
      */
-    protected $_includes = array();
+    protected $includes = array();
 
     /**
      * Check whether the current element of the iterator is acceptable
@@ -94,7 +96,7 @@ class IncludeExcludeFilterIterator extends FilterIterator
      */
     public function getBaseDirectory()
     {
-        return $this->_baseDirectory;
+        return $this->baseDirectory;
     }
 
     /**
@@ -104,7 +106,7 @@ class IncludeExcludeFilterIterator extends FilterIterator
      */
     public function getExcludes()
     {
-        return $this->_excludes;
+        return $this->excludes;
     }
 
     /**
@@ -114,7 +116,7 @@ class IncludeExcludeFilterIterator extends FilterIterator
      */
     public function getIncludes()
     {
-        return $this->_includes;
+        return $this->includes;
     }
 
     /**
@@ -125,7 +127,7 @@ class IncludeExcludeFilterIterator extends FilterIterator
      */
     public function setBaseDirectory($baseDirectory)
     {
-        $this->_baseDirectory = $baseDirectory;
+        $this->baseDirectory = $baseDirectory;
         return $this;
     }
 
@@ -137,7 +139,7 @@ class IncludeExcludeFilterIterator extends FilterIterator
      */
     public function setExcludes(array $excludes)
     {
-        $this->_excludes = $excludes;
+        $this->excludes = $excludes;
         return $this;
     }
 
@@ -149,7 +151,7 @@ class IncludeExcludeFilterIterator extends FilterIterator
      */
     public function setIncludes(array $includes)
     {
-        $this->_includes = $includes;
+        $this->includes = $includes;
         return $this;
     }
 

@@ -33,23 +33,23 @@
 
 namespace Pants\Task;
 
-use InvalidArgumentException,
-    Pants\BuildException;
+use InvalidArgumentException;
+use Pants\BuildException;
 
 /**
  * Call another target task
  *
- * @package Pants
- * @subpackage Task
+ * @package Pants\Task
  */
 class Call extends AbstractTask
 {
 
     /**
      * Name of target to call
+     *
      * @var string
      */
-    protected $_target;
+    protected $target;
 
     /**
      * Execute the task
@@ -82,7 +82,7 @@ class Call extends AbstractTask
      */
     public function getTarget()
     {
-        return $this->_target;
+        return $this->target;
     }
 
     /**
@@ -93,7 +93,7 @@ class Call extends AbstractTask
      */
     public function setTarget($target)
     {
-        $this->_target = $target;
+        $this->target = $target;
         return $this;
     }
 

@@ -38,8 +38,7 @@ use Pants\BuildException;
 /**
  * Output task
  *
- * @package Pants
- * @subpackage Task
+ * @package Pants\Task
  */
 class Output extends AbstractTask
 {
@@ -48,7 +47,7 @@ class Output extends AbstractTask
      * Message to display
      * @var string
      */
-    protected $_message;
+    protected $message;
 
     /**
      * Execute the task
@@ -74,7 +73,7 @@ class Output extends AbstractTask
      */
     public function getMessage()
     {
-        return $this->_message;
+        return $this->message;
     }
 
     /**
@@ -85,7 +84,7 @@ class Output extends AbstractTask
      */
     public function setMessage($message)
     {
-        $this->_message = $message;
+        $this->message = $message;
         return $this;
     }
 

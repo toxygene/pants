@@ -38,17 +38,17 @@ use Pants\BuildException;
 /**
  * Touch file(s) task
  *
- * @package Pants
- * @subpackage Task
+ * @package Pants\Task
  */
 class Touch extends AbstractTask
 {
 
     /**
      * Target file
+     *
      * @var string
      */
-    protected $_file;
+    protected $file;
 
     /**
      * Execute the task
@@ -64,7 +64,7 @@ class Touch extends AbstractTask
 
         $file = $this->filterProperties($this->getFile());
 
-        $this->_run(function() use ($file) {
+        $this->run(function() use ($file) {
             return touch($file);
         });
 
@@ -78,7 +78,7 @@ class Touch extends AbstractTask
      */
     public function getFile()
     {
-        return $this->_file;
+        return $this->file;
     }
 
     /**
@@ -89,7 +89,7 @@ class Touch extends AbstractTask
      */
     public function setFile($file)
     {
-        $this->_file = $file;
+        $this->file = $file;
         return $this;
     }
 

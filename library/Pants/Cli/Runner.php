@@ -31,69 +31,74 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
-namespace Pants\Task;
+namespace Pants\Cli;
 
-use Pants\BuildException;
+use Pants\Builder;
+use Pants\Cli\Getopt;
 
 /**
- * Set properties from a file task
+ * Runner
  *
- * @package Pants\Task
+ * @package Pants\Cli
  */
-class PropertyFile extends AbstractTask
+class Runner
 {
 
     /**
-     * File
+     * Run the cli
      *
-     * @var string
+     * @var array $argv
      */
-    protected $file;
-
-    /**
-     * Set the properties
-     *
-     * @return PropertyFile
-     * @throws BuildException
-     */
-    public function execute()
+    public function run($argv)
     {
-        if (!$this->getFile()) {
-            throw new BuildException("File not set");
+        $opts = new Getopt(
+            array(
+                "file|f=s"  => "Set the build file (defaults to build.xml)",
+                "help|h"    => "Print help message",
+                "list|l"    => "Print a list of targets",
+                "verbose"   => "Make temp more verbose",
+                "version|v" => "Print the version"
+            ),
+            $argv
+        );
+
+        try {
+            $opts->parse();
+        } catch (ConsoleException $e) {
+            echo $opts->getUsageMessage();
+            exit(255);
         }
 
-        $file = $this->filterProperties($this->getFile());
-
-        foreach (parse_ini_file($file, false, INI_SCANNER_RAW) as $name => $value) {
-            $name  = $this->filterProperties($name);
-            $value = $this->filterProperties($value);
-
-            $this->getProject()->getProperties()->{$name} = $value;
+        if ($opts->getOption("h")) {
+            echo $opts->getUsageMessage();
+            exit;
         }
 
-        return $this;
-    }
+        if ($opts->getOption("v")) {
+            echo "Pants v@version@\n";
+            exit;
+        }
 
-    /**
-     * Get the file
-     *
-     * @return string
-     */
-    public function getFile()
-    {
-        return $this->file;
-    }
+        $file = $opts->getOption("f");
+        if (!$file) {
+            $file = "build.xml";
+        }
 
-    /**
-     * Set the file
-     *
-     * @param string $file
-     * @return Property
-     */
-    public function setFile($file)
-    {
-        $this->file = $file;
-        return $this;
+        $builder = new Builder();
+        $project = $builder->build($file);
+
+        if ($opts->getOption("l")) {
+            foreach ($project->getTargets()->getDescriptions() as $name => $description) {
+                printf(
+                    "%s %s\n",
+                    $name,
+                    $description
+                );
+            }
+            exit;
+        }
+
+        $project->execute($opts->getRemainingArgs());
     }
 
 }

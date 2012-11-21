@@ -38,23 +38,24 @@ use Pants\BuildException;
 /**
  * Set a property task
  *
- * @package Pants
- * @subpackage Task
+ * @package Pants\Task
  */
 class Property extends AbstractTask
 {
 
     /**
      * Name
+     *
      * @var string
      */
-    protected $_name;
+    protected $name;
 
     /**
      * Value
+     *
      * @var string
      */
-    protected $_value;
+    protected $value;
 
     /**
      * Set the property
@@ -85,7 +86,7 @@ class Property extends AbstractTask
      */
     public function getName()
     {
-        return $this->_name;
+        return $this->name;
     }
 
     /**
@@ -95,7 +96,7 @@ class Property extends AbstractTask
      */
     public function getValue()
     {
-        return $this->_value;
+        return $this->value;
     }
 
     /**
@@ -106,7 +107,7 @@ class Property extends AbstractTask
      */
     public function setName($name)
     {
-        $this->_name = $name;
+        $this->name = $name;
         return $this;
     }
 
@@ -118,7 +119,7 @@ class Property extends AbstractTask
      */
     public function setValue($value)
     {
-        $this->_value = $value;
+        $this->value = $value;
         return $this;
     }
 

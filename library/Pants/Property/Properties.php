@@ -31,75 +31,128 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
-namespace Pants;
+namespace Pants\Property;
 
 use InvalidArgumentException;
+use Pants\Property\PropertyNameCycleException;
 
 /**
- * Types container
+ * Properties container
  *
- * @package Pants
+ * @package Pants\Property
  */
-class Types
+class Properties
 {
 
     /**
-     * Types
+     * Items
+     *
      * @var array
      */
-    protected $_types = array();
+    protected $items = array();
 
     /**
-     * Get a type
+     * Get a property
      *
      * @param string $name
-     * @return mixed
+     * @return string
      * @throws InvalidArgumentException
      */
     public function __get($name)
     {
-        if (!isset($this->$name)) {
-            throw new InvalidArgumentException("There is no type with the name of '{$name}'");
+        $filteredName = $this->filter($name);
+
+        if (!isset($this->$filteredName)) {
+            throw new InvalidArgumentException("There is no property with a name of '{$name}'");
         }
 
-        return $this->_types[$name];
+        return $this->items[$filteredName];
     }
 
     /**
-     * Check if a type exists
+     * Check if a property exists
      *
      * @param string $name
      * @return boolean
      */
     public function __isset($name)
     {
-        return isset($this->_types[$name]);
+        return isset($this->items[$this->filter($name)]);
     }
 
     /**
-     * Set a type
+     * Set a property
      *
      * @param string $name
-     * @param mixed $type
+     * @param string $value
      */
-    public function __set($name, $type)
+    public function __set($name, $value)
     {
-        $this->_types[$name] = $type;
+        $this->items[$name] = $value;
     }
 
     /**
-     * Unset a types
+     * To string
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        $properties = array();
+        foreach ($this->items as $key => $value) {
+            $properties[] = "{$key} = {$value}";
+        }
+        return implode("\n", $properties);
+    }
+
+    /**
+     * Unset a property
      *
      * @param string $name
-     * @throws InvalidArgumentException
      */
     public function __unset($name)
     {
-        if (!isset($this->$name)) {
-            throw new InvalidArgumentException("There is no type with the name of '{$name}'");
+        $filteredName = $this->filter($name);
+
+        if (!isset($this->$filteredName)) {
+            throw new InvalidArgumentException("There is no property with a name of '{$name}'");
         }
 
-        unset($this->_types[$name]);
+        unset($this->items[$filteredName]);
+    }
+
+    /**
+     * Filter a string by converting properties to their values
+     *
+     * @param string $string
+     * @param array $encountered
+     * @return string
+     * @throws PropertyNameCycleException
+     */
+    public function filter($string, $encountered = array())
+    {
+        while (preg_match('#^(.*)\${(.*?)}(.*)$#', $string, $matches)) {
+            if (in_array($matches[2], $encountered)) {
+                throw new PropertyNameCycleException();
+            }
+
+            $encountered[] = $matches[2];
+            $string = $matches[1] . $this->filter($this->{$matches[2]}, $encountered) . $matches[3];
+        }
+        return $string;
+    }
+
+    /**
+     * Set a property
+     *
+     * @param string $name
+     * @param string $value
+     * @return Properties
+     */
+    public function set($name, $value)
+    {
+        $this->$name = $value;
+        return $this;
     }
 
 }

@@ -38,8 +38,7 @@ use Traversable;
 /**
  * FileSet-able interface
  *
- * @package Pants
- * @subpackage Task
+ * @package Pants\Task
  */
 interface FileSetable
 {

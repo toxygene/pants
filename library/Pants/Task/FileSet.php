@@ -33,32 +33,33 @@
 
 namespace Pants\Task;
 
-use Pants\BuildException,
-    Pants\FileSet as FileSetType,
-    Pants\FileSet\Pattern,
-    Pants\Task\AbstractTask,
-    StdClass;
+use Pants\BuildException;
+use Pants\FileSet\FileSet as FileSetType;
+use Pants\FileSet\Pattern;
+use Pants\Task\AbstractTask;
+use StdClass;
 
 /**
  * FileSet task
  *
- * @package Pants
- * @subpackage Task
+ * @package Pants\Task
  */
 class FileSet extends AbstractTask
 {
 
     /**
      * Base directory
+     *
      * @var string
      */
-    protected $_baseDirectory;
+    protected $baseDirectory;
 
     /**
      * Id
+     *
      * @var string
      */
-    protected $_id;
+    protected $id;
 
     /**
      *
@@ -66,7 +67,7 @@ class FileSet extends AbstractTask
     public function createInclude()
     {
         $include = new Pattern;
-        $this->_includes[] = $include;
+        $this->includes[] = $include;
         return $include;
     }
 
@@ -89,7 +90,7 @@ class FileSet extends AbstractTask
             function($include) {
                 return $include->getPattern();
             },
-            $this->_includes
+            $this->includes
         ));
 
         // TODO populate file set object
@@ -106,7 +107,7 @@ class FileSet extends AbstractTask
      */
     public function getBaseDirectory()
     {
-        return $this->_baseDirectory;
+        return $this->baseDirectory;
     }
 
     /**
@@ -116,7 +117,7 @@ class FileSet extends AbstractTask
      */
     public function getId()
     {
-        return $this->_id;
+        return $this->id;
     }
 
     /**
@@ -127,7 +128,7 @@ class FileSet extends AbstractTask
      */
     public function setBaseDirectory($baseDirectory)
     {
-        $this->_baseDirectory = $baseDirectory;
+        $this->baseDirectory = $baseDirectory;
         return $this;
     }
 
@@ -139,7 +140,7 @@ class FileSet extends AbstractTask
      */
     public function setId($id)
     {
-        $this->_id = $id;
+        $this->id = $id;
         return $this;
     }
 

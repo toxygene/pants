@@ -33,45 +33,48 @@
 
 namespace Pants;
 
-use ArrayIterator,
-    IteratorAggregate,
-    Pants\Task;
+use Zend\Loader\PluginClassLoader;
 
 /**
- * Tasks container
+ * Plugin class loader for built-in tasks
  *
- * @package Pants
+ * @package Pants\Tasks
  */
-class Tasks implements IteratorAggregate
+class TaskLoader extends PluginClassLoader
 {
 
     /**
-     * Tasks
+     * Pre-aliased tasks
+     *
      * @var array
      */
-    protected $_tasks = array();
-
-    /**
-     * Add a task
-     *
-     * @param Task $task
-     * @return Tasks
-     */
-    public function add(Task $task)
-    {
-        $this->_tasks[] = $task;
-
-        return $this;
-    }
-
-    /**
-     * Get an iterator
-     *
-     * @return ArrayIterator
-     */
-    public function getIterator()
-    {
-        return new ArrayIterator($this->_tasks);
-    }
+    protected $plugins = array(
+        "call"             => "Pants\Task\Call",
+        "chgrp"            => "Pants\Task\Chgrp",
+        "chmod"            => "Pants\Task\Chmod",
+        "copy"             => "Pants\Task\Copy",
+        "cp"               => "Pants\Task\Copy",
+        "delete"           => "Pants\Task\Delete",
+        "docblox"          => "Pants\Task\Docblox",
+        "exec"             => "Pants\Task\Execute",
+        "execute"          => "Pants\Task\Execute",
+        "fileset"          => "Pants\Task\FileSet",
+        "file_set"         => "Pants\Task\FileSet",
+        "input"            => "Pants\Task\Input",
+        "move"             => "Pants\Task\Move",
+        "mv"               => "Pants\Task\Move",
+        "output"           => "Pants\Task\Output",
+        "phpcodesniffer"   => "Pants\Task\PhpCodeSniffer",
+        "php_code_sniffer" => "Pants\Task\PhpCodeSniffer",
+        "phpscript"        => "Pants\Task\PhpScript",
+        "php_script"       => "Pants\Task\PhpScript",
+        "property"         => "Pants\Task\Property",
+        "propertyfile"     => "Pants\Task\PropertyFile",
+        "property_file"    => "Pants\Task\PropertyFile",
+        "rm"               => "Pants\Task\Delete",
+        "tokenfilter"      => "Pants\Task\TokenFilter",
+        "token_filter"     => "Pants\Task\TokenFilter",
+        "touch"            => "Pants\Task\Touch"
+    );
 
 }

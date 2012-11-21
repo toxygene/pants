@@ -20,9 +20,9 @@
  * @version    $Id$
  */
 
-namespace Pants;
+namespace Pants\Cli;
 
-use Pants\Getopt\Exception;
+use Pants\Cli\Getopt\Exception;
 
 /**
  * Zend_Console_Getopt is a class to parse options for command-line

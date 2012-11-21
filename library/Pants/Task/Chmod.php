@@ -33,36 +33,38 @@
 
 namespace Pants\Task;
 
-use Pants\BuildException,
-    Pants\Task\FileSetable,
-    Traversable;
+use Pants\BuildException;
+use Pants\Task\FileSetable;
+use Traversable;
 
 /**
  * Change file(s) permissions
  *
- * @package Pants
- * @subpackage Task
+ * @package Pants\Task
  */
 class Chmod extends AbstractTask implements FileSetable
 {
 
     /**
      * Target file
+     *
      * @var string
      */
-    protected $_file;
+    protected $file;
 
     /**
      * FileSets
+     *
      * @var array
      */
-    protected $_fileSets = array();
+    protected $fileSets = array();
 
     /**
      * Mode to set
+     *
      * @var string
      */
-    protected $_mode;
+    protected $mode;
 
     /**
      * Add a file set
@@ -72,7 +74,7 @@ class Chmod extends AbstractTask implements FileSetable
      */
     public function addFileSet(Traversable $fileSet)
     {
-        $this->_fileSets[] = $fileSet;
+        $this->fileSets[] = $fileSet;
         return $this;
     }
 
@@ -84,7 +86,7 @@ class Chmod extends AbstractTask implements FileSetable
     public function createFileSet()
     {
         $fileSet = new FileSet();
-        $this->_fileSets[] = $fileSet;
+        $this->fileSets[] = $fileSet;
         return $fileSet;
     }
 
@@ -112,12 +114,12 @@ class Chmod extends AbstractTask implements FileSetable
         );
 
         if ($file) {
-            $this->_chmod($file, $mode);
+            $this->chmod($file, $mode);
         }
 
         foreach ($this->getFileSets() as $fileSet) {
             foreach ($fileSet as $file) {
-                $this->_chmod($file, $mode);
+                $this->chmod($file, $mode);
             }
         }
 
@@ -131,7 +133,7 @@ class Chmod extends AbstractTask implements FileSetable
      */
     public function getFile()
     {
-        return $this->_file;
+        return $this->file;
     }
 
     /**
@@ -141,7 +143,7 @@ class Chmod extends AbstractTask implements FileSetable
      */
     public function getFileSets()
     {
-        return $this->_fileSets;
+        return $this->fileSets;
     }
 
     /**
@@ -151,7 +153,7 @@ class Chmod extends AbstractTask implements FileSetable
      */
     public function getMode()
     {
-        return $this->_mode;
+        return $this->mode;
     }
 
     /**
@@ -162,7 +164,7 @@ class Chmod extends AbstractTask implements FileSetable
      */
     public function setFile($file)
     {
-        $this->_file = $file;
+        $this->file = $file;
         return $this;
     }
 
@@ -174,7 +176,7 @@ class Chmod extends AbstractTask implements FileSetable
      */
     public function setMode($mode)
     {
-        $this->_mode = $mode;
+        $this->mode = $mode;
         return $this;
     }
 
@@ -186,7 +188,7 @@ class Chmod extends AbstractTask implements FileSetable
      */
     protected function _chmod($file, $mode)
     {
-        return $this->_run(function() use ($file, $mode) {
+        return $this->run(function() use ($file, $mode) {
             return chmod($file, $mode);
         });
     }

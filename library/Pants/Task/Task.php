@@ -31,16 +31,31 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
-namespace Pants\Properties;
+namespace Pants;
 
-use RuntimeException;
+use Pants\Project;
 
 /**
- * Property name cycle detected exception
+ * Task interface
  *
- * @package Pants
- * @subpackage Properties
+ * @package Pants\Tasks
  */
-class PropertyNameCycleException extends RuntimeException
+interface Task
 {
+
+    /**
+     * Execute the task
+     *
+     * @return Task
+     */
+    public function execute();
+
+    /**
+     * Set the project
+     *
+     * @param Project $project
+     * @return Task
+     */
+    public function setProject(Project $project);
+
 }

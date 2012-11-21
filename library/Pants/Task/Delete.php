@@ -33,9 +33,9 @@
 
 namespace Pants\Task;
 
-use Pants\BuildException,
-    Pants\Task\FileSetable,
-    Traversable;
+use Pants\BuildException;
+use Pants\Task\FileSetable;
+use Traversable;
 
 /**
  * Delete file(s) task
@@ -48,15 +48,17 @@ class Delete extends AbstractTask implements FileSetable
 
     /**
      * Target file
+     *
      * @var string
      */
-    protected $_file;
+    protected $file;
 
     /**
      * FileSets
+     *
      * @var array
      */
-    protected $_fileSets = array();
+    protected $fileSets = array();
 
     /**
      * Add a file set
@@ -66,7 +68,7 @@ class Delete extends AbstractTask implements FileSetable
      */
     public function addFileSet(Traversable $fileSet)
     {
-        $this->_fileSets[] = $fileSet;
+        $this->fileSets[] = $fileSet;
         return $this;
     }
 
@@ -78,7 +80,7 @@ class Delete extends AbstractTask implements FileSetable
     public function createFileset()
     {
         $fileSet = new FileSet();
-        $this->_fileSets[] = $fileSet;
+        $this->fileSets[] = $fileSet;
         return $fileSet;
     }
 
@@ -97,12 +99,12 @@ class Delete extends AbstractTask implements FileSetable
         $file = $this->filterProperties($this->getFile());
 
         if ($file) {
-            $this->_delete($file);
+            $this->delete($file);
         }
 
-        foreach ($this->_fileSets as $fileSet) {
+        foreach ($this->fileSets as $fileSet) {
             foreach ($fileSet as $file) {
-                $this->_delete($file);
+                $this->delete($file);
             }
         }
 
@@ -116,7 +118,7 @@ class Delete extends AbstractTask implements FileSetable
      */
     public function getFile()
     {
-        return $this->_file;
+        return $this->file;
     }
 
     /**
@@ -126,7 +128,7 @@ class Delete extends AbstractTask implements FileSetable
      */
     public function getFileSets()
     {
-        return $this->_fileSets;
+        return $this->fileSets;
     }
 
     /**
@@ -137,7 +139,7 @@ class Delete extends AbstractTask implements FileSetable
      */
     public function setFile($file)
     {
-        $this->_file = $file;
+        $this->file = $file;
         return $this;
     }
 
@@ -149,7 +151,7 @@ class Delete extends AbstractTask implements FileSetable
      */
     protected function _delete($file)
     {
-        return $this->_run(function() use ($file) {
+        return $this->run(function() use ($file) {
             unlink($file);
         });
     }

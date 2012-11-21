@@ -31,61 +31,15 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
-namespace Pants;
+namespace Pants\Property;
 
-use IteratorAggregate,
-    IteratorIterator,
-    Pants\Types;
+use RuntimeException;
 
 /**
- * Lazy loaded file set
+ * Property name cycle detected exception
  *
- * @package Pants
- * @subpackage FileSet
+ * @package Pants\Property
  */
-class LazyLoadedFileSet implements IteratorAggregate
+class PropertyNameCycleException extends RuntimeException
 {
-
-    /**
-     * Constructor
-     *
-     * @param Types $types
-     * @param string $id
-     */
-    public function __construct(Types $types, $id)
-    {
-        $this->_types = $types;
-        $this->_id    = $id;
-    }
-
-    /**
-     * Get the id
-     *
-     * @return string
-     */
-    public function getId()
-    {
-        return $this->_id;
-    }
-
-    /**
-     * Get the iterator
-     *
-     * @return IteratorIterator
-     */
-    public function getIterator()
-    {
-        return new IteratorIterator($this->getTypes()->{$this->getId()});
-    }
-
-    /**
-     * Get the types
-     *
-     * @return Types
-     */
-    public function getTypes()
-    {
-        return $this->_types;
-    }
-
 }

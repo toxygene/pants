@@ -33,11 +33,11 @@
 
 namespace Pants;
 
-use Pants\Properties,
-    Pants\Targets,
-    Pants\Task\Chdir,
-    Pants\Tasks,
-    Pants\Types;
+use Pants\Property\Properties;
+use Pants\Target\Targets;
+use Pants\Task\Chdir;
+use Pants\Task\Tasks;
+use Pants\Type\Types;
 
 /**
  * Project
@@ -49,49 +49,55 @@ class Project
 
     /**
      * Basedir
+     *
      * @var string
      */
-    protected $_baseDir;
+    protected $baseDir;
 
     /**
      * Default task name
+     *
      * @var string
      */
-    protected $_default;
+    protected $default;
 
     /**
      * Properties
+     *
      * @var Properties
      */
-    protected $_properties;
+    protected $properties;
 
     /**
      * Targets
+     *
      * @var Targets
      */
-    protected $_targets;
+    protected $targets;
 
     /**
      * Tasks
+     *
      * @var Tasks
      */
-    protected $_tasks;
+    protected $tasks;
 
     /**
      * Types
+     *
      * @var Types
      */
-    protected $_types;
+    protected $types;
 
     /**
      * Constructor
      */
     public function __construct()
     {
-        $this->_properties = new Properties();
-        $this->_targets    = new Targets();
-        $this->_tasks      = new Tasks();
-        $this->_types      = new Types();
+        $this->properties = new Properties();
+        $this->targets    = new Targets();
+        $this->tasks      = new Tasks();
+        $this->types      = new Types();
     }
 
     /**
@@ -102,8 +108,8 @@ class Project
      */
     public function execute($targets = array())
     {
-        $this->_setupBaseDir()
-             ->_setupBuiltinProperties();
+        $this->setupBaseDir()
+             ->setupBuiltinProperties();
 
         foreach ($this->getTasks() as $task) {
             $task->setProject($this)
@@ -137,7 +143,7 @@ class Project
      */
     public function getBaseDir()
     {
-        return $this->_baseDir;
+        return $this->baseDir;
     }
 
     /**
@@ -147,7 +153,7 @@ class Project
      */
     public function getDefault()
     {
-        return $this->_default;
+        return $this->default;
     }
 
     /**
@@ -157,7 +163,7 @@ class Project
      */
     public function getProperties()
     {
-        return $this->_properties;
+        return $this->properties;
     }
 
     /**
@@ -167,7 +173,7 @@ class Project
      */
     public function getTargets()
     {
-        return $this->_targets;
+        return $this->targets;
     }
 
     /**
@@ -177,7 +183,7 @@ class Project
      */
     public function getTasks()
     {
-        return $this->_tasks;
+        return $this->tasks;
     }
 
     /**
@@ -187,7 +193,7 @@ class Project
      */
     public function getTypes()
     {
-        return $this->_types;
+        return $this->types;
     }
 
     /**
@@ -198,7 +204,7 @@ class Project
      */
     public function setBaseDir($baseDir)
     {
-        $this->_baseDir = $baseDir;
+        $this->baseDir = $baseDir;
         return $this;
     }
 
@@ -210,7 +216,7 @@ class Project
      */
     public function setDefault($default)
     {
-        $this->_default = $default;
+        $this->default = $default;
         return $this;
     }
 
@@ -242,7 +248,7 @@ class Project
                    ->set("pants.version", "@version@")
                    ->set("php.version", PHP_VERSION);
 
-        foreach ($_SERVER as $key => $value) {
+        foreach ($SERVER as $key => $value) {
             $properties->set("env.{$key}", $value);
         }
 

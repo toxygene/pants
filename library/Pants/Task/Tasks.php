@@ -33,72 +33,46 @@
 
 namespace Pants;
 
-use Pants\Builder,
-    Pants\Getopt;
+use ArrayIterator;
+use IteratorAggregate;
+use Pants\Task\Task;
 
 /**
- * Runner
+ * Tasks container
  *
- * @package Pants
+ * @package Pants\Tasks
  */
-class Runner
+class Tasks implements IteratorAggregate
 {
 
     /**
-     * Run the cli
+     * Tasks
      *
-     * @var array $argv
+     * @var array
      */
-    public function run($argv)
+    protected $tasks = array();
+
+    /**
+     * Add a task
+     *
+     * @param Task $task
+     * @return Tasks
+     */
+    public function add(Task $task)
     {
-        $opts = new Getopt(
-            array(
-                "file|f=s"  => "Set the build file (defaults to build.xml)",
-                "help|h"    => "Print help message",
-                "list|l"    => "Print a list of targets",
-                "verbose"   => "Make temp more verbose",
-                "version|v" => "Print the version"
-            ),
-            $argv
-        );
+        $this->tasks[] = $task;
 
-        try {
-            $opts->parse();
-        } catch (ConsoleException $e) {
-            echo $opts->getUsageMessage();
-            exit(255);
-        }
+        return $this;
+    }
 
-        if ($opts->getOption("h")) {
-            echo $opts->getUsageMessage();
-            exit;
-        }
-
-        if ($opts->getOption("v")) {
-            echo "Pants v@version@\n";
-            exit;
-        }
-
-        $file = $opts->getOption("f");
-        if (!$file) {
-            $file = "build.xml";
-        }
-
-        $builder = new Builder();
-        $project = $builder->build($file);
-
-        if ($opts->getOption("l")) {
-            foreach ($project->getTargets()->getDescriptions() as $name => $description) {
-                printf(
-                    "%s %s\n",
-                    $name,
-                    $description
-                );
-            }
-            exit;
-        }
-
-        $project->execute($opts->getRemainingArgs());
+    /**
+     * Get an iterator
+     *
+     * @return ArrayIterator
+     */
+    public function getIterator()
+    {
+        return new ArrayIterator($this->tasks);
     }
 
 }
