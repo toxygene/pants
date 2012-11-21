@@ -1,0 +1,15 @@
+{
+    "name": "toxygene/pants",
+    "description": "asdf",
+    "license": "BSD-3-Clause",
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "http://packages.zendframework.com/"
+        }
+    ],
+    "require": {
+        "zendframework/zend-loader": "2.*",
+        "zendframework/zend-stdlib": "2.*"
+    }
+}
