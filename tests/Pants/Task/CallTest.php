@@ -85,7 +85,7 @@ class CallTest extends TestCase
         $project = new Project();
 
         // Setup the mock target that will be called
-        $mock = $this->getMock("Pants\Target");
+        $mock = $this->getMock("Pants\Target\Target");
 
         $mock->expects($this->any())
              ->method("getName")

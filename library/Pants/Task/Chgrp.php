@@ -79,6 +79,20 @@ class Chgrp extends AbstractTask implements FileSetable
     }
 
     /**
+     * Chgrp a file
+     *
+     * @param string $file
+     * @param string $group
+     * @return boolean
+     */
+    protected function chgrp($file, $group)
+    {
+        return $this->run(function() use ($file, $group) {
+            return chgrp($file, $group);
+        });
+    }
+
+    /**
      * Create a file set tied to this task
      *
      * @return FileSet
@@ -174,20 +188,6 @@ class Chgrp extends AbstractTask implements FileSetable
     {
         $this->group = $group;
         return $this;
-    }
-
-    /**
-     * Chgrp a file
-     *
-     * @param string $file
-     * @param string $group
-     * @return boolean
-     */
-    protected function _chgrp($file, $group)
-    {
-        return $this->run(function() use ($file, $group) {
-            return chgrp($file, $group);
-        });
     }
 
 }

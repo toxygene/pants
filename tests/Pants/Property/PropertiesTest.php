@@ -29,10 +29,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace PantsTest;
+namespace PantsTest\Properties;
 
-use Pants\Properties,
-    PHPUnit_Framework_TestCase as TestCase;
+use Pants\Property\Properties;
+use PHPUnit_Framework_TestCase as TestCase;
 
 /**
  *
@@ -44,66 +44,66 @@ class PropertiesTest extends TestCase
      * Properties
      * @var Properties
      */
-    protected $_properties;
+    protected $properties;
 
     /**
      * Setup the test case
      */
     public function setUp()
     {
-        $this->_properties = new Properties();
+        $this->properties = new Properties();
     }
 
     public function testGettingAndSettingProperties()
     {
-        $this->_properties->one = "two";
-        $this->_properties->three = "four";
+        $this->properties->one = "two";
+        $this->properties->three = "four";
 
-        $this->assertEquals("two", $this->_properties->one);
-        $this->assertEquals("four", $this->_properties->three);
+        $this->assertEquals("two", $this->properties->one);
+        $this->assertEquals("four", $this->properties->three);
     }
 
     public function testUnsettingANonexistantPropertyThrowsAnException()
     {
         $this->setExpectedException("InvalidArgumentException");
 
-        unset($this->_properties->one);
+        unset($this->properties->one);
     }
 
     public function testGettingANonexistantPropertyThrowsAnException()
     {
         $this->setExpectedException("InvalidArgumentException");
 
-        $this->_properties->one;
+        $this->properties->one;
     }
 
     public function testExistanceOfPropertiesCanBeChecked()
     {
-        $this->_properties->one = "two";
+        $this->properties->one = "two";
 
-        $this->assertTrue(isset($this->_properties->one));
-        $this->assertFalse(isset($this->_properties->two));
+        $this->assertTrue(isset($this->properties->one));
+        $this->assertFalse(isset($this->properties->two));
     }
 
     public function testFilteringReplacesPropertiesWithTheirValues()
     {
-        $this->_properties->one = "two";
-        $this->_properties->three = '${one}';
+        $this->properties->one = "two";
+        $this->properties->three = '${one}';
 
         $this->assertEquals(
             "test two test two test",
-            $this->_properties->filter('test ${one} test ${three} test')
+            $this->properties->filter('test ${one} test ${three} test')
         );
     }
 
     public function testDetectedPropertyCyclesThrowAnException()
     {
-        $this->setExpectedException("Pants\Properties\PropertyNameCycleException");
+        $this->setExpectedException("\Pants\Property\PropertyNameCycleException");
 
-        $this->_properties->one = '${two}';
-        $this->_properties->two = '${one}';
+        $this->properties->one = '${two}';
+        $this->properties->two = '${one}';
 
-        $this->_properties->filter('${one}');
+        $this->properties->filter('${one}');
     }
 
 }

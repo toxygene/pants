@@ -31,9 +31,9 @@
 
 namespace PantsTest;
 
-use Pants\Project,
-    Pants\Target,
-    PHPUnit_Framework_TestCase as TestCase;
+use Pants\Project;
+use Pants\Target\Target;
+use PHPUnit_Framework_TestCase as TestCase;
 
 /**
  *
@@ -43,101 +43,103 @@ class TargetTest extends TestCase
 
     /**
      * Project
+     *
      * @var Project
      */
-    protected $_project;
+    protected $project;
 
     /**
      * Target
+     *
      * @var Target
      */
-    protected $_target;
+    protected $target;
 
     /**
      * Setup the test case
      */
     public function setUp()
     {
-        $this->_target = new Target();
-        $this->_project = new Project();
+        $this->target = new Target();
+        $this->project = new Project();
 
-        $this->_target->setProject($this->_project);
+        $this->target->setProject($this->project);
     }
 
     public function testNameCanBeSet()
     {
-        $this->_target->setName("test");
+        $this->target->setName("test");
 
-        $this->assertEquals("test", $this->_target->getName());
+        $this->assertEquals("test", $this->target->getName());
     }
 
     public function testDescriptionCanBeSet()
     {
-        $this->_target->setDescription("test");
+        $this->target->setDescription("test");
 
-        $this->assertEquals("test", $this->_target->getDescription());
+        $this->assertEquals("test", $this->target->getDescription());
     }
 
     public function testTasksCanBeRetrieved()
     {
-        $this->assertInstanceOf("\Pants\Tasks", $this->_target->getTasks());
+        $this->assertInstanceOf("\Pants\Task\Tasks", $this->target->getTasks());
     }
 
     public function testTasksAreExecutedOnTargetExecute()
     {
-        $task = $this->getMock("\Pants\Task");
+        $task = $this->getMock("\Pants\Task\Task");
 
         $task->expects($this->exactly(2))
              ->method("setProject")
-             ->with($this->_project)
+             ->with($this->project)
              ->will($this->returnValue($task));
 
         $task->expects($this->exactly(2))
              ->method("execute")
              ->will($this->returnValue($task));
 
-        $this->_target
+        $this->target
              ->getTasks()
              ->add($task)
              ->add($task);
 
-        $this->_target
+        $this->target
              ->execute();
     }
 
     public function testTasksAreNotExecutedIfIfIsNotSet()
     {
-        $task = $this->getMock("\Pants\Task");
+        $task = $this->getMock("\Pants\Task\Task");
 
         $task->expects($this->never())
              ->method("execute");
 
-        $this->_target
+        $this->target
              ->getTasks()
              ->add($task);
 
-        $this->_target
+        $this->target
              ->setIf(array("one"))
              ->execute();
     }
 
     public function testTasksAreNotExecutedIfUnlessIsSet()
     {
-        $task = $this->getMock("\Pants\Task");
+        $task = $this->getMock("\Pants\Task\Task");
 
         $task->expects($this->never())
              ->method("execute");
 
-        $this->_target
+        $this->target
              ->getTasks()
              ->add($task);
 
-        $this->_target
+        $this->target
              ->getProject()
              ->getProperties()
              ->one = true;
 
-        $this->_target
+        $this->target
              ->setUnless(array("one"))
              ->execute();
     }

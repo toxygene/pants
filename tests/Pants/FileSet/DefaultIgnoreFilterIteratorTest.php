@@ -31,9 +31,9 @@
 
 namespace PantsTest;
 
-use Pants\FileSet\DefaultIgnoreFilterIterator,
-    PHPUnit_Framework_TestCase as TestCase,
-    RecursiveArrayIterator;
+use Pants\FileSet\DefaultIgnoreFilterIterator;
+use PHPUnit_Framework_TestCase as TestCase;
+use RecursiveArrayIterator;
 
 /**
  *

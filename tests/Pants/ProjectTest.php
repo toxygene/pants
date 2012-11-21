@@ -63,7 +63,7 @@ class ProjectTest extends TestCase
 
     public function testPropertiesCanBeRetrieved()
     {
-        $this->assertInstanceOf("Pants\Properties", $this->_project->getProperties());
+        $this->assertInstanceOf("Pants\Property\Properties", $this->_project->getProperties());
     }
 
     public function testTasksAreExecutedBeforeTargets()
@@ -89,7 +89,7 @@ class ProjectTest extends TestCase
 
     public function testDefaultTargetIsExecutedIfNoTargetsAreSpecified()
     {
-        $target = $this->getMock("\Pants\Target");
+        $target = $this->getMock("\Pants\Target\Target");
 
         $target->expects($this->once())
                ->method("getName")

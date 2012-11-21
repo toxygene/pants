@@ -29,10 +29,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace PantsTest;
+namespace PantsTest\Target;
 
-use Pants\Targets,
-    PHPUnit_Framework_TestCase as TestCase;
+use Pants\Target\Targets;
+use PHPUnit_Framework_TestCase as TestCase;
 
 /**
  *
@@ -42,62 +42,63 @@ class TargetsTest extends TestCase
 
     /**
      * Targets
+     *
      * @var Targets
      */
-    protected $_targets;
+    protected $targets;
 
     /**
      * Setup the test case
      */
     public function setUp()
     {
-        $this->_project = $this->getMock("\Pants\Project");
+        $this->project = $this->getMock("\Pants\Project");
 
-        $this->_targets = new Targets();
+        $this->targets = new Targets();
     }
 
     public function testTargetsCanBeCheckedForExistance()
     {
-        $target = $this->getMock("\Pants\Target");
+        $target = $this->getMock("\Pants\Target\Target");
 
         $target->expects($this->once())
                ->method("getName")
                ->will($this->returnValue("test"));
 
-        $this->_targets->add($target);
+        $this->targets->add($target);
 
-        $this->assertTrue(isset($this->_targets->test));
-        $this->assertFalse(isset($this->_targets->asdf));
+        $this->assertTrue(isset($this->targets->test));
+        $this->assertFalse(isset($this->targets->asdf));
     }
 
     public function testTargetsCanBeRemoved()
     {
-        $target = $this->getMock("\Pants\Target");
+        $target = $this->getMock("\Pants\Target\Target");
 
         $target->expects($this->once())
                ->method("getName")
                ->will($this->returnValue("test"));
 
-        $this->_targets->add($target);
+        $this->targets->add($target);
 
-        $this->assertTrue(isset($this->_targets->test));
+        $this->assertTrue(isset($this->targets->test));
 
-        unset($this->_targets->test);
+        unset($this->targets->test);
 
-        $this->assertFalse(isset($this->_targets->test));
+        $this->assertFalse(isset($this->targets->test));
     }
 
     public function testCannotAddATargetWithTheSameNameAsAnExistingTarget()
     {
         $this->setExpectedException("InvalidArgumentException");
 
-        $target = $this->getMock("\Pants\Target");
+        $target = $this->getMock("\Pants\Target\Target");
 
         $target->expects($this->any())
                ->method("getName")
                ->will($this->returnValue("test"));
 
-        $this->_targets
+        $this->targets
              ->add($target)
              ->add($target);
     }
@@ -106,7 +107,7 @@ class TargetsTest extends TestCase
     {
         $this->setExpectedException("InvalidArgumentException");
 
-        unset($this->_targets->invalid);
+        unset($this->targets->invalid);
     }
 
 }

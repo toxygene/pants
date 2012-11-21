@@ -103,25 +103,13 @@ abstract class AbstractTask implements Task
     }
 
     /**
-     * Set the project
-     *
-     * @param Project $project
-     * @return Task
-     */
-    public function setProject(Project $project)
-    {
-        $this->project = $project;
-        return $this;
-    }
-
-    /**
      * Run a function
      *
      * @param function $function
      * @return mixed
      * @throws BuildException
      */
-    protected function _run($function)
+    protected function run($function)
     {
         set_error_handler(function($errno, $errstr) {
             throw new BuildException($errstr);
@@ -137,6 +125,18 @@ abstract class AbstractTask implements Task
         restore_error_handler();
 
         return $result;
+    }
+
+    /**
+     * Set the project
+     *
+     * @param Project $project
+     * @return Task
+     */
+    public function setProject(Project $project)
+    {
+        $this->project = $project;
+        return $this;
     }
 
 }

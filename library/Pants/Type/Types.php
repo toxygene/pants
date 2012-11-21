@@ -31,7 +31,7 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
-namespace Pants\Types;
+namespace Pants\Type;
 
 use InvalidArgumentException;
 

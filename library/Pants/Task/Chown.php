@@ -79,6 +79,20 @@ class Chown extends AbstractTask implements FileSetable
     }
 
     /**
+     * Chown a file
+     *
+     * @param string $file
+     * @param string $owner
+     * @return boolean
+     */
+    protected function chown($file, $owner)
+    {
+        return $this->run(function() use ($file, $owner) {
+            return chown($file, $owner);
+        });
+    }
+
+    /**
      * Create a file set tied to this task
      *
      * @return FileSet
@@ -174,20 +188,6 @@ class Chown extends AbstractTask implements FileSetable
     {
         $this->owner = $owner;
         return $this;
-    }
-
-    /**
-     * Chown a file
-     *
-     * @param string $file
-     * @param string $owner
-     * @return boolean
-     */
-    protected function _chown($file, $owner)
-    {
-        return $this->run(function() use ($file, $owner) {
-            return chown($file, $owner);
-        });
     }
 
 }

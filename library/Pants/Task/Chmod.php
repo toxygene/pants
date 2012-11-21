@@ -79,6 +79,19 @@ class Chmod extends AbstractTask implements FileSetable
     }
 
     /**
+     * Chmod a file
+     *
+     * @param string $file
+     * @param integer $mode
+     */
+    protected function chmod($file, $mode)
+    {
+        return $this->run(function() use ($file, $mode) {
+            return chmod($file, $mode);
+        });
+    }
+
+    /**
      * Create a file set tied to this task
      *
      * @return FileSet
@@ -178,19 +191,6 @@ class Chmod extends AbstractTask implements FileSetable
     {
         $this->mode = $mode;
         return $this;
-    }
-
-    /**
-     * Chmod a file
-     *
-     * @param string $file
-     * @param integer $mode
-     */
-    protected function _chmod($file, $mode)
-    {
-        return $this->run(function() use ($file, $mode) {
-            return chmod($file, $mode);
-        });
     }
 
 }

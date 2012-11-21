@@ -85,6 +85,19 @@ class Delete extends AbstractTask implements FileSetable
     }
 
     /**
+     * Delete a file
+     *
+     * @param string $file
+     * @return boolean
+     */
+    protected function delete($file)
+    {
+        return $this->run(function() use ($file) {
+            unlink($file);
+        });
+    }
+
+    /**
      * Execute the task
      *
      * @return Delete
@@ -141,19 +154,6 @@ class Delete extends AbstractTask implements FileSetable
     {
         $this->file = $file;
         return $this;
-    }
-
-    /**
-     * Delete a file
-     *
-     * @param string $file
-     * @return boolean
-     */
-    protected function _delete($file)
-    {
-        return $this->run(function() use ($file) {
-            unlink($file);
-        });
     }
 
 }

@@ -225,7 +225,7 @@ class Project
      *
      * @return Project
      */
-    protected function _setupBaseDir()
+    protected function setupBaseDir()
     {
         if ($this->getBaseDir()) {
             chdir($this->getBaseDir());
@@ -239,7 +239,7 @@ class Project
      *
      * @return Project
      */
-    protected function _setupBuiltinProperties()
+    protected function setupBuiltinProperties()
     {
         $properties = $this->getProperties();
 
@@ -248,7 +248,7 @@ class Project
                    ->set("pants.version", "@version@")
                    ->set("php.version", PHP_VERSION);
 
-        foreach ($SERVER as $key => $value) {
+        foreach ($_SERVER as $key => $value) {
             $properties->set("env.{$key}", $value);
         }
 

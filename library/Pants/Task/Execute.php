@@ -58,6 +58,21 @@ class Execute extends AbstractTask
     protected $directory;
 
     /**
+     * Change the working directory
+     *
+     * @param string $directory
+     * @return boolean
+     */
+    protected function chdir($directory)
+    {
+        if ($directory) {
+            return $this->run(function() use ($directory) {
+                return chdir($directory);
+            });
+        }
+    }
+
+    /**
      * Execute the task
      *
      * @return Exec
@@ -80,45 +95,6 @@ class Execute extends AbstractTask
     }
 
     /**
-     * Change the working directory
-     *
-     * @param string $directory
-     * @return boolean
-     */
-    protected function _chdir($directory)
-    {
-        if ($directory) {
-            return $this->run(function() use ($directory) {
-                return chdir($directory);
-            });
-        }
-    }
-
-    /**
-     * Change the working directory and run the function
-     *
-     * @param string $directory
-     * @param function $function
-     */
-    protected function _runInDirectory($directory, $function)
-    {
-        $cwd = getcwd();
-
-        $this->chdir($directory);
-
-        try {
-            $return = $this->run($function);
-        } catch (Exception $e) {
-            $this->chdir($cwd);
-            throw $e;
-        }
-
-        $this->chdir($cwd);
-
-        return $return;
-    }
-
-    /**
      * Get the command to execute
      *
      * @return string
@@ -136,6 +112,30 @@ class Execute extends AbstractTask
     public function getDirectory()
     {
         return $this->directory;
+    }
+
+    /**
+     * Change the working directory and run the function
+     *
+     * @param string $directory
+     * @param function $function
+     */
+    protected function runInDirectory($directory, $function)
+    {
+        $cwd = getcwd();
+
+        $this->chdir($directory);
+
+        try {
+            $return = $this->run($function);
+        } catch (Exception $e) {
+            $this->chdir($cwd);
+            throw $e;
+        }
+
+        $this->chdir($cwd);
+
+        return $return;
     }
 
     /**
