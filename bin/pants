@@ -3,7 +3,7 @@
 use Pants\Runner,
     Zend\Loader\StandardAutoloader;
 
-require_once "Zend/Loader/StandardAutoloader.php";
+require_once "vendor/autoload.php";
 
 $autoloader = new StandardAutoloader();
 $autoloader->registerNamespace("Pants")

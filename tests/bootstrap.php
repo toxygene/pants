@@ -36,7 +36,7 @@ if (is_readable('TestConfiguration.php')) {
     require_once 'TestConfiguration.php.dist';
 }
 
-require_once "../library/Zend/Loader/StandardAutoloader.php";
+require_once "../vendor/autoload.php";
 
 use Zend\Loader\StandardAutoloader;
 
