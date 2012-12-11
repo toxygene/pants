@@ -6,9 +6,17 @@
         {
             "type": "composer",
             "url": "http://packages.zendframework.com/"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/toxygene/pale"
         }
     ],
+    "require-dev": {
+        "phpunit/PHPUnit": "3.7.*"
+    },
     "require": {
+        "pale": "1.*",
         "zendframework/zend-loader": "2.*",
         "zendframework/zend-stdlib": "2.*"
     }
