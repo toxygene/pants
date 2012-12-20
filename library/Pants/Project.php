@@ -33,9 +33,9 @@
 
 namespace Pants;
 
+use Pale\Pale;
 use Pants\Property\Properties;
 use Pants\Target\Targets;
-use Pants\Task\Chdir;
 use Pants\Task\Tasks;
 use Pants\Type\Types;
 
@@ -228,7 +228,10 @@ class Project
     protected function setupBaseDir()
     {
         if ($this->getBaseDir()) {
-            chdir($this->getBaseDir());
+            $project = $this;
+            Pale::run(function() use ($project) {
+                return chdir($project->getBaseDir());
+            });
         }
 
         return $this;

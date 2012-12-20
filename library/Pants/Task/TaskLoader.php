@@ -31,7 +31,7 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
-namespace Pants;
+namespace Pants\Task;
 
 use Zend\Loader\PluginClassLoader;
 
@@ -49,32 +49,33 @@ class TaskLoader extends PluginClassLoader
      * @var array
      */
     protected $plugins = array(
-        "call"             => "Pants\Task\Call",
-        "chgrp"            => "Pants\Task\Chgrp",
-        "chmod"            => "Pants\Task\Chmod",
-        "copy"             => "Pants\Task\Copy",
-        "cp"               => "Pants\Task\Copy",
-        "delete"           => "Pants\Task\Delete",
-        "docblox"          => "Pants\Task\Docblox",
-        "exec"             => "Pants\Task\Execute",
-        "execute"          => "Pants\Task\Execute",
-        "fileset"          => "Pants\Task\FileSet",
-        "file_set"         => "Pants\Task\FileSet",
-        "input"            => "Pants\Task\Input",
-        "move"             => "Pants\Task\Move",
-        "mv"               => "Pants\Task\Move",
-        "output"           => "Pants\Task\Output",
-        "phpcodesniffer"   => "Pants\Task\PhpCodeSniffer",
-        "php_code_sniffer" => "Pants\Task\PhpCodeSniffer",
-        "phpscript"        => "Pants\Task\PhpScript",
-        "php_script"       => "Pants\Task\PhpScript",
-        "property"         => "Pants\Task\Property",
-        "propertyfile"     => "Pants\Task\PropertyFile",
-        "property_file"    => "Pants\Task\PropertyFile",
-        "rm"               => "Pants\Task\Delete",
-        "tokenfilter"      => "Pants\Task\TokenFilter",
-        "token_filter"     => "Pants\Task\TokenFilter",
-        "touch"            => "Pants\Task\Touch"
+        "call"             => "Pants\\Task\\Call",
+        "chdir"            => "Pants\\Task\\Chdir",
+        "chgrp"            => "Pants\\Task\\Chgrp",
+        "chmod"            => "Pants\\Task\\Chmod",
+        "copy"             => "Pants\\Task\\Copy",
+        "cp"               => "Pants\\Task\\Copy",
+        "delete"           => "Pants\\Task\\Delete",
+        "docblox"          => "Pants\\Task\\Docblox",
+        "exec"             => "Pants\\Task\\Execute",
+        "execute"          => "Pants\\Task\\Execute",
+        "fileset"          => "Pants\\Task\\FileSet",
+        "file_set"         => "Pants\\Task\\FileSet",
+        "input"            => "Pants\\Task\\Input",
+        "move"             => "Pants\\Task\\Move",
+        "mv"               => "Pants\\Task\\Move",
+        "output"           => "Pants\\Task\\Output",
+        "phpcodesniffer"   => "Pants\\Task\\PhpCodeSniffer",
+        "php_code_sniffer" => "Pants\\Task\\PhpCodeSniffer",
+        "phpscript"        => "Pants\\Task\\PhpScript",
+        "php_script"       => "Pants\\Task\\PhpScript",
+        "property"         => "Pants\\Task\\Property",
+        "propertyfile"     => "Pants\\Task\\PropertyFile",
+        "property_file"    => "Pants\\Task\\PropertyFile",
+        "rm"               => "Pants\\Task\\Delete",
+        "tokenfilter"      => "Pants\\Task\\TokenFilter",
+        "token_filter"     => "Pants\\Task\\TokenFilter",
+        "touch"            => "Pants\\Task\\Touch"
     );
 
 }

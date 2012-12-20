@@ -33,100 +33,73 @@
 
 namespace Pants\Task;
 
-use BadMethodCallException;
-use Closure;
 use Pants\BuildException;
-use Pants\Project;
-use Pants\Property\PropertyNameCycleException;
-use Pants\Task\Task;
-use Pale\Pale;
 
 /**
- * Abstract base task
+ * Change the current working directory task
  *
- * @package Pants
- * @subpackage Task
+ * @package Pants\Task
  */
-abstract class AbstractTask implements Task
+class Chdir extends AbstractTask
 {
 
     /**
-     * Project
+     * Target directory
      *
-     * @var Project
+     * @var string
      */
-    protected $project;
+    protected $directory;
 
     /**
-     * Constructor
+     * Chgrp a file
      *
-     * @param array|Traversable $options
-     * @throws BadMethodCallException
+     * @param string $dir
+     * @return boolean
      */
-    public function __construct($options = array())
+    protected function chdir($dir)
     {
-        foreach ($options as $key => $value) {
-            $method = "set" . $key;
-            if (!method_exists($this, $method)) {
-                throw new BadMethodCallException("Method '{$method}' does not exist");
-            }
-            $this->$method($value);
-        }
+        return $this->run(function() use ($dir) {
+            return chdir($dir);
+        });
     }
 
     /**
-     * Filter a string for any properties
+     * Execute the task
      *
-     * @param string $string
+     * @return Chgrp
+     * @throws BuildException
+     * @return self
+     */
+    public function execute()
+    {
+        if (!$this->getDirectory()) {
+            throw new BuildException("Directory is not set");
+        }
+
+        $this->chdir($this->getDirectory());
+
+        return $this;
+    }
+
+    /**
+     * Get the target directory
+     *
      * @return string
-     * @throws BuildException
      */
-    public function filterProperties($string)
+    public function getDirectory()
     {
-        if (!$this->getProject()) {
-            throw new BuildException("Project not set");
-        }
-
-        try {
-            return $this->getProject()
-                        ->getProperties()
-                        ->filter($string);
-        } catch(PropertyNameCycleException $e) {
-            throw new BuildException("An error occurred while filtering the property", null, $e);
-        }
+        return $this->directory;
     }
 
     /**
-     * Get the project
+     * Set the target directory
      *
-     * @return Project
+     * @param string $directory
+     * @return self
      */
-    public function getProject()
+    public function setDirectory($directory)
     {
-        return $this->project;
-    }
-
-    /**
-     * Run a function
-     *
-     * @param Closure $function
-     * @return mixed
-     * @throws BuildException
-     */
-    protected function run(Closure $function)
-    {
-        return Pale::run($function);
-    }
-
-    /**
-     * Set the project
-     *
-     * @param Project $project
-     * @return Task
-     */
-    public function setProject(Project $project)
-    {
-        $this->project = $project;
+        $this->directory = $directory;
         return $this;
     }
 

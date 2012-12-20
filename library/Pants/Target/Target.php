@@ -33,7 +33,6 @@
 
 namespace Pants\Target;
 
-use Pants\Task\Task;
 use Pants\Task\AbstractTask;
 use Pants\Task\Tasks;
 
@@ -97,7 +96,7 @@ class Target extends AbstractTask
     /**
      * Constructor
      *
-     * @param array|Traversable $options
+     * @param array $options
      */
     public function __construct($options = array())
     {
