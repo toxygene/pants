@@ -3,7 +3,7 @@
  *
  */
 
-namespace Pants\Getopt;
+namespace Pants\Cli\Getopt;
 
 use Exception as PhpException;
 
