@@ -1,7 +1,10 @@
 {
-    "name": "toxygene/pants",
+    "bin": [
+        "bin/pants"
+    ],
     "description": "asdf",
     "license": "BSD-3-Clause",
+    "name": "toxygene/pants",
     "repositories": [
         {
             "type": "composer",
@@ -12,12 +15,12 @@
             "url": "https://github.com/toxygene/pale"
         }
     ],
-    "require-dev": {
-        "phpunit/PHPUnit": "3.7.*"
-    },
     "require": {
         "toxygene/pale": "dev-master",
         "zendframework/zend-loader": "2.*",
         "zendframework/zend-stdlib": "2.*"
+    },
+    "require-dev": {
+        "phpunit/PHPUnit": "3.7.*"
     }
 }
