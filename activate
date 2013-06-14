@@ -1,0 +1,1 @@
+PS1="(Pants) $PS1" PATH="`pwd`/vendor/bin:$PATH" APPLICATION_ENV="@APPLICATION_ENV@" bash --norc -i
