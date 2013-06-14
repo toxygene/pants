@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace PantsTest;
+namespace PantsTest\FileSet;
 
 use Pants\FileSet\DefaultIgnoreFilterIterator;
 use PHPUnit_Framework_TestCase as TestCase;

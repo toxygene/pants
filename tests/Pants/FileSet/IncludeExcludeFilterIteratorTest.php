@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -29,11 +29,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace PantsTest;
+namespace PantsTest\FileSet;
 
-use ArrayIterator,
-    Pants\FileSet\IncludeExcludeFilterIterator,
-    PHPUnit_Framework_TestCase as TestCase;
+use ArrayIterator;
+use Pants\FileSet\IncludeExcludeFilterIterator;
+use PHPUnit_Framework_TestCase as TestCase;
 
 /**
  *
@@ -45,27 +45,27 @@ class IncludeExcludeFilterIteratorTest extends TestCase
     {
         $filter = new IncludeExcludeFilterIterator(new ArrayIterator());
 
-        $filter->setBaseDirectory("test");
+        $filter->setBaseDirectory('test');
 
-        $this->assertEquals("test", $filter->getBaseDirectory());
+        $this->assertEquals('test', $filter->getBaseDirectory());
     }
 
     public function testExcludePatternsCanBeSet()
     {
         $filter = new IncludeExcludeFilterIterator(new ArrayIterator());
 
-        $filter->setExcludes(array("one", "two"));
+        $filter->setExcludes(array('one', 'two'));
 
-        $this->assertEquals(array("one", "two"), $filter->getExcludes());
+        $this->assertEquals(array('one', 'two'), $filter->getExcludes());
     }
 
     public function testIncludePatternsCanBeSet()
     {
         $filter = new IncludeExcludeFilterIterator(new ArrayIterator());
 
-        $filter->setIncludes(array("one", "two"));
+        $filter->setIncludes(array('one', 'two'));
 
-        $this->assertEquals(array("one", "two"), $filter->getIncludes());
+        $this->assertEquals(array('one', 'two'), $filter->getIncludes());
     }
 
     public function testEverythingIsIgnoredByDefault()
@@ -82,9 +82,9 @@ class IncludeExcludeFilterIteratorTest extends TestCase
         $mocks = $this->_getMockFileObjects();
 
         $filter = new IncludeExcludeFilterIterator(new ArrayIterator($mocks));
-        $filter->setBaseDirectory("/a/b")
-               ->setExcludes(array("#^t#"))
-               ->setIncludes(array("#o#"));
+        $filter->setBaseDirectory('/a/b')
+               ->setExcludes(array('#^t#'))
+               ->setIncludes(array('#o#'));
 
         $results = iterator_to_array($filter);
 
@@ -95,31 +95,31 @@ class IncludeExcludeFilterIteratorTest extends TestCase
 
     protected function _getMockFileObjects()
     {
-        $one = $this->getMock("SplFileObject", array(), array(), '', false);
+        $one = $this->getMock('SplFileObject', array(), array('/a/b/one'), '', true);
         $one->expects($this->once())
-            ->method("getPathname")
-            ->will($this->returnValue("/a/b/one"));
+            ->method('getPathname')
+            ->will($this->returnValue('/a/b/one'));
 
-        $two = $this->getMock("SplFileObject", array(), array(), '', false);
+        $two = $this->getMock('SplFileObject', array(), array('/a/b/two'), '', true);
         $two->expects($this->once())
-            ->method("getPathname")
-            ->will($this->returnValue("/a/b/two"));
+            ->method('getPathname')
+            ->will($this->returnValue('/a/b/two'));
 
-        $three = $this->getMock("SplFileObject", array(), array(), '', false);
+        $three = $this->getMock('SplFileObject', array(), array('/a/b/three'), '', true);
         $three->expects($this->once())
-              ->method("getPathname")
-              ->will($this->returnValue("/a/b/three"));
+              ->method('getPathname')
+              ->will($this->returnValue('/a/b/three'));
 
-        $four = $this->getMock("SplFileObject", array(), array(), '', false);
+        $four = $this->getMock('SplFileObject', array(), array('/a/b/four'), '', true);
         $four->expects($this->once())
-             ->method("getPathname")
-             ->will($this->returnValue("/a/b/four"));
+             ->method('getPathname')
+             ->will($this->returnValue('/a/b/four'));
 
         return array(
-            "one" => $one,
-            "two" => $two,
-            "three" => $three,
-            "four" => $four
+            'one' => $one,
+            'two' => $two,
+            'three' => $three,
+            'four' => $four
         );
     }
 

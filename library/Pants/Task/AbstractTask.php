@@ -34,6 +34,7 @@
 namespace Pants\Task;
 
 use BadMethodCallException;
+use ErrorException;
 use Closure;
 use Pants\BuildException;
 use Pants\Project;
@@ -115,7 +116,11 @@ abstract class AbstractTask implements Task
      */
     protected function run(Closure $function)
     {
-        return Pale::run($function);
+        try {
+            return Pale::run($function);
+        } catch (ErrorException $e) {
+            throw new BuildException($e->getMessage(), null, $e);
+        }
     }
 
     /**

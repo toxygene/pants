@@ -84,6 +84,7 @@ class Chgrp extends AbstractTask implements FileSetable
      * @param string $file
      * @param string $group
      * @return boolean
+     * @throws BuildException
      */
     protected function chgrp($file, $group)
     {

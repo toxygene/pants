@@ -89,6 +89,7 @@ class Delete extends AbstractTask implements FileSetable
      *
      * @param string $file
      * @return boolean
+     * @throws BuildException
      */
     protected function delete($file)
     {
