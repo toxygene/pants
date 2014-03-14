@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -31,9 +31,10 @@
 
 namespace PantsTest\Task;
 
-use Pants\Project,
-    Pants\Task\Chgrp,
-    PHPUnit_Framework_TestCase as TestCase;
+use org\bovigo\vfs\vfsStream;
+use Pants\Project;
+use Pants\Task\Chgrp;
+use PHPUnit_Framework_TestCase as TestCase;
 
 /**
  *
@@ -45,31 +46,33 @@ class ChgrpTest extends TestCase
      * Chgrp task
      * @var Chgrp
      */
-    protected $_chgrp;
+    protected $chgrp;
 
     /**
-     * Temporary file
+     * File to chgrp
      * @var string
      */
-    protected $_file;
+    protected $file;
+
+    /**
+     * Virtual file system
+     * @var vfsStream
+     */
+    protected $vfs;
 
     /**
      * Setup the test
      */
     public function setUp()
     {
-        if (!PANTS_CHGRP_VALID_GROUP_NAME) {
-            $this->markTestSkipped("PANTS_CHGRP_VALID_GROUP_NAME constant is not set");
-        }
-
-        if (!PANTS_CHGRP_INVALID_GROUP_NAME) {
-            $this->markTestSkipped("PANTS_CHGRP_INVALID_GROUP_NAME constant is not set");
-        }
-
-        $this->_chgrp = new Chgrp();
-        $this->_chgrp->setProject(new Project());
-
-        $this->_file = tempnam(sys_get_temp_dir(), "Pants_");
+        $this->vfs = vfsStream::setup('root', null, array(
+            'test' => 'test'
+        ));
+    
+        $this->chgrp = new Chgrp();
+        $this->chgrp->setProject(new Project());
+        
+        $this->file = vfsStream::url('root/test');
     }
 
     /**
@@ -77,46 +80,37 @@ class ChgrpTest extends TestCase
      */
     public function tearDown()
     {
-        unlink($this->_file);
+        unset($this->chgrp);
+        unset($this->file);
+        unset($this->vfs);
     }
 
     public function testFileIsRequired()
     {
-        $this->setExpectedException("\Pants\BuildException");
+        $this->setExpectedException('\Pants\BuildException');
 
-        $this->_chgrp
-             ->setGroup(PANTS_CHGRP_VALID_GROUP_NAME)
+        $this->chgrp
+             ->setGroup(1000)
              ->execute();
     }
 
     public function testGroupIsRequired()
     {
-        $this->setExpectedException("\Pants\BuildException");
-
-        $this->_chgrp
-             ->setFile($this->_file)
-             ->execute();
-    }
-
-    public function testFailureThrowsABuildException()
-    {
-        $this->setExpectedException("\Pants\BuildException");
-
-        $this->_chgrp
-             ->setFile($this->_file)
-             ->setGroup(PANTS_CHGRP_INVALID_GROUP_NAME)
+        $this->setExpectedException('\Pants\BuildException');
+        
+        $this->chgrp
+             ->setFile($this->file)
              ->execute();
     }
 
     public function testGroupIsSet()
     {
-        $this->_chgrp
-             ->setFile($this->_file)
-             ->setGroup(PANTS_CHGRP_VALID_GROUP_NAME)
+        $this->chgrp
+             ->setFile($this->file)
+             ->setGroup(1000)
              ->execute();
 
-        $group = posix_getgrgid(filegroup($this->_file));
-        $this->assertEquals(PANTS_CHGRP_VALID_GROUP_NAME, $group["name"]);
+        $this->assertEquals(1000, filegroup($this->file));
     }
 
 }

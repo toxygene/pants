@@ -47,10 +47,15 @@ class ChmodTest extends TestCase
      * @var Chmod
      */
     protected $chmod;
+    
+    /**
+     * File to chmod
+     * @var string
+     */
+    protected $file;
 
     /**
      * Virtual file system
-     *
      * @var vfsStream
      */
     protected $vfs;
@@ -75,7 +80,9 @@ class ChmodTest extends TestCase
      */
     public function tearDown()
     {
-        unlink($this->file);
+        unset($this->chmod);
+        unset($this->file);
+        unset($this->vfs);
     }
 
     public function testFileIsRequired()
@@ -93,16 +100,6 @@ class ChmodTest extends TestCase
 
         $this->chmod
              ->setFile($this->file)
-             ->execute();
-    }
-
-    public function testFailureThrowsABuildException()
-    {
-        $this->setExpectedException('\Pants\BuildException');
-
-        $this->chmod
-             ->setFile($this->file)
-             ->setMode('asdf')
              ->execute();
     }
 

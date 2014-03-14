@@ -31,9 +31,10 @@
 
 namespace PantsTest\Task;
 
-use Pants\Project,
-    Pants\Task\Copy,
-    PHPUnit_Framework_TestCase as TestCase;
+use org\bovigo\vfs\vfsStream;
+use Pants\Project;
+use Pants\Task\Copy;
+use PHPUnit_Framework_TestCase as TestCase;
 
 /**
  *
@@ -45,24 +46,33 @@ class CopyTest extends TestCase
      * Copy task
      * @var Copy
      */
-    protected $_copy;
+    protected $copy;
 
     /**
-     * Temporary file
+     * File to copy
      * @var string
      */
-    protected $_file;
+    protected $file;
+    
+    /**
+     * Virtual file system
+     * @var vfsStream
+     */
+    protected $vfs;
 
     /**
      * Setup the test
      */
     public function setUp()
     {
-        $this->_copy = new Copy();
-        $this->_copy->setProject(new Project());
+        $this->copy = new Copy();
+        $this->copy->setProject(new Project());
 
-        $this->_file = tempnam(sys_get_temp_dir(), "Pants_");
-        file_put_contents($this->_file, "testing");
+        $this->vfs = vfsStream::setup('root', null, array(
+            'test' => 'testing'
+        ));
+
+        $this->file = vfsStream::url('root/test');
     }
 
     /**
@@ -70,15 +80,17 @@ class CopyTest extends TestCase
      */
     public function tearDown()
     {
-        unlink($this->_file);
+        unset($this->copy);
+        unset($this->file);
+        unset($this->vfs);
     }
 
     public function testFileIsRequired()
     {
         $this->setExpectedException("\Pants\BuildException");
 
-        $this->_copy
-             ->setDestination($this->_file . "_1")
+        $this->copy
+             ->setDestination($this->file . "_1")
              ->execute();
     }
 
@@ -86,36 +98,22 @@ class CopyTest extends TestCase
     {
         $this->setExpectedException("\Pants\BuildException");
 
-        $this->_copy
-             ->setFile($this->_file)
-             ->execute();
-    }
-
-    public function testFailureThrowsABuildException()
-    {
-        if (!PANTS_COPY_INVALID_PATH) {
-            $this->markTestSkipped("PANTS_COPY_INVALID_PATH not set");
-        }
-
-        $this->setExpectedException("\Pants\BuildException");
-
-        $this->_copy
-             ->setFile($this->_file)
-             ->setDestination(PANTS_COPY_INVALID_PATH)
+        $this->copy
+             ->setFile($this->file)
              ->execute();
     }
 
     public function testFileIsCopied()
     {
-        $this->_copy
-             ->setFile($this->_file)
-             ->setDestination($this->_file . "_1")
+        $this->copy
+             ->setFile($this->file)
+             ->setDestination($this->file . "_1")
              ->execute();
 
-        $this->assertTrue(file_exists($this->_file . "_1"));
-        $this->assertEquals("testing", file_get_contents($this->_file . "_1"));
+        $this->assertTrue(file_exists($this->file . "_1"));
+        $this->assertEquals("testing", file_get_contents($this->file . "_1"));
 
-        unlink($this->_file . "_1");
+        unlink($this->file . "_1");
     }
 
 }

@@ -49,6 +49,13 @@ class Touch extends AbstractTask
      * @var string
      */
     protected $file;
+    
+    /**
+     * Time to touch the file with
+     *
+     * @var string
+     */
+    protected $time;
 
     /**
      * Execute the task
@@ -63,9 +70,10 @@ class Touch extends AbstractTask
         }
 
         $file = $this->filterProperties($this->getFile());
+        $time = $this->filterProperties($this->getTime());
 
-        $this->run(function() use ($file) {
-            return touch($file);
+        $this->run(function() use ($file, $time) {
+            return touch($file, $time);
         });
 
         return $this;
@@ -80,6 +88,16 @@ class Touch extends AbstractTask
     {
         return $this->file;
     }
+    
+    /**
+     * Get the time to touch the file with
+     *
+     * @return string
+     */
+    public function getTime()
+    {
+        return $this->time;
+    }
 
     /**
      * Set the target file
@@ -90,6 +108,18 @@ class Touch extends AbstractTask
     public function setFile($file)
     {
         $this->file = $file;
+        return $this;
+    }
+    
+    /**
+     * Set the time to touch the file with
+     *
+     * @param string $time
+     * @return Chgrp
+     */
+    public function setTime($time)
+    {
+        $this->time = $time;
         return $this;
     }
 

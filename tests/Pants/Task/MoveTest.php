@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -31,9 +31,10 @@
 
 namespace PantsTest\Task;
 
-use Pants\Project,
-    Pants\Task\Move,
-    PHPUnit_Framework_TestCase as TestCase;
+use org\bovigo\vfs\vfsStream;
+use Pants\Project;
+use Pants\Task\Move;
+use PHPUnit_Framework_TestCase as TestCase;
 
 /**
  *
@@ -42,50 +43,74 @@ class MoveTest extends TestCase
 {
 
     /**
+     * File to move
+     * @var string
+     */
+    protected $file;
+
+    /**
      * Move task
      * @var Move
      */
-    protected $_move;
+    protected $move;
+
+    /**
+     * Virtual file system
+     * @var vfsStream
+     */
+    protected $vfs;
 
     /**
      * Setup the test
      */
     public function setUp()
     {
-        $this->_move = new Move();
-        $this->_move->setProject(new Project());
+        $this->move = new Move();
+        $this->move->setProject(new Project());
+        
+        $this->vfs = vfsStream::setup('root', null, array(
+            'one' => 'test'
+        ));
+        
+        $this->file = vfsStream::url('root/one');
+    }
+    
+    /**
+     * Tear down the test case
+     */
+    public function testDown()
+    {
+        unset($this->file);
+        unset($this->move);
+        unset($this->vfs);
     }
 
     public function testFileIsRequired()
     {
-        $this->setExpectedException("\Pants\BuildException");
+        $this->setExpectedException('\Pants\BuildException');
 
-        $this->_move
-             ->setDestination("asdf")
+        $this->move
+             ->setDestination(vfsStream::url('root') . '_1')
              ->execute();
     }
 
     public function testDestinationIsRequired()
     {
-        $this->setExpectedException("\Pants\BuildException");
+        $this->setExpectedException('\Pants\BuildException');
 
-        $this->_move
-             ->setFile("asdf")
+        $this->move
+             ->setFile(vfsStream::url('root/one'))
              ->execute();
     }
 
     public function testFileIsMoved()
     {
-        $file = tempnam(sys_get_temp_dir(), "Pants_");
-
-        $this->_move
-             ->setFile($file)
-             ->setDestination($file . "_1")
+        $this->move
+             ->setFile($this->file)
+             ->setDestination($this->file . '_1')
              ->execute();
 
-        $this->assertTrue(file_exists($file . "_1"));
-
-        unlink($file . "_1");
+        $this->assertTrue(file_exists($this->file . '_1'));
     }
 
 }

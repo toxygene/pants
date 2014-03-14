@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -31,9 +31,10 @@
 
 namespace PantsTest\Task;
 
-use Pants\Project,
-    Pants\Task\Delete,
-    PHPUnit_Framework_TestCase as TestCase;
+use org\bovigo\vfs\vfsStream;
+use Pants\Project;
+use Pants\Task\Delete;
+use PHPUnit_Framework_TestCase as TestCase;
 
 /**
  *
@@ -45,41 +46,59 @@ class DeleteTest extends TestCase
      * Delete task
      * @var Delete
      */
-    protected $_delete;
+    protected $delete;
+    
+    /**
+     * File to delete
+     * @var string
+     */
+    protected $file;
+
+    /**
+     * Virtual file system
+     * @var vfsStream
+     */
+    protected $vfs;
 
     /**
      * Setup the test
      */
     public function setUp()
     {
-        $this->_delete = new Delete();
-        $this->_delete->setProject(new Project());
+        $this->delete = new Delete();
+        $this->delete->setProject(new Project());
+        
+        $this->vfs = vfsStream::setup('root', null, array(
+            'test' => 'test'
+        ));
+        
+        $this->file = vfsStream::url('root/test');
     }
 
     public function testFileIsRequired()
     {
-        $this->setExpectedException("\Pants\BuildException");
+        $this->setExpectedException('\Pants\BuildException');
 
-        $this->_delete
+        $this->delete
              ->execute();
     }
 
     public function testFailureThrowsABuildException()
     {
-        $this->setExpectedException("\Pants\BuildException");
+        $this->setExpectedException('\Pants\BuildException');
 
-        $this->_delete
-             ->setFile("something-that-does-not-exist")
+        $this->delete
+             ->setFile('something-that-does-not-exist')
              ->execute();
     }
 
     public function testFileIsDeleted()
     {
-        $file = tempnam(sys_get_temp_dir(), "Pants_");
-
-        $this->_delete
-             ->setFile($file)
+        $this->delete
+             ->setFile($this->file)
              ->execute();
+             
+        $this->assertFalse(file_exists($this->file));
     }
 
 }

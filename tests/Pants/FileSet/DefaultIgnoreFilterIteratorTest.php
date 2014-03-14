@@ -34,14 +34,20 @@ namespace PantsTest\FileSet;
 use org\bovigo\vfs\vfsStream;
 use Pants\FileSet\DefaultIgnoreFilterIterator;
 use PHPUnit_Framework_TestCase as TestCase;
-use RecursiveArrayIterator;
-use SplFileObject;
+use RecursiveDirectoryIterator;
 
 /**
  *
  */
 class DefaultIgnoreFilterIteratorTest extends TestCase
 {
+
+    /**
+     * Filter
+     *
+     * @var DefaultIgnoreFilterIterator
+     */
+    protected $filter;
 
     /**
      * Virtual file system
@@ -59,33 +65,26 @@ class DefaultIgnoreFilterIteratorTest extends TestCase
             '.git' => array(),
             '.gitignore' => 'test',
             '.svn' => array(),
-            'test' => 'test'
+            'test' => array()
         ));
+        
+        $this->filter = new DefaultIgnoreFilterIterator(new RecursiveDirectoryIterator(vfsStream::url("root")));
     }
 
     public function testPatternsCanBeSet()
     {
-        $filter = new DefaultIgnoreFilterIterator(new RecursiveArrayIterator(array()));
+        $this->filter->setPatterns(array('one', 'two'));
 
-        $filter->setPatterns(array('one', 'two'));
-
-        $this->assertEquals(array('one', 'two'), $filter->getPatterns());
+        $this->assertEquals(array('one', 'two'), $this->filter->getPatterns());
     }
 
     public function testOnlyNonIgnoredFilesAreReturned()
     {
-        $filter = new DefaultIgnoreFilterIterator(new RecursiveArrayIterator(array(
-            '.git',
-            '.gitignore',
-            '.svn',
-            'test'
-        )));
-
-        $results = iterator_to_array($filter);
+        $results = iterator_to_array($this->filter);
 
         $this->assertEquals(2, count($results));
-        $this->assertContains('.gitignore', $results);
-        $this->assertContains('test', $results);
+        $this->assertContains(vfsStream::url("root/.gitignore"), $results);
+        $this->assertContains(vfsStream::url("root/test"), $results);
     }
 
 }

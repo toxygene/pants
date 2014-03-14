@@ -31,17 +31,22 @@
 
 namespace PantsTest\FileSet;
 
-use ArrayIterator;
 use org\bovigo\vfs\vfsStream;
-use org\bovigo\vfs\visitor\vfsStreamPrintVisitor;
 use Pants\FileSet\IncludeExcludeFilterIterator;
 use PHPUnit_Framework_TestCase as TestCase;
+use RecursiveDirectoryIterator;
 
 /**
  *
  */
 class IncludeExcludeFilterIteratorTest extends TestCase
 {
+
+    /**
+     * Filter
+     *
+     */
+    protected $filter;
 
     /**
      * Virtual file system
@@ -61,65 +66,48 @@ class IncludeExcludeFilterIteratorTest extends TestCase
             'three' => 'test',
             'four' => 'test'
         ));
+        
+        $this->filter = new IncludeExcludeFilterIterator(new RecursiveDirectoryIterator(vfsStream::url("root")));
     }
 
     public function testBaseDirectoryCanBeSet()
     {
-        $filter = new IncludeExcludeFilterIterator(new ArrayIterator());
+        $this->filter->setBaseDirectory(vfsStream::url('one'));
 
-        $filter->setBaseDirectory(vfsStream::url('a'));
-
-        $this->assertEquals(vfsStream::url('a'), $filter->getBaseDirectory());
+        $this->assertEquals(vfsStream::url('one'), $this->filter->getBaseDirectory());
     }
 
     public function testExcludePatternsCanBeSet()
     {
-        $filter = new IncludeExcludeFilterIterator(new ArrayIterator());
+        $this->filter->setExcludes(array('one', 'two'));
 
-        $filter->setExcludes(array('one', 'two'));
-
-        $this->assertEquals(array('one', 'two'), $filter->getExcludes());
+        $this->assertEquals(array('one', 'two'), $this->filter->getExcludes());
     }
 
     public function testIncludePatternsCanBeSet()
     {
-        $filter = new IncludeExcludeFilterIterator(new ArrayIterator());
+        $this->filter->setIncludes(array('one', 'two'));
 
-        $filter->setIncludes(array('one', 'two'));
-
-        $this->assertEquals(array('one', 'two'), $filter->getIncludes());
+        $this->assertEquals(array('one', 'two'), $this->filter->getIncludes());
     }
 
     public function testEverythingIsIgnoredByDefault()
     {
-        $filter = new IncludeExcludeFilterIterator(new ArrayIterator(array(
-            'one' => 'one',
-            'two' => 'two',
-            'three' => 'three',
-            'four' => 'four'
-        )));
-
-        $this->assertEmpty(iterator_to_array($filter));
+        $this->assertEmpty(iterator_to_array($this->filter));
     }
 
     public function testFilesAreAcceptedIfTheyAreIncludedAndNotExcluded()
     {
-        $filter = new IncludeExcludeFilterIterator(new ArrayIterator(array(
-            'one',
-            'two',
-            'three',
-            'four'
-        )));
-        
-        $filter->setBaseDirectory(vfsStream::url('root'))
-               ->setExcludes(array('#^t#'))
-               ->setIncludes(array('#o#'));
+        $this->filter
+            ->setBaseDirectory(vfsStream::url('root'))
+            ->setExcludes(array('#^t#'))
+            ->setIncludes(array('#o#'));
 
-        $results = iterator_to_array($filter);
+        $results = iterator_to_array($this->filter);
 
         $this->assertEquals(2, count($results));
-        $this->assertContains('one', $results);
-        $this->assertContains('four', $results);
+        $this->assertContains(vfsStream::url('root/one'), $results);
+        $this->assertContains(vfsStream::url('root/four'), $results);
     }
 
 }

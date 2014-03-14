@@ -31,9 +31,10 @@
 
 namespace PantsTest\Task;
 
-use Pants\Project,
-    Pants\Task\Chown,
-    PHPUnit_Framework_TestCase as TestCase;
+use org\bovigo\vfs\vfsStream;
+use Pants\Project;
+use Pants\Task\Chown;
+use PHPUnit_Framework_TestCase as TestCase;
 
 /**
  *
@@ -45,31 +46,33 @@ class ChownTest extends TestCase
      * Chown task
      * @var Chown
      */
-    protected $_chown;
-
+    protected $chown;
+    
     /**
-     * Temporary file
+     * File to chown
      * @var string
      */
-    protected $_file;
+    protected $file;
+
+    /**
+     * Virtual file system
+     * @var vfsStream
+     */
+    protected $vfs;
 
     /**
      * Setup the test
      */
     public function setUp()
     {
-        if (!PANTS_CHOWN_VALID_USER_NAME) {
-            $this->markTestSkipped("PANTS_CHOWN_VALID_USER_NAME constant is not set");
-        }
+        $this->vfs = vfsStream::setup('root', null, array(
+            'one' => 'test'
+        ));
+        
+        $this->chown = new Chown();
+        $this->chown->setProject(new Project());
 
-        if (!PANTS_CHOWN_INVALID_USER_NAME) {
-            $this->markTestSkipped("PANTS_CHOWN_INVALID_USER_NAME constant is not set");
-        }
-
-        $this->_chown = new Chown();
-        $this->_chown->setProject(new Project());
-
-        $this->_file = tempnam(sys_get_temp_dir(), "Pants_");
+        $this->file = vfsStream::url('root/one');
     }
 
     /**
@@ -77,15 +80,17 @@ class ChownTest extends TestCase
      */
     public function tearDown()
     {
-        unlink($this->_file);
+        unset($this->chown);
+        unset($this->file);
+        unset($this->vfs);
     }
 
     public function testFileIsRequired()
     {
         $this->setExpectedException("\Pants\BuildException");
 
-        $this->_chown
-             ->setOwner(PANTS_CHOWN_VALID_USER_NAME)
+        $this->chown
+             ->setOwner(1000)
              ->execute();
     }
 
@@ -93,31 +98,19 @@ class ChownTest extends TestCase
     {
         $this->setExpectedException("\Pants\BuildException");
 
-        $this->_chown
-             ->setFile($this->_file)
-             ->execute();
-    }
-
-    public function testFailureThrowsABuildException()
-    {
-        $this->setExpectedException("\Pants\BuildException");
-
-        $this->_chown
-             ->setFile($this->_file)
-             ->setOwner(PANTS_CHOWN_INVALID_USER_NAME)
+        $this->chown
+             ->setFile($this->file)
              ->execute();
     }
 
     public function testOwnerIsSet()
     {
-        $this->_chown
-             ->setFile($this->_file)
-             ->setOwner(PANTS_CHOWN_VALID_USER_NAME)
+        $this->chown
+             ->setFile($this->file)
+             ->setOwner(1000)
              ->execute();
 
-        $owner = posix_getpwuid(fileowner($this->_file));
-
-        $this->assertEquals(PANTS_CHOWN_VALID_USER_NAME, $owner["name"]);
+        $this->assertEquals(1000, fileowner($this->file));
     }
 
 }

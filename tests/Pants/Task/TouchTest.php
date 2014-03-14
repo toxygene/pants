@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -31,9 +31,10 @@
 
 namespace PantsTest\Task;
 
-use Pants\Project,
-    Pants\Task\Touch,
-    PHPUnit_Framework_TestCase as TestCase;
+use org\bovigo\vfs\vfsStream;
+use Pants\Project;
+use Pants\Task\Touch;
+use PHPUnit_Framework_TestCase as TestCase;
 
 /**
  *
@@ -42,37 +43,57 @@ class TouchTest extends TestCase
 {
 
     /**
+     * File to touch
+     * @var string
+     */
+    protected $file;
+
+    /**
      * Touch task
      * @var Touch
      */
-    protected $_touch;
+    protected $touch;
+
+    /**
+     * Virtual file system
+     * @var vfsStream
+     */
+    protected $vfs;
 
     /**
      * Setup the test
      */
     public function setUp()
     {
-        $this->_touch = new Touch();
-        $this->_touch->setProject(new Project());
+        $this->touch = new Touch();
+        $this->touch->setProject(new Project());
+        
+        $this->vfs = vfsStream::setup('root', null, array(
+            'one' => 'test'
+        ));
+        
+        $this->file = vfsStream::url('root/one');
     }
 
     public function testFileIsRequired()
     {
-        $this->setExpectedException("\Pants\BuildException");
+        $this->setExpectedException('\Pants\BuildException');
 
-        $this->_touch
-             ->execute();
+        $this->touch
+            ->execute();
     }
 
-    public function testTouchesTheFile()
+    public function testTouchingANonExistentFileCreatesItAndSetsTheModifiedTime()
     {
-        $this->_touch
-             ->setFile("asdf")
-             ->execute();
+        $time = time();
 
-        $this->assertTrue(file_exists("asdf"));
+        $this->touch
+            ->setFile($this->file)
+            ->setTime($time)
+            ->execute();
 
-        unlink("asdf");
+        $this->assertTrue(file_exists($this->file));
+        $this->assertEquals($time, filemtime($this->file));
     }
 
 }
