@@ -120,11 +120,11 @@ class Chmod extends AbstractTask implements FileSetable
         }
 
         $file = $this->filterProperties($this->getFile());
-        $mode = base_convert(
-            $this->filterProperties($this->getMode()),
-            8,
-            10
-        );
+        $mode = $this->filterProperties($this->getMode());
+
+        if (is_string($mode)) {
+            $mode = octdec($mode);
+        }
 
         if ($file) {
             $this->chmod($file, $mode);

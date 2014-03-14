@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -31,9 +31,11 @@
 
 namespace PantsTest\FileSet;
 
+use org\bovigo\vfs\vfsStream;
 use Pants\FileSet\DefaultIgnoreFilterIterator;
 use PHPUnit_Framework_TestCase as TestCase;
 use RecursiveArrayIterator;
+use SplFileObject;
 
 /**
  *
@@ -41,56 +43,49 @@ use RecursiveArrayIterator;
 class DefaultIgnoreFilterIteratorTest extends TestCase
 {
 
+    /**
+     * Virtual file system
+     *
+     * @var vfsStream
+     */
+    protected $vfs;
+
+    /**
+     * Set up the test case
+     */
+    public function setUp()
+    {
+        $this->vfs = vfsStream::setup('root', null, array(
+            '.git' => array(),
+            '.gitignore' => 'test',
+            '.svn' => array(),
+            'test' => 'test'
+        ));
+    }
+
     public function testPatternsCanBeSet()
     {
         $filter = new DefaultIgnoreFilterIterator(new RecursiveArrayIterator(array()));
 
-        $filter->setPatterns(array("one", "two"));
+        $filter->setPatterns(array('one', 'two'));
 
-        $this->assertEquals(array("one", "two"), $filter->getPatterns());
+        $this->assertEquals(array('one', 'two'), $filter->getPatterns());
     }
 
     public function testOnlyNonIgnoredFilesAreReturned()
     {
-        $mocks = $this->_getMockFileObjects();
-
-        $filter = new DefaultIgnoreFilterIterator(new RecursiveArrayIterator($mocks));
+        $filter = new DefaultIgnoreFilterIterator(new RecursiveArrayIterator(array(
+            '.git',
+            '.gitignore',
+            '.svn',
+            'test'
+        )));
 
         $results = iterator_to_array($filter);
 
         $this->assertEquals(2, count($results));
-        $this->assertContains($mocks["two"], $results);
-        $this->assertContains($mocks["four"], $results);
-    }
-
-    protected function _getMockFileObjects()
-    {
-        $one = $this->getMock("SplFileObject", array(), array(), '', false);
-        $one->expects($this->once())
-            ->method("getFilename")
-            ->will($this->returnValue(".git"));
-
-        $two = $this->getMock("SplFileObject", array(), array(), '', false);
-        $two->expects($this->once())
-            ->method("getFilename")
-            ->will($this->returnValue(".gitignore"));
-
-        $three = $this->getMock("SplFileObject", array(), array(), '', false);
-        $three->expects($this->once())
-              ->method("getFilename")
-              ->will($this->returnValue(".svn"));
-
-        $four = $this->getMock("SplFileObject", array(), array(), '', false);
-        $four->expects($this->once())
-             ->method("getFilename")
-             ->will($this->returnValue("test"));
-
-        return array(
-            "one" => $one,
-            "two" => $two,
-            "three" => $three,
-            "four" => $four
-        );
+        $this->assertContains('.gitignore', $results);
+        $this->assertContains('test', $results);
     }
 
 }

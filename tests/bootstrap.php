@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -36,16 +36,16 @@ if (is_readable('TestConfiguration.php')) {
     require_once 'TestConfiguration.php.dist';
 }
 
-require_once "../vendor/autoload.php";
+require_once './vendor/autoload.php';
 
 use Zend\Loader\StandardAutoloader;
 
 $autoloader = new StandardAutoloader();
-$autoloader->registerNamespace("Pants", "../library/Pants")
+$autoloader->registerNamespace('Pants', './library/Pants')
            ->register();
 
 // Setup PHPUnit autoloading
-require_once "PHPUnit/Autoload.php";
+require_once 'PHPUnit/Autoload.php';
 
 // Set the error reporting
 error_reporting(E_ALL | E_STRICT);

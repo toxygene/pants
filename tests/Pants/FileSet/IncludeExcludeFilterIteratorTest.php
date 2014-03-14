@@ -32,6 +32,8 @@
 namespace PantsTest\FileSet;
 
 use ArrayIterator;
+use org\bovigo\vfs\vfsStream;
+use org\bovigo\vfs\visitor\vfsStreamPrintVisitor;
 use Pants\FileSet\IncludeExcludeFilterIterator;
 use PHPUnit_Framework_TestCase as TestCase;
 
@@ -41,13 +43,33 @@ use PHPUnit_Framework_TestCase as TestCase;
 class IncludeExcludeFilterIteratorTest extends TestCase
 {
 
+    /**
+     * Virtual file system
+     *
+     * @var vfsStream
+     */
+    protected $vfs;
+
+    /**
+     * Set up the test case
+     */
+    public function setUp()
+    {
+        $this->vfs = vfsStream::setup('root', null, array(
+            'one' => 'test',
+            'two' => 'test',
+            'three' => 'test',
+            'four' => 'test'
+        ));
+    }
+
     public function testBaseDirectoryCanBeSet()
     {
         $filter = new IncludeExcludeFilterIterator(new ArrayIterator());
 
-        $filter->setBaseDirectory('test');
+        $filter->setBaseDirectory(vfsStream::url('a'));
 
-        $this->assertEquals('test', $filter->getBaseDirectory());
+        $this->assertEquals(vfsStream::url('a'), $filter->getBaseDirectory());
     }
 
     public function testExcludePatternsCanBeSet()
@@ -70,57 +92,34 @@ class IncludeExcludeFilterIteratorTest extends TestCase
 
     public function testEverythingIsIgnoredByDefault()
     {
-        $mocks = $this->_getMockFileObjects();
-
-        $filter = new IncludeExcludeFilterIterator(new ArrayIterator($mocks));
+        $filter = new IncludeExcludeFilterIterator(new ArrayIterator(array(
+            'one' => 'one',
+            'two' => 'two',
+            'three' => 'three',
+            'four' => 'four'
+        )));
 
         $this->assertEmpty(iterator_to_array($filter));
     }
 
     public function testFilesAreAcceptedIfTheyAreIncludedAndNotExcluded()
     {
-        $mocks = $this->_getMockFileObjects();
-
-        $filter = new IncludeExcludeFilterIterator(new ArrayIterator($mocks));
-        $filter->setBaseDirectory('/a/b')
+        $filter = new IncludeExcludeFilterIterator(new ArrayIterator(array(
+            'one',
+            'two',
+            'three',
+            'four'
+        )));
+        
+        $filter->setBaseDirectory(vfsStream::url('root'))
                ->setExcludes(array('#^t#'))
                ->setIncludes(array('#o#'));
 
         $results = iterator_to_array($filter);
 
         $this->assertEquals(2, count($results));
-        $this->assertContains($mocks['one'], $results);
-        $this->assertContains($mocks['four'], $results);
-    }
-
-    protected function _getMockFileObjects()
-    {
-        $one = $this->getMock('SplFileObject', array(), array('/a/b/one'), '', true);
-        $one->expects($this->once())
-            ->method('getPathname')
-            ->will($this->returnValue('/a/b/one'));
-
-        $two = $this->getMock('SplFileObject', array(), array('/a/b/two'), '', true);
-        $two->expects($this->once())
-            ->method('getPathname')
-            ->will($this->returnValue('/a/b/two'));
-
-        $three = $this->getMock('SplFileObject', array(), array('/a/b/three'), '', true);
-        $three->expects($this->once())
-              ->method('getPathname')
-              ->will($this->returnValue('/a/b/three'));
-
-        $four = $this->getMock('SplFileObject', array(), array('/a/b/four'), '', true);
-        $four->expects($this->once())
-             ->method('getPathname')
-             ->will($this->returnValue('/a/b/four'));
-
-        return array(
-            'one' => $one,
-            'two' => $two,
-            'three' => $three,
-            'four' => $four
-        );
+        $this->assertContains('one', $results);
+        $this->assertContains('four', $results);
     }
 
 }

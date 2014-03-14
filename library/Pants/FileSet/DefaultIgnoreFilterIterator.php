@@ -74,7 +74,7 @@ class DefaultIgnoreFilterIterator extends RecursiveFilterIterator
             $pattern .= "({$p})";
         }
 
-        return preg_match("{$delimiter}{$pattern}{$delimiter}", $this->getInnerIterator()->current()->getFilename()) == 0;
+        return preg_match("{$delimiter}{$pattern}{$delimiter}", $this->getInnerIterator()->current()) == 0;
     }
 
     /**

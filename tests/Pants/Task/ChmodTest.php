@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -31,9 +31,10 @@
 
 namespace PantsTest\Task;
 
-use Pants\Project,
-    Pants\Task\Chmod,
-    PHPUnit_Framework_TestCase as TestCase;
+use org\bovigo\vfs\vfsStream;
+use Pants\Project;
+use Pants\Task\Chmod;
+use PHPUnit_Framework_TestCase as TestCase;
 
 /**
  *
@@ -45,23 +46,28 @@ class ChmodTest extends TestCase
      * Chmod task
      * @var Chmod
      */
-    protected $_chmod;
+    protected $chmod;
 
     /**
-     * Temporary file
-     * @var string
+     * Virtual file system
+     *
+     * @var vfsStream
      */
-    protected $_file;
+    protected $vfs;
 
     /**
-     * Setup the test
+     * Set up the test case
      */
     public function setUp()
     {
-        $this->_chmod = new Chmod();
-        $this->_chmod->setProject(new Project());
+        $this->vfs = vfsStream::setup('root', null, array(
+            'one' => 'test'
+        ));
+        
+        $this->chmod = new Chmod();
+        $this->chmod->setProject(new Project());
 
-        $this->_file = tempnam(sys_get_temp_dir(), "Pants_");
+        $this->file = vfsStream::url('root/one');
     }
 
     /**
@@ -69,45 +75,59 @@ class ChmodTest extends TestCase
      */
     public function tearDown()
     {
-        unlink($this->_file);
+        unlink($this->file);
     }
 
     public function testFileIsRequired()
     {
-        $this->setExpectedException("\Pants\BuildException");
+        $this->setExpectedException('\Pants\BuildException');
 
-        $this->_chmod
-             ->setMode(0777)
+        $this->chmod
+             ->setMode('0777')
              ->execute();
     }
 
     public function testModeIsRequired()
     {
-        $this->setExpectedException("\Pants\BuildException");
+        $this->setExpectedException('\Pants\BuildException');
 
-        $this->_chmod
-             ->setFile($this->_file)
+        $this->chmod
+             ->setFile($this->file)
              ->execute();
     }
 
     public function testFailureThrowsABuildException()
     {
-        $this->setExpectedException("\Pants\BuildException");
+        $this->setExpectedException('\Pants\BuildException');
 
-        $this->_chmod
-             ->setFile($this->_file)
-             ->setMode("asdf")
+        $this->chmod
+             ->setFile($this->file)
+             ->setMode('asdf')
              ->execute();
     }
 
     public function testPermissionsIsSet()
     {
-        $this->_chmod
-             ->setFile($this->_file)
-             ->setMode(0777)
+        $this->chmod
+             ->setFile($this->file)
+             ->setMode(0654)
              ->execute();
 
-        $this->assertEquals(0777, fileperms($this->_file) & 0777);
+        $perms = fileperms($this->file);
+        
+        $this->assertTrue((fileperms($this->file) & 0777) === 0654);
+    }
+    
+    public function testPermissionsAsAStringCanBeSet()
+    {
+        $this->chmod
+             ->setFile($this->file)
+             ->setMode("654")
+             ->execute();
+
+        $perms = fileperms($this->file);
+        
+        $this->assertTrue((fileperms($this->file) & 0777) === 0654);
     }
 
 }
