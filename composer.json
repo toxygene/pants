@@ -16,11 +16,11 @@
         }
     ],
     "require": {
-        "mikey179/vfsStream": "~1.2",
         "toxygene/pale": "dev-master",
         "zendframework/zend-loader": "~2.3"
     },
     "require-dev": {
+        "mikey179/vfsStream": "~1.2",
         "phpunit/phpunit": "~3.7"
     }
 }
