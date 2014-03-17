@@ -29,13 +29,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-// Load the configuration
-if (is_readable('TestConfiguration.php')) {
-    require_once 'TestConfiguration.php';
-} else {
-    require_once 'TestConfiguration.php.dist';
-}
-
 require_once './vendor/autoload.php';
 
 use Zend\Loader\StandardAutoloader;
