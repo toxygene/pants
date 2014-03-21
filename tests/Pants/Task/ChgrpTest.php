@@ -90,8 +90,8 @@ class ChgrpTest extends TestCase
         $this->setExpectedException('\Pants\BuildException');
 
         $this->chgrp
-             ->setGroup(1000)
-             ->execute();
+            ->setGroup(1000)
+            ->execute();
     }
 
     public function testGroupIsRequired()
@@ -99,16 +99,16 @@ class ChgrpTest extends TestCase
         $this->setExpectedException('\Pants\BuildException');
         
         $this->chgrp
-             ->setFile($this->file)
-             ->execute();
+            ->setFile($this->file)
+            ->execute();
     }
 
     public function testGroupIsSet()
     {
         $this->chgrp
-             ->setFile($this->file)
-             ->setGroup(1000)
-             ->execute();
+            ->setFile($this->file)
+            ->setGroup(1000)
+            ->execute();
 
         $this->assertEquals(1000, filegroup($this->file));
     }

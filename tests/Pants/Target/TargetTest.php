@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -66,36 +66,50 @@ class TargetTest extends TestCase
         $this->target->setProject($this->project);
     }
 
+    /**
+     * @covers Pants\Target\Target::getName
+     * @covers Pants\Target\Target::setName
+     */
     public function testNameCanBeSet()
     {
-        $this->target->setName("test");
+        $this->target->setName('test');
 
-        $this->assertEquals("test", $this->target->getName());
+        $this->assertEquals('test', $this->target->getName());
     }
 
+    /**
+     * @covers Pants\Target\Target::getDescription
+     * @covers Pants\Target\Target::setDescription
+     */
     public function testDescriptionCanBeSet()
     {
-        $this->target->setDescription("test");
+        $this->target->setDescription('test');
 
-        $this->assertEquals("test", $this->target->getDescription());
+        $this->assertEquals('test', $this->target->getDescription());
     }
 
+    /**
+     * @covers Pants\Target\Target::getTasks
+     */
     public function testTasksCanBeRetrieved()
     {
-        $this->assertInstanceOf("\Pants\Task\Tasks", $this->target->getTasks());
+        $this->assertInstanceOf('\Pants\Task\Tasks', $this->target->getTasks());
     }
 
+    /**
+     * @covers Pants\Target\Target::execute
+     */
     public function testTasksAreExecutedOnTargetExecute()
     {
-        $task = $this->getMock("\Pants\Task\Task");
+        $task = $this->getMock('\Pants\Task\Task');
 
         $task->expects($this->exactly(2))
-             ->method("setProject")
+             ->method('setProject')
              ->with($this->project)
              ->will($this->returnValue($task));
 
         $task->expects($this->exactly(2))
-             ->method("execute")
+             ->method('execute')
              ->will($this->returnValue($task));
 
         $this->target
@@ -107,28 +121,34 @@ class TargetTest extends TestCase
              ->execute();
     }
 
+    /**
+     * @covers Pants\Target\Target::execute
+     */
     public function testTasksAreNotExecutedIfIfIsNotSet()
     {
-        $task = $this->getMock("\Pants\Task\Task");
+        $task = $this->getMock('\Pants\Task\Task');
 
         $task->expects($this->never())
-             ->method("execute");
+             ->method('execute');
 
         $this->target
              ->getTasks()
              ->add($task);
 
         $this->target
-             ->setIf(array("one"))
+             ->setIf(array('one'))
              ->execute();
     }
 
+    /**
+     * @covers Pants\Target\Target::execute
+     */
     public function testTasksAreNotExecutedIfUnlessIsSet()
     {
-        $task = $this->getMock("\Pants\Task\Task");
+        $task = $this->getMock('\Pants\Task\Task');
 
         $task->expects($this->never())
-             ->method("execute");
+             ->method('execute');
 
         $this->target
              ->getTasks()
@@ -140,7 +160,7 @@ class TargetTest extends TestCase
              ->one = true;
 
         $this->target
-             ->setUnless(array("one"))
+             ->setUnless(array('one'))
              ->execute();
     }
 

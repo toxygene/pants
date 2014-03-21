@@ -70,6 +70,10 @@ class IncludeExcludeFilterIteratorTest extends TestCase
         $this->filter = new IncludeExcludeFilterIterator(new RecursiveDirectoryIterator(vfsStream::url("root")));
     }
 
+    /**
+     * @covers Pants\FileSet\IncludeExcludeFilterIterator::getBaseDirectory
+     * @covers Pants\FileSet\IncludeExcludeFilterIterator::setBaseDirectory
+     */
     public function testBaseDirectoryCanBeSet()
     {
         $this->filter->setBaseDirectory(vfsStream::url('one'));
@@ -77,6 +81,10 @@ class IncludeExcludeFilterIteratorTest extends TestCase
         $this->assertEquals(vfsStream::url('one'), $this->filter->getBaseDirectory());
     }
 
+    /**
+     * @covers Pants\FileSet\IncludeExcludeFilterIterator::getExcludes
+     * @covers Pants\FileSet\IncludeExcludeFilterIterator::setExcludes
+     */
     public function testExcludePatternsCanBeSet()
     {
         $this->filter->setExcludes(array('one', 'two'));
@@ -84,6 +92,10 @@ class IncludeExcludeFilterIteratorTest extends TestCase
         $this->assertEquals(array('one', 'two'), $this->filter->getExcludes());
     }
 
+    /**
+     * @covers Pants\FileSet\IncludeExcludeFilterIterator::getIncludes
+     * @covers Pants\FileSet\IncludeExcludeFilterIterator::setIncludes
+     */
     public function testIncludePatternsCanBeSet()
     {
         $this->filter->setIncludes(array('one', 'two'));
@@ -91,11 +103,17 @@ class IncludeExcludeFilterIteratorTest extends TestCase
         $this->assertEquals(array('one', 'two'), $this->filter->getIncludes());
     }
 
+    /**
+     * @covers Pants\FileSet\IncludeExcludeFilterIterator::accept
+     */
     public function testEverythingIsIgnoredByDefault()
     {
         $this->assertEmpty(iterator_to_array($this->filter));
     }
 
+    /**
+     * @covers Pants\FileSet\IncludeExcludeFilterIterator::accept
+     */
     public function testFilesAreAcceptedIfTheyAreIncludedAndNotExcluded()
     {
         $this->filter

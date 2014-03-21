@@ -71,6 +71,10 @@ class DefaultIgnoreFilterIteratorTest extends TestCase
         $this->filter = new DefaultIgnoreFilterIterator(new RecursiveDirectoryIterator(vfsStream::url("root")));
     }
 
+    /**
+     * @covers Pants\FileSet\DefaultIgnoreFilterIterator::getPatterns
+     * @covers Pants\FileSet\DefaultIgnoreFilterIterator::setPatterns
+     */
     public function testPatternsCanBeSet()
     {
         $this->filter->setPatterns(array('one', 'two'));
@@ -78,6 +82,9 @@ class DefaultIgnoreFilterIteratorTest extends TestCase
         $this->assertEquals(array('one', 'two'), $this->filter->getPatterns());
     }
 
+    /**
+     * @covers Pants\FileSet\DefaultIgnoreFilterIterator::accept
+     */
     public function testOnlyNonIgnoredFilesAreReturned()
     {
         $results = iterator_to_array($this->filter);

@@ -90,8 +90,8 @@ class ChmodTest extends TestCase
         $this->setExpectedException('\Pants\BuildException');
 
         $this->chmod
-             ->setMode('0777')
-             ->execute();
+            ->setMode('0777')
+            ->execute();
     }
 
     public function testModeIsRequired()
@@ -99,31 +99,27 @@ class ChmodTest extends TestCase
         $this->setExpectedException('\Pants\BuildException');
 
         $this->chmod
-             ->setFile($this->file)
-             ->execute();
+            ->setFile($this->file)
+            ->execute();
     }
 
     public function testPermissionsIsSet()
     {
         $this->chmod
-             ->setFile($this->file)
-             ->setMode(0654)
-             ->execute();
+            ->setFile($this->file)
+            ->setMode(0654)
+            ->execute();
 
-        $perms = fileperms($this->file);
-        
         $this->assertTrue((fileperms($this->file) & 0777) === 0654);
     }
     
     public function testPermissionsAsAStringCanBeSet()
     {
         $this->chmod
-             ->setFile($this->file)
-             ->setMode("654")
-             ->execute();
+            ->setFile($this->file)
+            ->setMode("654")
+            ->execute();
 
-        $perms = fileperms($this->file);
-        
         $this->assertTrue((fileperms($this->file) & 0777) === 0654);
     }
 

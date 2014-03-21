@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -52,18 +52,48 @@ class TargetsTest extends TestCase
      */
     public function setUp()
     {
-        $this->project = $this->getMock("\Pants\Project");
+        $this->project = $this->getMock('\Pants\Project');
 
         $this->targets = new Targets();
     }
 
-    public function testTargetsCanBeCheckedForExistance()
+    /**
+     * @covers Pants\Target\Targets::__get
+     * @covers Pants\Target\Targets::add
+     */
+    public function testTargetsCanBeAdded()
     {
-        $target = $this->getMock("\Pants\Target\Target");
+        $target = $this->getMock('\Pants\Target\Target');
 
         $target->expects($this->once())
-               ->method("getName")
-               ->will($this->returnValue("test"));
+               ->method('getName')
+               ->will($this->returnValue('test'));
+
+        $this->targets->add($target);
+        
+        $this->assertSame($target, $this->targets->test);
+    }
+    
+    /**
+     * @covers Pants\Target\Targets::__get
+     */
+    public function testGettingANonExistentTargetThrowsAnException()
+    {
+        $this->setExpectedException('InvalidArgumentException');
+        
+        $this->targets->test;
+    }
+
+    /**
+     * @covers Pants\Target\Targets::__isset
+     */
+    public function testTargetsCanBeCheckedForExistance()
+    {
+        $target = $this->getMock('\Pants\Target\Target');
+
+        $target->expects($this->once())
+               ->method('getName')
+               ->will($this->returnValue('test'));
 
         $this->targets->add($target);
 
@@ -71,13 +101,16 @@ class TargetsTest extends TestCase
         $this->assertFalse(isset($this->targets->asdf));
     }
 
+    /**
+     * @covers Pants\Target\Targets::__unset
+     */
     public function testTargetsCanBeRemoved()
     {
-        $target = $this->getMock("\Pants\Target\Target");
+        $target = $this->getMock('\Pants\Target\Target');
 
         $target->expects($this->once())
-               ->method("getName")
-               ->will($this->returnValue("test"));
+               ->method('getName')
+               ->will($this->returnValue('test'));
 
         $this->targets->add($target);
 
@@ -88,26 +121,32 @@ class TargetsTest extends TestCase
         $this->assertFalse(isset($this->targets->test));
     }
 
+    /**
+     * @covers Pants\Target\Targets::__unset
+     */
+    public function testRemovingATargetThatDoesNotExistThrowsAnException()
+    {
+        $this->setExpectedException('InvalidArgumentException');
+        
+        unset($this->targets->test);
+    }
+
+    /**
+     * @covers Pants\Target\Targets::add
+     */
     public function testCannotAddATargetWithTheSameNameAsAnExistingTarget()
     {
-        $this->setExpectedException("InvalidArgumentException");
+        $this->setExpectedException('InvalidArgumentException');
 
-        $target = $this->getMock("\Pants\Target\Target");
+        $target = $this->getMock('\Pants\Target\Target');
 
         $target->expects($this->any())
-               ->method("getName")
-               ->will($this->returnValue("test"));
+               ->method('getName')
+               ->will($this->returnValue('test'));
 
         $this->targets
              ->add($target)
              ->add($target);
-    }
-
-    public function testCannotUnsetANonexistantTarget()
-    {
-        $this->setExpectedException("InvalidArgumentException");
-
-        unset($this->targets->invalid);
     }
 
 }

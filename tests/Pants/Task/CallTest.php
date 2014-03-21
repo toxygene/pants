@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -31,9 +31,9 @@
 
 namespace PantsTest\Task;
 
-use Pants\Project,
-    Pants\Task\Call,
-    PHPUnit_Framework_TestCase as TestCase;
+use Pants\Project;
+use Pants\Task\Call;
+use PHPUnit_Framework_TestCase as TestCase;
 
 /**
  *
@@ -45,70 +45,94 @@ class CallTest extends TestCase
      * Call task
      * @var Call
      */
-    protected $_call;
+    protected $call;
 
     /**
      * Setup the test case
      */
     public function setUp()
     {
-        $this->_call = new Call();
-        $this->_call->setProject(new Project());
+        $this->call = new Call();
+
+        $this->call
+            ->setProject(new Project());
+    }
+    
+    /**
+     * Tear down the test case
+     */
+    public function tearDown()
+    {
+        unset($this->call);
     }
 
+    /**
+     * @covers Pants\Task\Call::execute
+     */
     public function testTargetIsRequired()
     {
-        $this->setExpectedException("\Pants\BuildException");
+        $this->setExpectedException('\Pants\BuildException');
 
-        $this->_call
-             ->execute();
+        $this->call
+            ->execute();
     }
 
+    /**
+     * @covers Pants\Task\Call::getTarget
+     * @covers Pants\Task\Call::setTarget
+     */
     public function testTargetIsConfigurable()
     {
-        $this->_call->setTarget("asdf");
+        $this->call
+            ->setTarget('asdf');
 
-        $this->assertEquals("asdf", $this->_call->getTarget());
+        $this->assertEquals('asdf', $this->call->getTarget());
     }
 
+    /**
+     * @covers Pants\Task\Call::execute
+     */
     public function testAValidTargetIsRequired()
     {
-        $this->setExpectedException("\Pants\BuildException");
+        $this->setExpectedException('\Pants\BuildException');
 
-        $this->_call
-             ->setTarget("asdf")
-             ->execute();
+        $this->call
+            ->setTarget('asdf')
+            ->execute();
     }
 
+    /**
+     * @covers Pants\Task\Call::execute
+     */
     public function testRequestedTargetIsExecuted()
     {
         $project = new Project();
 
         // Setup the mock target that will be called
-        $mock = $this->getMock("Pants\Target\Target");
+        $mock = $this->getMock('Pants\Target\Target');
 
         $mock->expects($this->any())
-             ->method("getName")
-             ->will($this->returnValue("asdf"));
+            ->method('getName')
+            ->will($this->returnValue('asdf'));
 
         $mock->expects($this->once())
-             ->method("setProject")
-             ->with($project)
-             ->will($this->returnValue($mock));
+            ->method('setProject')
+            ->with($project)
+            ->will($this->returnValue($mock));
 
         $mock->expects($this->once())
-             ->method("execute")
-             ->will($this->returnValue($mock));
+            ->method('execute')
+            ->will($this->returnValue($mock));
 
         // Add the mock target to the project
         $project->getTargets()
-                ->add($mock);
+            ->add($mock);
 
         // Call the mock target in the project
-        $this->_call
-             ->setProject($project)
-             ->setTarget("asdf")
-             ->execute();
+        $this->call
+            ->setProject($project)
+            ->setTarget('asdf')
+            ->execute();
     }
 
 }
