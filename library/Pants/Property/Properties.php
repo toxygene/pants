@@ -142,17 +142,4 @@ class Properties
         return $string;
     }
 
-    /**
-     * Set a property
-     *
-     * @param string $name
-     * @param string $value
-     * @return Properties
-     */
-    public function set($name, $value)
-    {
-        $this->$name = $value;
-        return $this;
-    }
-
 }

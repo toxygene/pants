@@ -246,13 +246,13 @@ class Project
     {
         $properties = $this->getProperties();
 
-        $properties->set("basedir", getcwd())
-                   ->set("host.os", PHP_OS)
-                   ->set("pants.version", "@version@")
-                   ->set("php.version", PHP_VERSION);
+        $properties->basedir           = getcwd();
+        $properties->{"host.os"}       = PHP_OS;
+        $properties->{"pants.version"} = "@version@";
+        $properties->{"php.version"}   = PHP_VERSION;
 
         foreach ($_SERVER as $key => $value) {
-            $properties->set("env.{$key}", $value);
+            $properties->{"env.{$key}"} = $value;
         }
 
         return $this;

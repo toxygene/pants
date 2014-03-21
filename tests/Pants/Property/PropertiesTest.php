@@ -54,6 +54,10 @@ class PropertiesTest extends TestCase
         $this->properties = new Properties();
     }
 
+    /**
+     * @covers Pants\Property\Properties::__get
+     * @covers Pants\Property\Properties::__set
+     */
     public function testGettingAndSettingProperties()
     {
         $this->properties->one = "two";
@@ -63,13 +67,9 @@ class PropertiesTest extends TestCase
         $this->assertEquals("four", $this->properties->three);
     }
 
-    public function testUnsettingANonexistantPropertyThrowsAnException()
-    {
-        $this->setExpectedException("InvalidArgumentException");
-
-        unset($this->properties->one);
-    }
-
+    /**
+     * @covers Pants\Property\Properties::__get
+     */
     public function testGettingANonexistantPropertyThrowsAnException()
     {
         $this->setExpectedException("InvalidArgumentException");
@@ -77,6 +77,9 @@ class PropertiesTest extends TestCase
         $this->properties->one;
     }
 
+    /**
+     * @covers Pants\Property\Properties::__isset
+     */
     public function testExistanceOfPropertiesCanBeChecked()
     {
         $this->properties->one = "two";
@@ -85,6 +88,30 @@ class PropertiesTest extends TestCase
         $this->assertFalse(isset($this->properties->two));
     }
 
+    /**
+     * @covers Pants\Property\Properties::__unset
+     */
+    public function testUnsettingAPropertyRemovesIt()
+    {
+        $this->properties->one = "test";
+        unset($this->properties->one);
+        
+        $this->assertFalse(isset($this->properties->one));
+    }
+
+    /**
+     * @covers Pants\Property\Properties::__unset
+     */
+    public function testUnsettingANonexistantPropertyThrowsAnException()
+    {
+        $this->setExpectedException("InvalidArgumentException");
+
+        unset($this->properties->one);
+    }
+    
+    /**
+     * @covers Pants\Property\Properties::filter
+     */
     public function testFilteringReplacesPropertiesWithTheirValues()
     {
         $this->properties->one = "two";
@@ -95,7 +122,10 @@ class PropertiesTest extends TestCase
             $this->properties->filter('test ${one} test ${three} test')
         );
     }
-
+    
+    /**
+     * @covers Pants\Property\Properties::filter
+     */
     public function testDetectedPropertyCyclesThrowAnException()
     {
         $this->setExpectedException("\Pants\Property\PropertyNameCycleException");
