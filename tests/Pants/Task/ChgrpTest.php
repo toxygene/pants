@@ -85,6 +85,9 @@ class ChgrpTest extends TestCase
         unset($this->vfs);
     }
 
+    /**
+     * @covers Pants\Task\Chgrp::execute
+     */
     public function testFileIsRequired()
     {
         $this->setExpectedException('\Pants\BuildException');
@@ -94,6 +97,9 @@ class ChgrpTest extends TestCase
             ->execute();
     }
 
+    /**
+     * @covers Pants\Task\Chgrp::execute
+     */
     public function testGroupIsRequired()
     {
         $this->setExpectedException('\Pants\BuildException');
@@ -103,6 +109,10 @@ class ChgrpTest extends TestCase
             ->execute();
     }
 
+
+    /**
+     * @covers Pants\Task\Chgrp::execute
+     */
     public function testGroupIsSet()
     {
         $this->chgrp

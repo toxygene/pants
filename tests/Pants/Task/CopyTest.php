@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -85,35 +85,42 @@ class CopyTest extends TestCase
         unset($this->vfs);
     }
 
+    /**
+     * @covers Pants\Task\Copy::execute
+     */
     public function testFileIsRequired()
     {
-        $this->setExpectedException("\Pants\BuildException");
+        $this->setExpectedException('\Pants\BuildException');
 
         $this->copy
-             ->setDestination($this->file . "_1")
-             ->execute();
+            ->setDestination($this->file . '_1')
+            ->execute();
     }
 
+    /**
+     * @covers Pants\Task\Copy::execute
+     */
     public function testDestinationIsRequired()
     {
-        $this->setExpectedException("\Pants\BuildException");
+        $this->setExpectedException('\Pants\BuildException');
 
         $this->copy
-             ->setFile($this->file)
-             ->execute();
+            ->setFile($this->file)
+            ->execute();
     }
 
+    /**
+     * @covers Pants\Task\Copy::execute
+     */
     public function testFileIsCopied()
     {
         $this->copy
-             ->setFile($this->file)
-             ->setDestination($this->file . "_1")
-             ->execute();
+            ->setFile($this->file)
+            ->setDestination($this->file . '_1')
+            ->execute();
 
-        $this->assertTrue(file_exists($this->file . "_1"));
-        $this->assertEquals("testing", file_get_contents($this->file . "_1"));
-
-        unlink($this->file . "_1");
+        $this->assertTrue(file_exists($this->file . '_1'));
+        $this->assertEquals('testing', file_get_contents($this->file . '_1'));
     }
 
 }

@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -85,30 +85,39 @@ class ChownTest extends TestCase
         unset($this->vfs);
     }
 
+    /**
+     * @covers Pants\Task\Chown::execute
+     */
     public function testFileIsRequired()
     {
-        $this->setExpectedException("\Pants\BuildException");
+        $this->setExpectedException('\Pants\BuildException');
 
         $this->chown
-             ->setOwner(1000)
-             ->execute();
+            ->setOwner(1000)
+            ->execute();
     }
 
+    /**
+     * @covers Pants\Task\Chown::execute
+     */
     public function testOwnerIsRequired()
     {
-        $this->setExpectedException("\Pants\BuildException");
+        $this->setExpectedException('\Pants\BuildException');
 
         $this->chown
-             ->setFile($this->file)
-             ->execute();
+            ->setFile($this->file)
+            ->execute();
     }
 
+    /**
+     * @covers Pants\Task\Chown::execute
+     */
     public function testOwnerIsSet()
     {
         $this->chown
-             ->setFile($this->file)
-             ->setOwner(1000)
-             ->execute();
+            ->setFile($this->file)
+            ->setOwner(1000)
+            ->execute();
 
         $this->assertEquals(1000, fileowner($this->file));
     }

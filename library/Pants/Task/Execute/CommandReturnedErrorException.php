@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -27,20 +27,38 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
+ *
+ * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
-require_once './vendor/autoload.php';
+namespace Pants\Task\Execute;
 
-use Zend\Loader\StandardAutoloader;
+use RuntimeException;
 
-$autoloader = new StandardAutoloader();
-$autoloader->registerNamespace('Pants', './library/Pants')
-           ->register();
+/**
+ *
+ */
+class CommandReturnedErrorException extends RuntimeException
+{
 
-// Setup PHPUnit autoloading
-require_once 'PHPUnit/Autoload.php';
+    /**
+     * Constructor
+     *
+     * @param string $command
+     * @param string $directory
+     * @param string $return
+     * @param string $stdout
+     * @param string $stderr
+     */
+    public function __construct($command, $directory, $return, $stdout, $stderr)
+    {
+        $this->command   = $command;
+        $this->directory = $directory;
+        $this->return    = $return;
+        $this->stdout    = $stdout;
+        $this->stderr    = $stderr;
+        
+        parent::__construct("'{$command}' failed : '{$stderr}'");
+    }
 
-// Set the error reporting
-error_reporting(E_ALL | E_STRICT);
-
-date_default_timezone_set('UTC');
+}

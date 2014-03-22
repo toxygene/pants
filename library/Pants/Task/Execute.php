@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -34,6 +34,7 @@
 namespace Pants\Task;
 
 use Pants\BuildException;
+use Pants\Task\Execute\CommandReturnedErrorException;
 
 /**
  * Execute a shell command task
@@ -56,20 +57,45 @@ class Execute extends AbstractTask
      * @var string
      */
     protected $directory;
-
+    
     /**
-     * Change the working directory
-     *
-     * @param string $directory
-     * @return boolean
+     * Execute a command
      */
-    protected function chdir($directory)
+    protected function exec($command, $directory)
     {
-        if ($directory) {
-            return $this->run(function() use ($directory) {
-                return chdir($directory);
-            });
-        }
+        return $this->run(function() use ($command, $directory) {
+            $descriptorSpec = array(
+                0 => array('pipe', 'r'),
+                1 => array('pipe', 'w'),
+                2 => array('pipe', 'w')
+            );
+            
+            $process = proc_open(
+                $command,
+                $descriptorSpec,
+                $pipes,
+                $directory
+            );
+            
+            if (!$process) {
+            }
+            
+            fclose($pipes[0]);
+            
+            $stdout = stream_get_contents($pipes[1]);
+            fclose($pipes[1]);
+            
+            $stderr = stream_get_contents($pipes[2]);
+            fclose($pipes[2]);
+            
+            $return = proc_close($process);
+            
+            return array(
+                'stdout' => $stdout,
+                'stderr' => $stderr,
+                'return' => $return
+            );
+        });
     }
 
     /**
@@ -81,15 +107,23 @@ class Execute extends AbstractTask
     public function execute()
     {
         if (!$this->getCommand()) {
-            throw new BuildException("Command is not set");
+            throw new BuildException('Command is not set');
         }
 
         $command   = $this->filterProperties($this->getCommand());
         $directory = $this->filterProperties($this->getDirectory());
 
-        $this->runInDirectory($this->getDirectory(), function() use ($command) {
-            exec($command);
-        });
+        $result = $this->exec($command, $directory);
+        
+        if ($result['return']) {
+            throw new CommandReturnedErrorException(
+                $command,
+                $directory,
+                $result['return'],
+                $result['stdout'],
+                $result['stderr']
+            );
+        }
 
         return $this;
     }
@@ -112,30 +146,6 @@ class Execute extends AbstractTask
     public function getDirectory()
     {
         return $this->directory;
-    }
-
-    /**
-     * Change the working directory and run the function
-     *
-     * @param string $directory
-     * @param function $function
-     */
-    protected function runInDirectory($directory, $function)
-    {
-        $cwd = getcwd();
-
-        $this->chdir($directory);
-
-        try {
-            $return = $this->run($function);
-        } catch (Exception $e) {
-            $this->chdir($cwd);
-            throw $e;
-        }
-
-        $this->chdir($cwd);
-
-        return $return;
     }
 
     /**

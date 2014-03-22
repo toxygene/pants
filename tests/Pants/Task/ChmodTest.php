@@ -85,6 +85,9 @@ class ChmodTest extends TestCase
         unset($this->vfs);
     }
 
+    /**
+     * @covers Pants\Task\Chmod::execute
+     */
     public function testFileIsRequired()
     {
         $this->setExpectedException('\Pants\BuildException');
@@ -94,6 +97,9 @@ class ChmodTest extends TestCase
             ->execute();
     }
 
+    /**
+     * @covers Pants\Task\Chmod::execute
+     */
     public function testModeIsRequired()
     {
         $this->setExpectedException('\Pants\BuildException');
@@ -103,6 +109,9 @@ class ChmodTest extends TestCase
             ->execute();
     }
 
+    /**
+     * @covers Pants\Task\Chmod::execute
+     */
     public function testPermissionsIsSet()
     {
         $this->chmod
@@ -112,7 +121,10 @@ class ChmodTest extends TestCase
 
         $this->assertTrue((fileperms($this->file) & 0777) === 0654);
     }
-    
+
+    /**
+     * @covers Pants\Task\Chmod::execute
+     */
     public function testPermissionsAsAStringCanBeSet()
     {
         $this->chmod

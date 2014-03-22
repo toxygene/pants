@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -31,9 +31,9 @@
 
 namespace PantsTest\Task;
 
-use Pants\Project,
-    Pants\Task\Execute,
-    PHPUnit_Framework_TestCase as TestCase;
+use Pants\Project;
+use Pants\Task\Execute;
+use PHPUnit_Framework_TestCase as TestCase;
 
 /**
  *
@@ -42,26 +42,18 @@ class ExecuteTest extends TestCase
 {
 
     /**
-     * Current working directory
-     * @var string
-     */
-    protected $_cwd;
-
-    /**
      * Execute task
      * @var Delete
      */
-    protected $_execute;
+    protected $execute;
 
     /**
      * Setup the test
      */
     public function setUp()
     {
-        $this->_execute = new Execute();
-        $this->_execute->setProject(new Project());
-
-        $this->_cwd = getcwd();
+        $this->execute = new Execute();
+        $this->execute->setProject(new Project());
     }
 
     /**
@@ -69,40 +61,53 @@ class ExecuteTest extends TestCase
      */
     public function tearDown()
     {
-        chdir($this->_cwd);
+        unset($this->execute);
     }
 
+    /**
+     * @covers Pants\Task\Execute::execute
+     */
     public function testCommandIsRequired()
     {
-        $this->setExpectedException("\Pants\BuildException");
+        $this->setExpectedException('\Pants\BuildException');
 
-        $this->_execute
-             ->execute();
+        $this->execute
+            ->execute();
     }
 
+    /**
+     * @covers Pants\Task\Execute::execute
+     */
     public function testFailureThrowsABuildException()
     {
-        $this->setExpectedException("\Pants\BuildException");
+        $this->setExpectedException('\Pants\BuildException');
 
-        $this->_execute
-             ->execute();
+        $this->execute
+            ->execute();
     }
 
+    /**
+     * @covers Pants\Task\Execute::execute
+     */
     public function testExecuteRunsCommand()
     {
-        $directory = sys_get_temp_dir();
-        $file      = "{$directory}/asdfasdf";
+        $this->execute
+            ->setCommand('php success.php')
+            ->setDirectory(__DIR__ . '/_files')
+            ->execute();
+    }
+    
+    /**
+     * @covers Pants\Task\Execute::execute
+     */
+    public function testFailedCommandThrowsException()
+    {
+        $this->setExpectedException('Pants\Task\Execute\CommandReturnedErrorException');
 
-        $command = sprintf("%s %s", escapeshellcmd("touch"), escapeshellarg($file));
-
-        $this->_execute
-             ->setDirectory($directory)
-             ->setCommand($command)
-             ->execute();
-
-        $this->assertTrue(file_exists($file));
-
-        unlink($file);
+        $this->execute
+            ->setCommand('php failure.php')
+            ->setDirectory(__DIR__ . '/_files')
+            ->execute();
     }
 
 }

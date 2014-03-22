@@ -75,28 +75,37 @@ class DeleteTest extends TestCase
         $this->file = vfsStream::url('root/test');
     }
 
+    /**
+     * @covers Pants\Task\Delete::execute
+     */
     public function testFileIsRequired()
     {
         $this->setExpectedException('\Pants\BuildException');
 
         $this->delete
-             ->execute();
+            ->execute();
     }
 
+    /**
+     * @covers Pants\Task\Delete::execute
+     */
     public function testFailureThrowsABuildException()
     {
         $this->setExpectedException('\Pants\BuildException');
 
         $this->delete
-             ->setFile('something-that-does-not-exist')
-             ->execute();
+            ->setFile('something-that-does-not-exist')
+            ->execute();
     }
 
+    /**
+     * @covers Pants\Task\Delete::execute
+     */
     public function testFileIsDeleted()
     {
         $this->delete
-             ->setFile($this->file)
-             ->execute();
+            ->setFile($this->file)
+            ->execute();
              
         $this->assertFalse(file_exists($this->file));
     }

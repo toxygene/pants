@@ -45,6 +45,7 @@ class IncludeExcludeFilterIteratorTest extends TestCase
     /**
      * Filter
      *
+     * @var IncludeExcludeFilterIterator
      */
     protected $filter;
 
