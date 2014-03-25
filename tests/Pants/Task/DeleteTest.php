@@ -91,7 +91,7 @@ class DeleteTest extends TestCase
      */
     public function testFailureThrowsABuildException()
     {
-        $this->setExpectedException('\Pants\BuildException');
+        $this->setExpectedException('\ErrorException');
 
         $this->delete
             ->setFile('something-that-does-not-exist')

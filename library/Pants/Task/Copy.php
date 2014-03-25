@@ -33,6 +33,7 @@
 
 namespace Pants\Task;
 
+use Pale\Pale;
 use Pants\BuildException;
 
 /**
@@ -76,7 +77,7 @@ class Copy extends AbstractTask
         $file        = $this->filterProperties($this->getFile());
         $destination = $this->filterProperties($this->getDestination());
 
-        $this->run(function() use($file, $destination) {
+        Pale::run(function() use($file, $destination) {
             return copy($file, $destination);
         });
 

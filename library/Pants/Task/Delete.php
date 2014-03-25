@@ -33,6 +33,7 @@
 
 namespace Pants\Task;
 
+use Pale\Pale;
 use Pants\BuildException;
 use Pants\Task\FileSetable;
 use Traversable;
@@ -85,20 +86,6 @@ class Delete extends AbstractTask implements FileSetable
     }
 
     /**
-     * Delete a file
-     *
-     * @param string $file
-     * @return boolean
-     * @throws BuildException
-     */
-    protected function delete($file)
-    {
-        return $this->run(function() use ($file) {
-            unlink($file);
-        });
-    }
-
-    /**
      * Execute the task
      *
      * @return Delete
@@ -113,12 +100,16 @@ class Delete extends AbstractTask implements FileSetable
         $file = $this->filterProperties($this->getFile());
 
         if ($file) {
-            $this->delete($file);
+            Pale::run(function() use ($file) {
+                return unlink($file);
+            });
         }
 
         foreach ($this->fileSets as $fileSet) {
             foreach ($fileSet as $file) {
-                $this->delete($file);
+                Pale::run(function() use ($file) {
+                    return unlink($file);
+                });
             }
         }
 
