@@ -109,5 +109,29 @@ class ExecuteTest extends TestCase
             ->setDirectory(__DIR__ . '/_files')
             ->execute();
     }
+    
+    /**
+     * @covers Pants\Task\Execute::getCommand
+     * @covers Pants\Task\Execute::setCommand
+     */
+    public function testCommandCanBeSet()
+    {
+        $this->execute
+            ->setCommand('asdf');
+            
+        $this->assertEquals('asdf', $this->execute->getCommand());
+    }
+    
+    /**
+     * @covers Pants\Task\Execute::getDirectory
+     * @covers Pants\Task\Execute::setDirectory
+     */
+    public function testDirectoryCanBeSet()
+    {
+        $this->execute
+            ->setDirectory('asdf');
+            
+        $this->assertEquals('asdf', $this->execute->getDirectory());
+    }
 
 }

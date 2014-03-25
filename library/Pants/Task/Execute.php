@@ -33,6 +33,7 @@
 
 namespace Pants\Task;
 
+use Pale\Pale;
 use Pants\BuildException;
 use Pants\Task\Execute\CommandReturnedErrorException;
 
@@ -57,13 +58,23 @@ class Execute extends AbstractTask
      * @var string
      */
     protected $directory;
-    
+
     /**
-     * Execute a command
+     * Execute the task
+     *
+     * @return Exec
+     * @throws BuildException
      */
-    protected function exec($command, $directory)
+    public function execute()
     {
-        return $this->run(function() use ($command, $directory) {
+        if (!$this->getCommand()) {
+            throw new BuildException('Command is not set');
+        }
+
+        $command   = $this->filterProperties($this->getCommand());
+        $directory = $this->filterProperties($this->getDirectory());
+
+        $result = Pale::run(function() use ($command, $directory) {
             $descriptorSpec = array(
                 0 => array('pipe', 'r'),
                 1 => array('pipe', 'w'),
@@ -78,6 +89,7 @@ class Execute extends AbstractTask
             );
             
             if (!$process) {
+                throw new CommandFailedException($command, $directory);
             }
             
             fclose($pipes[0]);
@@ -96,24 +108,6 @@ class Execute extends AbstractTask
                 'return' => $return
             );
         });
-    }
-
-    /**
-     * Execute the task
-     *
-     * @return Exec
-     * @throws BuildException
-     */
-    public function execute()
-    {
-        if (!$this->getCommand()) {
-            throw new BuildException('Command is not set');
-        }
-
-        $command   = $this->filterProperties($this->getCommand());
-        $directory = $this->filterProperties($this->getDirectory());
-
-        $result = $this->exec($command, $directory);
         
         if ($result['return']) {
             throw new CommandReturnedErrorException(
