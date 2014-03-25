@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -34,13 +34,14 @@
 namespace Pants\Task;
 
 use Pants\BuildException;
+use Pants\Task\AbstractTask;
 
 /**
  * Read input task
  *
  * @package Pants\Task
  */
-class Input
+class Input extends AbstractTask
 {
 
     /**
@@ -56,6 +57,13 @@ class Input
      * @var string
      */
     protected $defaultValue;
+    
+    /**
+     * Input stream
+     *
+     * @var resource
+     */
+    protected $inputStream = STDIN;
 
     /**
      * Message to display
@@ -63,13 +71,20 @@ class Input
      * @var string
      */
     protected $message;
+    
+    /**
+     * Output stream
+     *
+     * @var resource
+     */
+    protected $outputStream = STDOUT;
 
     /**
      * Prompt character
      *
      * @var string
      */
-    protected $promptCharacter = "?";
+    protected $promptCharacter = '?';
 
     /**
      * Valid arguments
@@ -86,23 +101,33 @@ class Input
     public function execute()
     {
         if (!$this->getPropertyName()) {
-            throw new BuildException("Property name not set");
+            throw new BuildException('Property name not set');
         }
 
         if ($this->getMessage()) {
-            echo $this->filterProperties($this->getMessages());
+            fwrite($this->getOutputStream(), $this->filterProperties($this->getMessage()));
         }
 
-        if ($this->getValidArgs()) {
-            echo " [" . implode("/", $this->getValidArgs()) . "]";
+        $validArgs = array();
+
+        foreach ($this->getValidArgs() as $validArg) {
+            $validArgs[] = $this->filterProperties($validArg);
+        }
+        
+        if ($validArgs) {
+            fwrite($this->getOutputStream(), ' [' . implode('/', $validArgs) . ']');
         }
 
-        echo $this->filterProperties($this->getPromptCharacter()) . " ";
+        fwrite($this->getOutputStream(), $this->filterProperties($this->getPromptCharacter()) . ' ');
 
-        $value = fgets(STDIN);
+        $value = trim(fgets($this->getInputStream()));
 
-        if (trim($value) == "") {
+        if (trim($value) == '') {
             $value = $this->filterProperties($this->getDefaultValue());
+        }
+
+        if ($validArgs && !in_array($value, $validArgs)) {
+            throw new BuildException('Invalid argument');
         }
 
         $this->getProject()
@@ -112,52 +137,157 @@ class Input
         return $this;
     }
 
+    /**
+     * Get the default value
+     *
+     * @return string
+     */
     public function getDefaultValue()
     {
         return $this->defaultValue;
     }
+    
+    /**
+     * Get the input stream
+     *
+     * @return resource
+     */
+    public function getInputStream()
+    {
+        return $this->inputStream;
+    }
 
+    /**
+     * Get the message
+     *
+     * @return string
+     */
     public function getMessage()
     {
         return $this->message;
     }
+    
+    /**
+     * Get the output stream
+     *
+     * @return resource
+     */
+    public function getOutputStream()
+    {
+        return $this->outputStream;
+    }
 
+    /**
+     * Get the prompt character
+     *
+     * @return string
+     */
     public function getPromptCharacter()
     {
         return $this->promptCharacter;
     }
 
+    /**
+     * Get the property name
+     *
+     * @return string
+     */
     public function getPropertyName()
     {
         return $this->propertyName;
     }
 
+    /**
+     * Get the valid arguements
+     *
+     * @return string
+     */
     public function getValidArgs()
     {
         return $this->validArgs;
     }
 
+    /**
+     * Set the default value
+     *
+     * @param string $defaultValue
+     * @return Input
+     */
     public function setDefaultValue($defaultValue)
     {
         $this->defaultValue = $defaultValue;
         return $this;
     }
+    
+    /**
+     * Set the input stream
+     *
+     * @param resource $inputStream
+     * @return Input
+     */
+    public function setInputStream($inputStream)
+    {
+        $this->inputStream = $inputStream;
+        return $this;
+    }
 
+    /**
+     * Set the message
+     *
+     * @param string $message
+     * @return Input
+     */
     public function setMessage($message)
     {
         $this->message = $message;
         return $this;
     }
 
+    /**
+     * Set the prompt character
+     *
+     * @param string $promptCharacter
+     * @return Input
+     */
     public function setPromptCharacter($promptCharacter)
     {
         $this->promptCharacter = $promptCharacter;
         return $this;
     }
+    
+    /** 
+     * Set the output stream
+     *
+     * @param resource $outputStream
+     * @return Input
+     */
+    public function setOutputStream($outputStream)
+    {
+        $this->outputStream = $outputStream;
+        return $this;
+    }
 
+    /**
+     * Set the property name
+     *
+     * @param string $propertyName
+     * @return Input
+     */
     public function setPropertyName($propertyName)
     {
         $this->propertyName = $propertyName;
+        return $this;
+    }
+    
+    /**
+     * Set the valid arguments
+     *
+     * @param array $validArgs
+     * @return Input
+     */
+    public function setValidArgs($validArgs)
+    {
+        $this->validArgs = $validArgs;
         return $this;
     }
 
