@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -31,9 +31,10 @@
 
 namespace PantsTest\Task;
 
-use Pants\Project,
-    Pants\Task\TokenFilter,
-    PHPUnit_Framework_TestCase as TestCase;
+use org\bovigo\vfs\vfsStream;
+use Pants\Project;
+use Pants\Task\TokenFilter;
+use PHPUnit_Framework_TestCase as TestCase;
 
 /**
  *
@@ -45,23 +46,27 @@ class TokenFilterTest extends TestCase
      * Temporary file
      * @var string
      */
-    protected $_file;
+    protected $file;
 
     /**
      * TokenFilter task
      * @var TokenFilter
      */
-    protected $_tokenFilter;
+    protected $tokenFilter;
 
     /**
      * Setup the test
      */
     public function setUp()
     {
-        $this->_tokenFilter = new TokenFilter();
-        $this->_tokenFilter->setProject(new Project());
+        vfsStream::setup('root', null, array(
+            'one' => '@asdf@ $qwer$'
+        ));
+        
+        $this->tokenFilter = new TokenFilter();
+        $this->tokenFilter->setProject(new Project());
 
-        $this->_file = tempnam(sys_get_temp_dir(), "Pants_");
+        $this->file = vfsStream::url('root/one');
     }
 
     /**
@@ -69,37 +74,74 @@ class TokenFilterTest extends TestCase
      */
     public function tearDown()
     {
-        unlink($this->_file);
+        unset($this->file);
+        unset($this->tokenFilter);
     }
 
+    /**
+     * @covers Pants\Task\TokenFilter::execute
+     */
     public function testFileIsRequired()
     {
-        $this->setExpectedException("\Pants\BuildException");
+        $this->setExpectedException('\Pants\BuildException');
 
-        $this->_tokenFilter
-             ->execute();
+        $this->tokenFilter
+            ->execute();
+    }
+    
+    /**
+     * @covers Pants\Task\TokenFilter::getFile
+     * @covers Pants\Task\TokenFilter::setFile
+     */
+    public function testFileCanBeSet()
+    {
+        $this->tokenFilter
+            ->setFile('test');
+            
+        $this->assertEquals('test', $this->tokenFilter->getFile());
     }
 
+    /**
+     * @covers Pants\Task\TokenFilter::addReplacement
+     * @covers Pants\Task\TokenFilter::getReplacements
+     */
     public function testTokensCanBeAdded()
     {
-        $this->_tokenFilter
-             ->addReplacement("asdf", "fdsa")
-             ->addReplacement("qwer", "rewq");
+        $this->tokenFilter
+            ->addReplacement('asdf', 'fdsa')
+            ->addReplacement('qwer', 'rewq');
 
-        $this->assertEquals(array("asdf" => "fdsa", "qwer" => "rewq"), $this->_tokenFilter->getReplacements());
+        $this->assertEquals(array('asdf' => 'fdsa', 'qwer' => 'rewq'), $this->tokenFilter->getReplacements());
     }
 
+    /**
+     * @covers Pants\Task\TokenFilter::execute
+     */
     public function testTokensAreReplacedInTheFileOnExecute()
     {
-        file_put_contents($this->_file, "@asdf@ @qwer@");
+        $this->tokenFilter
+            ->setFile($this->file)
+            ->addReplacement('asdf', 'fdsa')
+            ->addReplacement('qwer', 'rewq')
+            ->execute();
 
-        $this->_tokenFilter
-             ->setFile($this->_file)
-             ->addReplacement("asdf", "fdsa")
-             ->addReplacement("qwer", "rewq")
-             ->execute();
+        $this->assertEquals('fdsa $qwer$', file_get_contents($this->file));
+    }
 
-        $this->assertEquals("fdsa rewq", file_get_contents($this->_file));
+    /**
+     * @covers Pants\Task\TokenFilter::getStartingCharacter
+     * @covers Pants\Task\TokenFilter::getEndingCharacter
+     * @covers Pants\Task\TokenFilter::setStartingCharacter
+     * @covers Pants\Task\TokenFilter::setEndingCharacter
+     */
+    public function testStartAndEndCharacterCanBeChanged()
+    {
+        $this->tokenFilter
+            ->setStartingCharacter('$')
+            ->setEndingCharacter('$');
+
+        $this->assertEquals('$', $this->tokenFilter->getStartingCharacter());
+        $this->assertEquals('$', $this->tokenFilter->getEndingCharacter());
     }
 
 }
