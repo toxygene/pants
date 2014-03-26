@@ -27,72 +27,98 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *
- * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
-namespace Pants\Task;
+namespace PantsTest\Task;
 
-use Pale\Pale;
-use Pants\BuildException;
+use org\bovigo\vfs\vfsStream;
+use Pants\Project;
+use Pants\Task\Chdir;
+use PHPUnit_Framework_TestCase as TestCase;
 
 /**
- * Change the current working directory task
  *
- * @package Pants\Task
  */
-class Chdir extends AbstractTask
+class ChdirTest extends TestCase
 {
 
     /**
-     * Target directory
-     *
+     * Current working directory
      * @var string
      */
-    protected $directory;
+    protected $cwd;
 
     /**
-     * Execute the task
-     *
-     * @return Chgrp
-     * @throws BuildException
-     * @return self
+     * Chdir task
+     * @var Chdir
      */
-    public function execute()
+    protected $task;
+
+    /**
+     * Setup the test case
+     */
+    public function setUp()
     {
-        if (!$this->getDirectory()) {
-            throw new BuildException('Directory is not set');
-        }
+        $this->cwd = getcwd();
         
-        $directory = $this->filterProperties($this->getDirectory());
-
-        Pale::run(function() use ($directory) {
-            return chdir($directory);
-        });
-
-        return $this;
+        $this->task = new Chdir();
+        $this->task->setProject(new Project());
     }
 
     /**
-     * Get the target directory
-     *
-     * @return string
+     * Tear down the test case
      */
-    public function getDirectory()
+    public function tearDown()
     {
-        return $this->directory;
+        chdir($this->cwd);
+        unset($this->task);
     }
 
     /**
-     * Set the target directory
-     *
-     * @param string $directory
-     * @return self
+     * @covers Pants\Task\Chdir::getDirectory
+     * @covers Pants\Task\Chdir::setDirectory
      */
-    public function setDirectory($directory)
+    public function testDirectoryCanBeSet()
     {
-        $this->directory = $directory;
-        return $this;
+        $this->task
+            ->setDirectory('test');
+
+        $this->assertEquals('test', $this->task->getDirectory());
+    }
+
+    /**
+     * @covers Pants\Task\Chdir::execute
+     */
+    public function testDirectoryIsRequired()
+    {
+        $this->setExpectedException('\Pants\BuildException');
+
+        $this->task
+            ->execute();
+    }
+    
+    /**
+     * @covers Pants\Task\Chdir::execute
+     */
+    public function testChdirToInvalidDirectoryThrowsErrorException()
+    {
+        $this->setExpectedException('\ErrorException');
+
+        $this->task
+            ->setDirectory('/8pa8pvoiaKVRa8ij4Da4a90uv89')
+            ->execute();
+    }
+    
+    /**
+     * @covers Pants\Task\Chdir::execute
+     */
+    public function testChdirChangesTheCurrentWorkingDirectory()
+    {
+        $this->task
+            ->setDirectory(__DIR__ . '/_files')
+            ->execute();
+            
+        $this->assertEquals(realPath(__DIR__ . '/_files'), getcwd());
     }
 
 }

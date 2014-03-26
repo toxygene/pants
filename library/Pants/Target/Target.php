@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -114,11 +114,11 @@ class Target extends AbstractTask
     {
         foreach ($this->getDepends() as $depends) {
             $this->getProject()
-                 ->execute($depends);
+                ->execute($depends);
         }
 
         $properties = $this->getProject()
-                           ->getProperties();
+            ->getProperties();
 
         foreach ($this->getIf() as $if) {
             if (!isset($properties->$if) || !$properties->$if) {
@@ -134,7 +134,7 @@ class Target extends AbstractTask
 
         foreach ($this->getTasks() as $task) {
             $task->setProject($this->getProject())
-                 ->execute();
+                ->execute();
         }
 
         return $this;

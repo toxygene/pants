@@ -80,19 +80,6 @@ class Chmod extends AbstractTask implements FileSetable
     }
 
     /**
-     * Chmod a file
-     *
-     * @param string $file
-     * @param integer $mode
-     */
-    protected function chmod($file, $mode)
-    {
-        return Pale::run(function() use ($file, $mode) {
-            return chmod($file, $mode);
-        });
-    }
-
-    /**
      * Create a file set tied to this task
      *
      * @return FileSet
@@ -128,12 +115,16 @@ class Chmod extends AbstractTask implements FileSetable
         }
 
         if ($file) {
-            $this->chmod($file, $mode);
+            Pale::run(function() use ($file, $mode) {
+                return chmod($file, $mode);
+            });
         }
 
         foreach ($this->getFileSets() as $fileSet) {
             foreach ($fileSet as $file) {
-                $this->chmod($file, $mode);
+                Pale::run(function() use ($file, $mode) {
+                    return chmod($file, $mode);
+                });
             }
         }
 

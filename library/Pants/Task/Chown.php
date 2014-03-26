@@ -80,20 +80,6 @@ class Chown extends AbstractTask implements FileSetable
     }
 
     /**
-     * Chown a file
-     *
-     * @param string $file
-     * @param string $owner
-     * @return boolean
-     */
-    protected function chown($file, $owner)
-    {
-        return Pale::run(function() use ($file, $owner) {
-            return chown($file, $owner);
-        });
-    }
-
-    /**
      * Create a file set tied to this task
      *
      * @return FileSet
@@ -125,12 +111,16 @@ class Chown extends AbstractTask implements FileSetable
         $owner = $this->filterProperties($this->getOwner());
 
         if ($file) {
-            $this->chown($file, $owner);
+            Pale::run(function() use ($file, $owner) {
+                return chown($file, $owner);
+            });
         }
 
         foreach ($this->getFileSets() as $fileSet) {
             foreach ($fileSet as $file) {
-                $this->chmod($file, $mode);
+                Pale::run(function() use ($file, $owner) {
+                    return chown($file, $owner);
+                });
             }
         }
 

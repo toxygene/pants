@@ -66,10 +66,11 @@ class TargetsTest extends TestCase
         $target = $this->getMock('\Pants\Target\Target');
 
         $target->expects($this->once())
-               ->method('getName')
-               ->will($this->returnValue('test'));
+              ->method('getName')
+              ->will($this->returnValue('test'));
 
-        $this->targets->add($target);
+        $this->targets
+            ->add($target);
         
         $this->assertSame($target, $this->targets->test);
     }
@@ -92,10 +93,11 @@ class TargetsTest extends TestCase
         $target = $this->getMock('\Pants\Target\Target');
 
         $target->expects($this->once())
-               ->method('getName')
-               ->will($this->returnValue('test'));
+            ->method('getName')
+            ->will($this->returnValue('test'));
 
-        $this->targets->add($target);
+        $this->targets
+            ->add($target);
 
         $this->assertTrue(isset($this->targets->test));
         $this->assertFalse(isset($this->targets->asdf));
@@ -109,10 +111,11 @@ class TargetsTest extends TestCase
         $target = $this->getMock('\Pants\Target\Target');
 
         $target->expects($this->once())
-               ->method('getName')
-               ->will($this->returnValue('test'));
+            ->method('getName')
+            ->will($this->returnValue('test'));
 
-        $this->targets->add($target);
+        $this->targets
+            ->add($target);
 
         $this->assertTrue(isset($this->targets->test));
 
@@ -141,12 +144,57 @@ class TargetsTest extends TestCase
         $target = $this->getMock('\Pants\Target\Target');
 
         $target->expects($this->any())
-               ->method('getName')
-               ->will($this->returnValue('test'));
+            ->method('getName')
+            ->will($this->returnValue('test'));
 
         $this->targets
-             ->add($target)
-             ->add($target);
+            ->add($target)
+            ->add($target);
+    }
+    
+    /**
+     * @covers Pants\Target\Targets::getDescriptions
+     */
+    public function testDescriptionsCanBeRetrieved()
+    {
+        $target = $this->getMock('\Pants\Target\Target');
+
+        $target->expects($this->once())
+            ->method('getName')
+            ->will($this->returnValue('test'));
+
+        $target->expects($this->once())
+            ->method('getDescription')
+            ->will($this->returnValue('test'));
+
+        $this->targets
+            ->add($target);
+            
+        $this->assertEquals(array('test' => 'test'), $this->targets->getDescriptions());
+    }
+    
+    /**
+     * @covers Pants\Target\Targets::getDescriptions
+     */
+    public function testHiddenTargetsAreNotAddedToDescriptions()
+    {
+        $target = $this->getMock('\Pants\Target\Target');
+
+        $target->expects($this->once())
+            ->method('getName')
+            ->will($this->returnValue('test'));
+
+        $target->expects($this->once())
+            ->method('getHidden')
+            ->will($this->returnValue(true));
+
+        $target->expects($this->never())
+            ->method('getDescription');
+
+        $this->targets
+            ->add($target);
+            
+        $this->assertEquals(array(), $this->targets->getDescriptions());
     }
 
 }

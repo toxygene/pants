@@ -104,21 +104,21 @@ class TargetTest extends TestCase
         $task = $this->getMock('\Pants\Task\Task');
 
         $task->expects($this->exactly(2))
-             ->method('setProject')
-             ->with($this->project)
-             ->will($this->returnValue($task));
+            ->method('setProject')
+            ->with($this->project)
+            ->will($this->returnValue($task));
 
         $task->expects($this->exactly(2))
-             ->method('execute')
-             ->will($this->returnValue($task));
+            ->method('execute')
+            ->will($this->returnValue($task));
 
         $this->target
-             ->getTasks()
-             ->add($task)
-             ->add($task);
+            ->getTasks()
+            ->add($task)
+            ->add($task);
 
         $this->target
-             ->execute();
+            ->execute();
     }
 
     /**
@@ -129,15 +129,15 @@ class TargetTest extends TestCase
         $task = $this->getMock('\Pants\Task\Task');
 
         $task->expects($this->never())
-             ->method('execute');
+            ->method('execute');
 
         $this->target
-             ->getTasks()
-             ->add($task);
+            ->getTasks()
+            ->add($task);
 
         $this->target
-             ->setIf(array('one'))
-             ->execute();
+            ->setIf(array('one'))
+            ->execute();
     }
 
     /**
@@ -148,20 +148,37 @@ class TargetTest extends TestCase
         $task = $this->getMock('\Pants\Task\Task');
 
         $task->expects($this->never())
-             ->method('execute');
+            ->method('execute');
 
         $this->target
-             ->getTasks()
-             ->add($task);
+            ->getTasks()
+            ->add($task);
 
         $this->target
-             ->getProject()
-             ->getProperties()
-             ->one = true;
+            ->getProject()
+            ->getProperties()
+            ->one = true;
 
         $this->target
-             ->setUnless(array('one'))
-             ->execute();
+            ->setUnless(array('one'))
+            ->execute();
+    }
+    
+    /**
+     * @covers Pants\Target\Target::execute
+     */
+    public function testDependIsExecuted()
+    {
+        $project = $this->getMock('\Pants\Project');
+        
+        $project->expects($this->once())
+            ->method('execute')
+            ->with('test');
+
+        $this->target
+            ->setProject($project)
+            ->setDepends(array('test'))
+            ->execute();
     }
 
 }

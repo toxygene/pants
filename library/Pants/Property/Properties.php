@@ -94,6 +94,7 @@ class Properties
     /**
      * To string
      *
+     * @codeCoverageIgnore
      * @return string
      */
     public function __toString()

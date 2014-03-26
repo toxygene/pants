@@ -80,21 +80,6 @@ class Chgrp extends AbstractTask implements FileSetable
     }
 
     /**
-     * Chgrp a file
-     *
-     * @param string $file
-     * @param string $group
-     * @return boolean
-     * @throws ErrorException
-     */
-    protected function chgrp($file, $group)
-    {
-        return Pale::run(function() use ($file, $group) {
-            return chgrp($file, $group);
-        });
-    }
-
-    /**
      * Create a file set tied to this task
      *
      * @return FileSet
@@ -126,12 +111,16 @@ class Chgrp extends AbstractTask implements FileSetable
         $group = $this->filterProperties($this->getGroup());
 
         if ($file) {
-            $this->chgrp($file, $group);
+            Pale::run(function() use ($file, $group) {
+                return chgrp($file, $group);
+            });
         }
 
         foreach ($this->getFileSets() as $fileSet) {
             foreach ($fileSet as $file) {
-                $this->chgrp($file, $mode);
+                Pale::run(function() use ($file, $group) {
+                    return chgrp($file, $group);
+                });
             }
         }
 
