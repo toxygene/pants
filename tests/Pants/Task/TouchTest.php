@@ -77,6 +77,30 @@ class TouchTest extends TestCase
         unset($this->file);
         unset($this->touch);
     }
+    
+    /**
+     * @covers Pants\Task\Touch::getFile
+     * @covers Pants\Task\Touch::setFile
+     */
+    public function testFileCanBeSet()
+    {
+        $this->touch
+            ->setFile('test');
+
+        $this->assertEquals('test', $this->touch->getFile());
+    }
+    
+    /**
+     * @covers Pants\Task\Touch::getTime
+     * @covers Pants\Task\Touch::setTime
+     */
+    public function testTimeCanBeSet()
+    {
+        $this->touch
+            ->setTime(10001);
+
+        $this->assertEquals(10001, $this->touch->getTime());
+    }
 
     /**
      * @covers Pants\Task\Touch::execute
