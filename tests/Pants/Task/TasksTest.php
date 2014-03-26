@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -27,52 +27,54 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *
- * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
-namespace Pants\Task;
+namespace PantsTest\Task;
 
-use ArrayIterator;
-use IteratorAggregate;
-use Pants\Task\Task;
+use Pants\Project;
+use Pants\Task\Tasks;
+use PHPUnit_Framework_TestCase as TestCase;
 
 /**
- * Tasks container
  *
- * @package Pants\Tasks
  */
-class Tasks implements IteratorAggregate
+class TasksTest extends TestCase
 {
 
     /**
      * Tasks
-     *
-     * @var array
+     * @var Tasks
      */
-    protected $tasks = array();
-
+    protected $tasks;
+    
     /**
-     * Add a task
-     *
-     * @param Task $task
-     * @return Tasks
+     * Setup the test case
      */
-    public function add(Task $task)
+    public function setUp()
     {
-        $this->tasks[] = $task;
-
-        return $this;
+        $this->tasks = new Tasks();
     }
-
+    
     /**
-     * Get an iterator
-     *
-     * @return Iterator
+     * Tear down the test case
      */
-    public function getIterator()
+    public function tearDown()
     {
-        return new ArrayIterator($this->tasks);
+        unset($this->tasks);
+    }
+    
+    /**
+     * @covers Pants\Task\Tasks::add
+     * @covers Pants\Task\Tasks::getIterator
+     */
+    public function testTasksCanBeAdded()
+    {
+        $task = $this->getMock('Pants\Task\Task');
+        
+        $this->tasks
+            ->add($task);
+            
+        $this->assertEquals(array($task), iterator_to_array($this->tasks));
     }
 
 }
