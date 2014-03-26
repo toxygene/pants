@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -45,41 +45,59 @@ class OutputTest extends TestCase
      * Output task
      * @var Output
      */
-    protected $_task;
+    protected $task;
 
     /**
      * Setup the test case
      */
     public function setUp()
     {
-        $this->_task = new Output();
-        $this->_task->setProject(new Project());
+        $this->task = new Output();
+        $this->task->setProject(new Project());
+    }
+    
+    /**
+     * Tear down the test case
+     */
+    public function tearDown()
+    {
+        unset($this->task);
     }
 
+    /**
+     * @covers Pants\Task\Output::getMessage
+     * @covers Pants\Task\Output::setMessage
+     */
     public function testMessageCanBeSet()
     {
-        $this->_task->setMessage("one");
-        $this->assertEquals("one", $this->_task->getMessage());
+        $this->task->setMessage('one');
+        $this->assertEquals('one', $this->task->getMessage());
     }
 
+    /**
+     * @covers Pants\Task\Output::execute
+     */
     public function testMessageIsRequired()
     {
-        $this->setExpectedException("\Pants\BuildException");
+        $this->setExpectedException('\Pants\BuildException');
 
-        $this->_task
+        $this->task
              ->execute();
     }
 
+    /**
+     * @covers Pants\Task\Output::execute
+     */
     public function testMessageIsPrintedOnExecute()
     {
-        $this->_task->setMessage("one");
+        $this->task->setMessage('one');
 
         ob_start();
-        $this->_task->execute();
+        $this->task->execute();
         $output = ob_get_contents();
         ob_end_clean();
 
-        $this->assertEquals("one", $output);
+        $this->assertEquals('one', $output);
     }
 
 }

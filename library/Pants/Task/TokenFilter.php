@@ -33,6 +33,7 @@
 
 namespace Pants\Task;
 
+use Pale\Pale;
 use Pants\BuildException;
 
 /**
@@ -102,7 +103,7 @@ class TokenFilter extends AbstractTask
         $startingCharacter = $this->filterProperties($this->getStartingCharacter());
 
 
-        $this->run(function() use ($file, $replacements, $endingCharacter, $startingCharacter) {
+        Pale::run(function() use ($file, $replacements, $endingCharacter, $startingCharacter) {
             $contents = file_get_contents($file);
 
             foreach ($replacements as $token => $value) {

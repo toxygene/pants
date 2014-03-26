@@ -68,7 +68,7 @@ class CopyTest extends TestCase
         $this->copy = new Copy();
         $this->copy->setProject(new Project());
 
-        $this->vfs = vfsStream::setup('root', null, array(
+        vfsStream::setup('root', null, array(
             'test' => 'testing'
         ));
 
@@ -82,7 +82,6 @@ class CopyTest extends TestCase
     {
         unset($this->copy);
         unset($this->file);
-        unset($this->vfs);
     }
 
     /**

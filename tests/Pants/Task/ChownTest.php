@@ -55,17 +55,11 @@ class ChownTest extends TestCase
     protected $file;
 
     /**
-     * Virtual file system
-     * @var vfsStream
-     */
-    protected $vfs;
-
-    /**
-     * Setup the test
+     * Setup the test case
      */
     public function setUp()
     {
-        $this->vfs = vfsStream::setup('root', null, array(
+        vfsStream::setup('root', null, array(
             'one' => 'test'
         ));
         
@@ -76,13 +70,12 @@ class ChownTest extends TestCase
     }
 
     /**
-     * Tear down the test
+     * Tear down the test case
      */
     public function tearDown()
     {
         unset($this->chown);
         unset($this->file);
-        unset($this->vfs);
     }
 
     /**

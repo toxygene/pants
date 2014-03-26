@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -34,13 +34,9 @@
 namespace Pants\Task;
 
 use BadMethodCallException;
-use ErrorException;
-use Closure;
 use Pants\BuildException;
 use Pants\Project;
-use Pants\Property\PropertyNameCycleException;
 use Pants\Task\Task;
-use Pale\Pale;
 
 /**
  * Abstract base task
@@ -66,13 +62,7 @@ abstract class AbstractTask implements Task
      */
     public function __construct($options = array())
     {
-        foreach ($options as $key => $value) {
-            $method = "set" . $key;
-            if (!method_exists($this, $method)) {
-                throw new BadMethodCallException("Method '{$method}' does not exist");
-            }
-            $this->$method($value);
-        }
+        $this->setOptions($options);
     }
 
     /**
@@ -80,21 +70,16 @@ abstract class AbstractTask implements Task
      *
      * @param string $string
      * @return string
-     * @throws BuildException
      */
     public function filterProperties($string)
     {
         if (!$this->getProject()) {
-            throw new BuildException("Project not set");
+            throw new BuildException('Project not set');
         }
 
-        try {
-            return $this->getProject()
-                        ->getProperties()
-                        ->filter($string);
-        } catch(PropertyNameCycleException $e) {
-            throw new BuildException("An error occurred while filtering the property", null, $e);
-        }
+        return $this->getProject()
+            ->getProperties()
+            ->filter($string);
     }
 
     /**
@@ -106,28 +91,32 @@ abstract class AbstractTask implements Task
     {
         return $this->project;
     }
-
+    
     /**
-     * Run a function
+     * Set the options
      *
-     * @param Closure $function
-     * @return mixed
-     * @throws BuildException
+     * @param Traversable $options
+     * @return AbstractTask
+     * @throws BadMethodCallException
      */
-    protected function run(Closure $function)
+    public function setOptions($options = array())
     {
-        try {
-            return Pale::run($function);
-        } catch (ErrorException $e) {
-            throw new BuildException($e->getMessage(), null, $e);
+        foreach ($options as $key => $value) {
+            $method = 'set' . $key;
+            if (!method_exists($this, $method)) {
+                throw new BadMethodCallException("Method '{$method}' does not exist");
+            }
+            $this->$method($value);
         }
+        
+        return $this;
     }
 
     /**
      * Set the project
      *
      * @param Project $project
-     * @return Task
+     * @return AbstractTask
      */
     public function setProject(Project $project)
     {

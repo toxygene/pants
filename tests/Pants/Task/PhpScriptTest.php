@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -31,9 +31,9 @@
 
 namespace PantsTest\Task;
 
-use Pants\Project,
-    Pants\Task\PhpScript,
-    PHPUnit_Framework_TestCase as TestCase;
+use Pants\Project;
+use Pants\Task\PhpScript;
+use PHPUnit_Framework_TestCase as TestCase;
 
 /**
  *
@@ -45,45 +45,63 @@ class PhpScriptTest extends TestCase
      * PhpScript task
      * @var PhpScript
      */
-    protected $_task;
+    protected $task;
 
     /**
      * Setup the test case
      */
     public function setUp()
     {
-        $this->_task = new PhpScript();
-        $this->_task->setProject(new Project());
+        $this->task = new PhpScript();
+        $this->task->setProject(new Project());
+    }
+    
+    /**
+     * Tear down the test case
+     */
+    public function tearDown()
+    {
+        unset($this->task);
     }
 
+    /**
+     * @covers Pants\Task\PhpScript::getFile
+     * @covers Pants\Task\PhpScript::setFile
+     */
     public function testFileCanBeSet()
     {
-        $this->_task->setFile("asdf");
-        $this->assertEquals("asdf", $this->_task->getFile());
+        $this->task->setFile('asdf');
+        $this->assertEquals('asdf', $this->task->getFile());
     }
 
+    /**
+     * @covers Pants\Task\PhpScript::execute
+     */
     public function testFileIsRequired()
     {
-        $this->setExpectedException("\Pants\BuildException");
+        $this->setExpectedException('\Pants\BuildException');
 
-        $this->_task
+        $this->task
              ->execute();
     }
 
+    /**
+     * @covers Pants\Task\PhpScript::execute
+     */
     public function testScriptIsIncludedOnExecute()
     {
-        $this->_task
-             ->setFile(__DIR__ . "/_files/php-script-1.php");
+        $this->task
+             ->setFile(__DIR__ . '/_files/php-script-1.php');
 
         ob_start();
 
-        $this->_task
+        $this->task
              ->execute();
 
         $output = ob_get_contents();
         ob_end_clean();
 
-        $this->assertEquals("PhpScript executed", $output);
+        $this->assertEquals('PhpScript executed', $output);
     }
 
 }

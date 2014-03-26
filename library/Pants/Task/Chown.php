@@ -33,6 +33,7 @@
 
 namespace Pants\Task;
 
+use Pale\Pale;
 use Pants\BuildException;
 use Pants\Task\FileSetable;
 use Traversable;
@@ -87,7 +88,7 @@ class Chown extends AbstractTask implements FileSetable
      */
     protected function chown($file, $owner)
     {
-        return $this->run(function() use ($file, $owner) {
+        return Pale::run(function() use ($file, $owner) {
             return chown($file, $owner);
         });
     }

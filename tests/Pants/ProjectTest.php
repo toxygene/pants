@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -31,8 +31,8 @@
 
 namespace PantsTest;
 
-use Pants\Project,
-    PHPUnit_Framework_TestCase as TestCase;
+use Pants\Project;
+use PHPUnit_Framework_TestCase as TestCase;
 
 /**
  *
@@ -44,84 +44,108 @@ class ProjectTest extends TestCase
      * Project
      * @var Project
      */
-    protected $_project;
+    protected $project;
 
     /**
      * Setup the test case
      */
     public function setUp()
     {
-        $this->_project = new Project();
+        $this->project = new Project();
+    }
+    
+    /**
+     * Tear down the test case
+     */
+    public function tearDown()
+    {
+        unset($this->project);
     }
 
+    /**
+     * @covers Pants\Project::getDefault
+     * @covers Pants\Project::setDefault
+     */
     public function testDefaultCanBeSet()
     {
-        $this->_project->setDefault("test");
+        $this->project->setDefault('test');
 
-        $this->assertEquals("test", $this->_project->getDefault());
+        $this->assertEquals('test', $this->project->getDefault());
     }
 
+    /**
+     * @covers Pants\Project::getProperties
+     */
     public function testPropertiesCanBeRetrieved()
     {
-        $this->assertInstanceOf("Pants\Property\Properties", $this->_project->getProperties());
+        $this->assertInstanceOf('Pants\Property\Properties', $this->project->getProperties());
     }
 
+    /**
+     * @covers Pants\Project::execute
+     */
     public function testTasksAreExecutedBeforeTargets()
     {
-        $task = $this->getMock("\Pants\Task\AbstractTask");
+        $task = $this->getMock('\Pants\Task\AbstractTask');
 
         $task->expects($this->once())
-             ->method("setProject")
-             ->with($this->_project)
-             ->will($this->returnValue($task));
+            ->method('setProject')
+            ->with($this->project)
+            ->will($this->returnValue($task));
 
         $task->expects($this->once())
-             ->method("execute")
-             ->will($this->returnValue($task));
+            ->method('execute')
+            ->will($this->returnValue($task));
 
-        $this->_project
-             ->getTasks()
-             ->add($task);
+        $this->project
+            ->getTasks()
+            ->add($task);
 
-        $this->_project
-             ->execute();
+        $this->project
+            ->execute();
     }
 
+    /**
+     * @covers Pants\Project::execute
+     */
     public function testDefaultTargetIsExecutedIfNoTargetsAreSpecified()
     {
-        $target = $this->getMock("\Pants\Target\Target");
+        $target = $this->getMock('\Pants\Target\Target');
 
         $target->expects($this->once())
-               ->method("getName")
-               ->will($this->returnValue("default"));
+              ->method('getName')
+              ->will($this->returnValue('default'));
 
         $target->expects($this->once())
-               ->method("setProject")
-               ->with($this->_project)
-               ->will($this->returnValue($target));
+              ->method('setProject')
+              ->with($this->project)
+              ->will($this->returnValue($target));
 
         $target->expects($this->once())
-               ->method("execute")
-               ->will($this->returnValue($target));
+              ->method('execute')
+              ->will($this->returnValue($target));
 
-        $this->_project
-             ->setDefault("default")
-             ->getTargets()
-             ->add($target);
+        $this->project
+            ->setDefault('default')
+            ->getTargets()
+            ->add($target);
 
-        $this->_project
-             ->execute();
+        $this->project
+            ->execute();
     }
 
+    /**
+     * @covers Pants\Project::execute
+     */
     public function testBaseDirChangesTheCurrentWorkingDirectory()
     {
         $cwd = getcwd();
 
-        $this->_project
-             ->setBaseDir("/")
-             ->execute();
+        $this->project
+            ->setBaseDir('/')
+            ->execute();
 
-        $this->assertEquals("/", getcwd());
+        $this->assertEquals('/', getcwd());
 
         chdir($cwd);
     }

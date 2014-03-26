@@ -33,6 +33,7 @@
 
 namespace Pants\Task;
 
+use Pale\Pale;
 use Pants\BuildException;
 use Pants\FileSet\FileSet;
 use PHP_CodeSniffer as CodeSniffer;
@@ -110,7 +111,7 @@ class PhpCodeSniffer extends AbstractTask
         }
 
         if (!class_exists("CodeSniffer")) {
-            $this->run(function() {
+            Pale::run(function() {
                 require_once "PHP/CodeSniffer.php";
             });
         }

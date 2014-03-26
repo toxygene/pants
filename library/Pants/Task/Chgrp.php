@@ -33,6 +33,7 @@
 
 namespace Pants\Task;
 
+use Pale\Pale;
 use Pants\BuildException;
 use Pants\Task\FileSetable;
 use Traversable;
@@ -84,11 +85,11 @@ class Chgrp extends AbstractTask implements FileSetable
      * @param string $file
      * @param string $group
      * @return boolean
-     * @throws BuildException
+     * @throws ErrorException
      */
     protected function chgrp($file, $group)
     {
-        return $this->run(function() use ($file, $group) {
+        return Pale::run(function() use ($file, $group) {
             return chgrp($file, $group);
         });
     }

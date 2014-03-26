@@ -55,12 +55,6 @@ class TouchTest extends TestCase
     protected $touch;
 
     /**
-     * Virtual file system
-     * @var vfsStream
-     */
-    protected $vfs;
-
-    /**
      * Setup the test
      */
     public function setUp()
@@ -68,13 +62,25 @@ class TouchTest extends TestCase
         $this->touch = new Touch();
         $this->touch->setProject(new Project());
         
-        $this->vfs = vfsStream::setup('root', null, array(
+        vfsStream::setup('root', null, array(
             'one' => 'test'
         ));
         
         $this->file = vfsStream::url('root/one');
     }
+    
+    /**
+     * Tear down the test case
+     */
+    public function tearDown()
+    {
+        unset($this->file);
+        unset($this->touch);
+    }
 
+    /**
+     * @covers Pants\Task\Touch::execute
+     */
     public function testFileIsRequired()
     {
         $this->setExpectedException('\Pants\BuildException');
@@ -83,6 +89,9 @@ class TouchTest extends TestCase
             ->execute();
     }
 
+    /**
+     * @covers Pants\Task\Touch::execute
+     */
     public function testTouchingANonExistentFileCreatesItAndSetsTheModifiedTime()
     {
         $time = time();

@@ -55,17 +55,11 @@ class ChmodTest extends TestCase
     protected $file;
 
     /**
-     * Virtual file system
-     * @var vfsStream
-     */
-    protected $vfs;
-
-    /**
      * Set up the test case
      */
     public function setUp()
     {
-        $this->vfs = vfsStream::setup('root', null, array(
+        vfsStream::setup('root', null, array(
             'one' => 'test'
         ));
         
@@ -82,7 +76,6 @@ class ChmodTest extends TestCase
     {
         unset($this->chmod);
         unset($this->file);
-        unset($this->vfs);
     }
 
     /**

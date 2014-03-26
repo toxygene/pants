@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -60,17 +60,13 @@ class Call extends AbstractTask
     public function execute()
     {
         if (!$this->getTarget()) {
-            throw new BuildException("No target set");
+            throw new BuildException('No target set');
         }
 
         $target = $this->filterProperties($this->getTarget());
 
-        try {
-            $this->getProject()
-                 ->execute($target);
-        } catch (InvalidArgumentException $e) {
-            throw new BuildException("Could not execute '{$target}'", null, $e);
-        }
+        $this->getProject()
+            ->execute($target);
 
         return $this;
     }

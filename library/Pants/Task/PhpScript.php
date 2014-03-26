@@ -33,6 +33,7 @@
 
 namespace Pants\Task;
 
+use Pale\Pale;
 use Pants\BuildException;
 
 /**
@@ -64,7 +65,7 @@ class PhpScript extends AbstractTask
 
         $file = $this->filterProperties($this->getFile());
 
-        $this->run(function() use ($file) {
+        Pale::run(function() use ($file) {
             require $file;
         });
 

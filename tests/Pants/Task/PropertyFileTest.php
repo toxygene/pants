@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -31,9 +31,9 @@
 
 namespace PantsTest\Task;
 
-use Pants\Project,
-    Pants\Task\PropertyFile,
-    PHPUnit_Framework_TestCase as TestCase;
+use Pants\Project;
+use Pants\Task\PropertyFile;
+use PHPUnit_Framework_TestCase as TestCase;
 
 /**
  *
@@ -45,38 +45,52 @@ class PropertyFileTest extends TestCase
      * PropertyFile task
      * @var PropertyFile
      */
-    protected $_task;
+    protected $task;
 
     /**
      * Setup the test case
      */
     public function setUp()
     {
-        $this->_task = new PropertyFile();
-        $this->_task->setProject(new Project());
+        $this->task = new PropertyFile();
+        $this->task->setProject(new Project());
+    }
+    
+    /**
+     * Tear down the test case
+     */
+    public function tearDown()
+    {
+        unset($this->task);
     }
 
+    /**
+     * @covers Pants\Task\PropertyFile::execute
+     */
     public function testFileIsRequired()
     {
-        $this->setExpectedException("\Pants\BuildException");
+        $this->setExpectedException('\Pants\BuildException');
 
-        $this->_task
-             ->execute();
+        $this->task
+            ->execute();
     }
 
+    /**
+     * @covers Pants\Task\PropertyFile::execute
+     */
     public function testPropertiesAreAdded()
     {
-        $this->_task
-             ->setFile(__DIR__ . "/_files/properties-1.ini")
-             ->execute();
+        $this->task
+            ->setFile(__DIR__ . '/_files/properties-1.ini')
+            ->execute();
 
-        $properties = $this->_task
-                           ->getProject()
-                           ->getProperties();
+        $properties = $this->task
+            ->getProject()
+            ->getProperties();
 
-        $this->assertEquals("three", $properties->{"one.two"});
-        $this->assertEquals("six", $properties->{"four.five"});
-        $this->assertEquals("three", $properties->{"seven.eight"});
+        $this->assertEquals('three', $properties->{'one.two'});
+        $this->assertEquals('six', $properties->{'four.five'});
+        $this->assertEquals('three', $properties->{'seven.eight'});
     }
 
 }

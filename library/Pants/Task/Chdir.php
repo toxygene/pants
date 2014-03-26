@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -33,6 +33,7 @@
 
 namespace Pants\Task;
 
+use Pale\Pale;
 use Pants\BuildException;
 
 /**
@@ -51,19 +52,6 @@ class Chdir extends AbstractTask
     protected $directory;
 
     /**
-     * Chgrp a file
-     *
-     * @param string $dir
-     * @return boolean
-     */
-    protected function chdir($dir)
-    {
-        return $this->run(function() use ($dir) {
-            return chdir($dir);
-        });
-    }
-
-    /**
      * Execute the task
      *
      * @return Chgrp
@@ -73,10 +61,12 @@ class Chdir extends AbstractTask
     public function execute()
     {
         if (!$this->getDirectory()) {
-            throw new BuildException("Directory is not set");
+            throw new BuildException('Directory is not set');
         }
 
-        $this->chdir($this->getDirectory());
+        Pale::run(function() use ($dir) {
+            return chdir($dir);
+        });
 
         return $this;
     }

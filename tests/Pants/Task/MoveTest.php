@@ -55,12 +55,6 @@ class MoveTest extends TestCase
     protected $move;
 
     /**
-     * Virtual file system
-     * @var vfsStream
-     */
-    protected $vfs;
-
-    /**
      * Setup the test
      */
     public function setUp()
@@ -68,7 +62,7 @@ class MoveTest extends TestCase
         $this->move = new Move();
         $this->move->setProject(new Project());
         
-        $this->vfs = vfsStream::setup('root', null, array(
+        vfsStream::setup('root', null, array(
             'one' => 'test'
         ));
         
@@ -82,33 +76,41 @@ class MoveTest extends TestCase
     {
         unset($this->file);
         unset($this->move);
-        unset($this->vfs);
     }
 
+    /**
+     * @covers Pants\Task\Move::execute
+     */
     public function testFileIsRequired()
     {
         $this->setExpectedException('\Pants\BuildException');
 
         $this->move
-             ->setDestination(vfsStream::url('root') . '_1')
-             ->execute();
+            ->setDestination(vfsStream::url('root') . '_1')
+            ->execute();
     }
 
+    /**
+     * @covers Pants\Task\Move::execute
+     */
     public function testDestinationIsRequired()
     {
         $this->setExpectedException('\Pants\BuildException');
 
         $this->move
-             ->setFile(vfsStream::url('root/one'))
-             ->execute();
+            ->setFile(vfsStream::url('root/one'))
+            ->execute();
     }
 
+    /**
+     * @covers Pants\Task\Move::execute
+     */
     public function testFileIsMoved()
     {
         $this->move
-             ->setFile($this->file)
-             ->setDestination($this->file . '_1')
-             ->execute();
+            ->setFile($this->file)
+            ->setDestination($this->file . '_1')
+            ->execute();
 
         $this->assertTrue(file_exists($this->file . '_1'));
     }

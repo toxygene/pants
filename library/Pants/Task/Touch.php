@@ -33,6 +33,7 @@
 
 namespace Pants\Task;
 
+use Pale\Pale;
 use Pants\BuildException;
 
 /**
@@ -72,7 +73,7 @@ class Touch extends AbstractTask
         $file = $this->filterProperties($this->getFile());
         $time = $this->filterProperties($this->getTime());
 
-        $this->run(function() use ($file, $time) {
+        Pale::run(function() use ($file, $time) {
             return touch($file, $time);
         });
 

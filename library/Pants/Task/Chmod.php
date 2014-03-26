@@ -33,6 +33,7 @@
 
 namespace Pants\Task;
 
+use Pale\Pale;
 use Pants\BuildException;
 use Pants\Task\FileSetable;
 use Traversable;
@@ -86,7 +87,7 @@ class Chmod extends AbstractTask implements FileSetable
      */
     protected function chmod($file, $mode)
     {
-        return $this->run(function() use ($file, $mode) {
+        return Pale::run(function() use ($file, $mode) {
             return chmod($file, $mode);
         });
     }

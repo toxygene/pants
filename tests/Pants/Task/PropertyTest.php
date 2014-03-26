@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -31,9 +31,9 @@
 
 namespace PantsTest\Task;
 
-use Pants\Project,
-    Pants\Task\Property,
-    PHPUnit_Framework_TestCase as TestCase;
+use Pants\Project;
+use Pants\Task\Property;
+use PHPUnit_Framework_TestCase as TestCase;
 
 /**
  *
@@ -45,46 +45,68 @@ class PropertyTest extends TestCase
      * Properties task
      * @var Property
      */
-    protected $_task;
+    protected $task;
 
     /**
      * Setup the test case
      */
     public function setUp()
     {
-        $this->_task = new Property();
-        $this->_task->setProject(new Project());
+        $this->task = new Property();
+        $this->task->setProject(new Project());
+    }
+    
+    /**
+     * Tear down the test case
+     */
+    public function tearDown()
+    {
+        unset($this->task);
     }
 
+    /**
+     * @covers Pants\Task\Property::getName
+     * @covers Pants\Task\Property::setName
+     */
     public function testNameCanBeSet()
     {
-        $this->_task->setName("one");
-        $this->assertEquals("one", $this->_task->getName());
+        $this->task->setName('one');
+        $this->assertEquals('one', $this->task->getName());
     }
 
+    /**
+     * @covers Pants\Task\Property::getValue
+     * @covers Pants\Task\Property::setValue
+     */
     public function testValueCanBeSet()
     {
-        $this->_task->setValue("one");
-        $this->assertEquals("one", $this->_task->getValue());
+        $this->task->setValue('one');
+        $this->assertEquals('one', $this->task->getValue());
     }
 
+    /**
+     * @covers Pants\Task\Property::execute
+     */
     public function testNameIsRequired()
     {
-        $this->setExpectedException("\Pants\BuildException");
+        $this->setExpectedException('\Pants\BuildException');
 
-        $this->_task
-             ->setValue("value")
-             ->execute();
+        $this->task
+            ->setValue('value')
+            ->execute();
     }
 
+    /**
+     * @covers Pants\Task\Property::execute
+     */
     public function testPropertiesAreSetOnTheProjectOnExecute()
     {
-        $this->_task
-             ->setName("one")
-             ->setValue("two")
-             ->execute();
+        $this->task
+            ->setName('one')
+            ->setValue('two')
+            ->execute();
 
-        $this->assertEquals("two", $this->_task->getProject()->getProperties()->one);
+        $this->assertEquals('two', $this->task->getProject()->getProperties()->one);
     }
 
 }

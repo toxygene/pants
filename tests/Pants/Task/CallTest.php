@@ -94,7 +94,7 @@ class CallTest extends TestCase
      */
     public function testAValidTargetIsRequired()
     {
-        $this->setExpectedException('\Pants\BuildException');
+        $this->setExpectedException('\InvalidArgumentException');
 
         $this->call
             ->setTarget('asdf')
