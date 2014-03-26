@@ -38,7 +38,7 @@ use RuntimeException;
 /**
  *
  */
-class CommandFailedException extends RuntimeException
+class CommandFailedToRunException extends RuntimeException
 {
 
     /**
@@ -46,19 +46,13 @@ class CommandFailedException extends RuntimeException
      *
      * @param string $command
      * @param string $directory
-     * @param string $return
-     * @param string $stdout
-     * @param string $stderr
      */
-    public function __construct($command, $directory, $return, $stdout, $stderr)
+    public function __construct($command, $directory)
     {
         $this->command   = $command;
         $this->directory = $directory;
-        $this->return    = $return;
-        $this->stdout    = $stdout;
-        $this->stderr    = $stderr;
         
-        parent::__construct("'{$command}' failed");
+        parent::__construct("'{$command}' failed to run");
     }
 
 }
