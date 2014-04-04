@@ -134,8 +134,6 @@ class FileSet implements IteratorAggregate
             $this->getBaseDirectory()
         );
 
-        $iterator->setFlags(FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO | FilesystemIterator::SKIP_DOTS);
-
         // Optionally wrap the iterator with a default ignore filter iterator
         if ($this->getAddDefaultIgnore()) {
             $iterator = new DefaultIgnoreFilterIterator($iterator);
