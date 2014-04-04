@@ -50,18 +50,11 @@ class DefaultIgnoreFilterIteratorTest extends TestCase
     protected $filter;
 
     /**
-     * Virtual file system
-     *
-     * @var vfsStream
-     */
-    protected $vfs;
-
-    /**
      * Set up the test case
      */
     public function setUp()
     {
-        $this->vfs = vfsStream::setup('root', null, array(
+        vfsStream::setup('root', null, array(
             '.git' => array(),
             '.gitignore' => 'test',
             '.svn' => array(),
