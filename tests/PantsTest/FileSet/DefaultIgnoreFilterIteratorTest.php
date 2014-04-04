@@ -82,8 +82,7 @@ class DefaultIgnoreFilterIteratorTest extends TestCase
     {
         $results = iterator_to_array($this->filter);
 
-        $this->assertEquals(2, count($results));
-        $this->assertContains(vfsStream::url("root/.gitignore"), $results);
+        $this->assertEquals(1, count($results));
         $this->assertContains(vfsStream::url("root/test"), $results);
     }
 
