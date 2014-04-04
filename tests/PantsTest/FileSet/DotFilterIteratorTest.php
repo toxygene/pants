@@ -44,6 +44,13 @@ class DotFilterIteratorTest extends TestCase
 {
 
     /**
+     * Filter iterator
+     *
+     * @var DotFilterIterator
+     */
+    protected $filter;
+
+    /**
      * Setup the test case
      */
     public function setUp()
@@ -53,6 +60,20 @@ class DotFilterIteratorTest extends TestCase
             '..' => array(),
             'one' => 'one'
         ));
+        
+        $this->filter = new DotFilterIterator(
+            new RecursiveDirectoryIterator(
+                vfsStream::url('root')
+            )
+        );
+    }
+    
+    /**
+     * Tear down the test case
+     */
+    public function tearDown()
+    {
+        unset($this->filter);
     }
 
     /**
@@ -60,18 +81,11 @@ class DotFilterIteratorTest extends TestCase
      */
     public function testDotDirectoriesAreFilteredOut()
     {
-        $this->assertEquals(
-            array(
-                vfsStream::url('root/one') => new SplFileInfo(vfsStream::url('root/one'))
-            ),
-            iterator_to_array(
-                new DotFilterIterator(
-                    new RecursiveDirectoryIterator(
-                        vfsStream::url('root')
-                    )
-                )
-            )
-        );
+        $results = iterator_to_array($this->filter);
+
+        $this->assertCount(1, $results);
+        $this->assertArrayHasKey(vfsStream::url('root/one'), $results);
+        $this->assertEquals(new SplFileInfo(vfsStream::url('root/one')), $results[vfsStream::url('root/one')]);
     }
 
 }

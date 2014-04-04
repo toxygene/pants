@@ -60,7 +60,7 @@ class DefaultIgnoreFilterIteratorTest extends TestCase
             '.svn' => array(),
             'test' => array()
         ));
-        
+
         $this->filter = new DefaultIgnoreFilterIterator(new RecursiveDirectoryIterator(vfsStream::url("root")));
     }
 
