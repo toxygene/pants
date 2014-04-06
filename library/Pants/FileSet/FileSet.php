@@ -36,11 +36,11 @@ namespace Pants\FileSet;
 use Exception;
 use FilesystemIterator;
 use IteratorAggregate;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 use Pants\FileSet\DefaultIgnoreFilterIterator;
 use Pants\FileSet\DotFilterIterator;
 use Pants\FileSet\IncludeExcludeFilterIterator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
 /**
  * Abstraction of a set of files
@@ -141,13 +141,9 @@ class FileSet implements IteratorAggregate
 
         // Wrap the iterator with a recursive iterator iterator
         $iterator = new RecursiveIteratorIterator(
-            $iterator
+            $iterator,
+            RecursiveIteratorIterator::CHILD_FIRST
         );
-
-        $iterator->setFlags(RecursiveIteratorIterator::CHILD_FIRST);
-
-        // Wrap the iterator with a dot filter iterator
-        $iterator = new DotFilterIterator($iterator);
 
         // Wrap the iterator with an include/exclude filter iterator
         $iterator = new IncludeExcludeFilterIterator(
@@ -155,8 +151,8 @@ class FileSet implements IteratorAggregate
         );
 
         $iterator->setBaseDirectory($this->getBaseDirectory())
-                 ->setExcludes($this->getExcludes())
-                 ->setIncludes($this->getIncludes());
+            ->setExcludes($this->getExcludes())
+            ->setIncludes($this->getIncludes());
 
         return $iterator;
     }

@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -27,73 +27,58 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *
- * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
-namespace Pants\FileSet;
+namespace PantsTest\FileSet;
 
-use RecursiveFilterIterator;
-use RecursiveIterator;
+use org\bovigo\vfs\vfsStream;
+use Pants\FileSet\FileSet;
+use PHPUnit_Framework_TestCase as TestCase;
 
 /**
- * Default ignore filter iterator
  *
- * @package Pants\FileSet
  */
-class DefaultIgnoreFilterIterator extends RecursiveFilterIterator
+class FileSetTest extends TestCase
 {
+    
+    /**
+     * File set
+     *
+     * @var FileSet
+     */
+    protected $fileSet;
 
     /**
-     * Default patterns
-     *
-     * @var array
+     * Setup the test case
      */
-    protected $patterns = array(
-        '#^.git$#',
-        '#^.gitignore$#',
-        '#^.svn$#',
-        '#^.*?\.swp#'
-    );
-
-    /**
-     * Check whether the current element of the iterator is acceptable
-     *
-     * @return boolean
-     */
-    public function accept()
+    public function setUp()
     {
-        $delimiter = "#";
+        vfsStream::setup(
+            'root',
+            null,
+            array(
+                '.git' => array(),
+                '.gitignore' => 'test',
+                'README' => 'test',
+                'src' => array(
+                    'test' => 'test',
+                    '.test.swp' => 'test'
+                )
+            )
+        );
 
-        foreach ($this->getPatterns() as $pattern) {
-            if (preg_match($pattern, $this->getInnerIterator()->current()->getFilename())) {
-                return false;
-            }
-        }
-        
-        return true;
+        $this->fileSet = new FileSet();
+
+        $this->fileSet
+            ->setBaseDirectory(vfsStream::url('root'));
     }
-
+    
     /**
-     * Get the patterns
-     *
-     * @return array
+     * Tear down the test case
      */
-    public function getPatterns()
+    public function tearDown()
     {
-        return $this->patterns;
-    }
-
-    /**
-     * Set the patterns
-     *
-     * @param array $patterns
-     * @return DefaultIgnoreFilterIterator
-     */
-    public function setPatterns(array $patterns)
-    {
-        $this->patterns = $patterns;
-        return $this;
+        unset($this->fileSet);
     }
 
 }

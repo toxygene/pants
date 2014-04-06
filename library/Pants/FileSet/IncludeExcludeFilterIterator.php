@@ -72,7 +72,7 @@ class IncludeExcludeFilterIterator extends FilterIterator
         $path = preg_replace(
             "#^" . preg_quote($this->getBaseDirectory()) . "/?#",
             "",
-            $this->getInnerIterator()->current()->getFilename()
+            $this->getInnerIterator()->current()->getPathname()
         );
 
         foreach ($this->getIncludes() as $include) {

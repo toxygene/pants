@@ -31,6 +31,7 @@
 
 namespace PantsTest\FileSet;
 
+use FilesystemIterator;
 use org\bovigo\vfs\vfsStream;
 use Pants\FileSet\IncludeExcludeFilterIterator;
 use PHPUnit_Framework_TestCase as TestCase;
@@ -50,25 +51,22 @@ class IncludeExcludeFilterIteratorTest extends TestCase
     protected $filter;
 
     /**
-     * Virtual file system
-     *
-     * @var vfsStream
-     */
-    protected $vfs;
-
-    /**
      * Set up the test case
      */
     public function setUp()
     {
-        $this->vfs = vfsStream::setup('root', null, array(
+        vfsStream::setup('root', null, array(
             'one' => 'test',
             'two' => 'test',
             'three' => 'test',
             'four' => 'test'
         ));
+
+        $iterator = new RecursiveDirectoryIterator(
+            vfsStream::url('root')
+        );
         
-        $this->filter = new IncludeExcludeFilterIterator(new RecursiveDirectoryIterator(vfsStream::url("root")));
+        $this->filter = new IncludeExcludeFilterIterator($iterator);
     }
 
     /**

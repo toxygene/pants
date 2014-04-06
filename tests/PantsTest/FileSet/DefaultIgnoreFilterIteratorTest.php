@@ -31,6 +31,7 @@
 
 namespace PantsTest\FileSet;
 
+use FilesystemIterator;
 use org\bovigo\vfs\vfsStream;
 use Pants\FileSet\DefaultIgnoreFilterIterator;
 use PHPUnit_Framework_TestCase as TestCase;
@@ -61,7 +62,11 @@ class DefaultIgnoreFilterIteratorTest extends TestCase
             'test' => array()
         ));
 
-        $this->filter = new DefaultIgnoreFilterIterator(new RecursiveDirectoryIterator(vfsStream::url("root")));
+        $iterator = new RecursiveDirectoryIterator(
+            vfsStream::url('root')
+        );
+        
+        $this->filter = new DefaultIgnoreFilterIterator($iterator);
     }
 
     /**
