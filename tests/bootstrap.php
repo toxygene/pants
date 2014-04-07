@@ -35,7 +35,7 @@ use Zend\Loader\StandardAutoloader;
 
 $autoloader = new StandardAutoloader();
 $autoloader->registerNamespace('Pants', './library/Pants')
-           ->register();
+    ->register();
 
 // Setup PHPUnit autoloading
 require_once 'PHPUnit/Autoload.php';
