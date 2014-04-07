@@ -63,8 +63,6 @@ class DefaultIgnoreFilterIterator extends RecursiveFilterIterator
      */
     public function accept()
     {
-        $delimiter = "#";
-
         foreach ($this->getPatterns() as $pattern) {
             if (preg_match($pattern, $this->getInnerIterator()->current()->getFilename())) {
                 return false;
