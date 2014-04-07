@@ -34,6 +34,7 @@ namespace PantsTest\FileSet;
 use org\bovigo\vfs\vfsStream;
 use Pants\FileSet\FileSet;
 use PHPUnit_Framework_TestCase as TestCase;
+use SplFileInfo;
 
 /**
  *
@@ -67,10 +68,7 @@ class FileSetTest extends TestCase
             )
         );
 
-        $this->fileSet = new FileSet();
-
-        $this->fileSet
-            ->setBaseDirectory(vfsStream::url('root'));
+        $this->fileSet = new FileSet(vfsStream::url('root'));
     }
     
     /**
@@ -79,6 +77,22 @@ class FileSetTest extends TestCase
     public function tearDown()
     {
         unset($this->fileSet);
+    }
+    
+    /**
+     *
+     */
+    public function testIteratesOverAllFilesAndDirectories()
+    {
+        $paths = iterator_to_array($this->fileSet);
+        
+        $this->assertCount(6, $paths);
+        $this->assertContains(vfsStream::url('root/.git'), $paths);
+        $this->assertContains(vfsStream::url('root/.gitignore'), $paths);
+        $this->assertContains(vfsStream::url('root/README'), $paths);
+        $this->assertContains(vfsStream::url('root/src'), $paths);
+        $this->assertContains(vfsStream::url('root/src/test'), $paths);
+        $this->assertContains(vfsStream::url('root/src/.test.swp'), $paths);
     }
 
 }

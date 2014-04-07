@@ -27,47 +27,26 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *
- * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
-namespace Pants\FileSet;
+namespace Pants\FileSet\IncludeExcludeFilterIterator;
 
-use FilesystemIterator;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
+use SplFileInfo;
 
 /**
- * Abstraction of a set of files
+ * Matcher interface for the include/exclude filter iterator
  *
- * @package Pants\FileSet
+ * @package Pants\FileSet\IncludeExcludeFilterIterator
  */
-class FileSet extends RecursiveIteratorIterator
+interface Matcher
 {
 
     /**
-     * Constructor
+     * Check if a pathname is a match
      *
-     * @param string $baseDirectory
+     * @param string $pathname
+     * @return boolean
      */
-    public function __construct($baseDirectory)
-    {
-        parent::__construct(
-            new RecursiveDirectoryIterator(
-                $baseDirectory
-            ),
-            RecursiveIteratorIterator::CHILD_FIRST
-        );
-    }
-
-    /**
-     * Return each file in the fileset as the pathname of the file
-     *
-     * @return string
-     */
-    public function current()
-    {
-        return parent::current()->getPathname();
-    }
-
+    public function match($pathname);
+    
 }

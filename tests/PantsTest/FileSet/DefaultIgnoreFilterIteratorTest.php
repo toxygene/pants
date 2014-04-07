@@ -62,11 +62,9 @@ class DefaultIgnoreFilterIteratorTest extends TestCase
             'test' => array()
         ));
 
-        $iterator = new RecursiveDirectoryIterator(
+        $this->filter = new DefaultIgnoreFilterIterator(new RecursiveDirectoryIterator(
             vfsStream::url('root')
-        );
-        
-        $this->filter = new DefaultIgnoreFilterIterator($iterator);
+        ));
     }
 
     /**

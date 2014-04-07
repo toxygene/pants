@@ -62,11 +62,9 @@ class IncludeExcludeFilterIteratorTest extends TestCase
             'four' => 'test'
         ));
 
-        $iterator = new RecursiveDirectoryIterator(
+        $this->filter = new IncludeExcludeFilterIterator(new RecursiveDirectoryIterator(
             vfsStream::url('root')
-        );
-        
-        $this->filter = new IncludeExcludeFilterIterator($iterator);
+        ));
     }
 
     /**
@@ -86,9 +84,14 @@ class IncludeExcludeFilterIteratorTest extends TestCase
      */
     public function testExcludePatternsCanBeSet()
     {
-        $this->filter->setExcludes(array('one', 'two'));
+        $matcher1 = $this->getMock('\Pants\FileSet\IncludeExcludeFilterIterator\Matcher');
+        $matcher2 = $this->getMock('\Pants\FileSet\IncludeExcludeFilterIterator\Matcher');
 
-        $this->assertEquals(array('one', 'two'), $this->filter->getExcludes());
+        $this->filter->setExcludes(array($matcher1, $matcher2));
+
+        $this->assertCount(2, $this->filter->getExcludes());
+        $this->assertContains($matcher1, $this->filter->getExcludes());
+        $this->assertContains($matcher2, $this->filter->getExcludes());
     }
 
     /**
@@ -97,9 +100,14 @@ class IncludeExcludeFilterIteratorTest extends TestCase
      */
     public function testIncludePatternsCanBeSet()
     {
-        $this->filter->setIncludes(array('one', 'two'));
+        $matcher1 = $this->getMock('\Pants\FileSet\IncludeExcludeFilterIterator\Matcher');
+        $matcher2 = $this->getMock('\Pants\FileSet\IncludeExcludeFilterIterator\Matcher');
 
-        $this->assertEquals(array('one', 'two'), $this->filter->getIncludes());
+        $this->filter->setIncludes(array($matcher1, $matcher2));
+
+        $this->assertCount(2, $this->filter->getIncludes());
+        $this->assertContains($matcher1, $this->filter->getIncludes());
+        $this->assertContains($matcher2, $this->filter->getIncludes());
     }
 
     /**
@@ -115,10 +123,47 @@ class IncludeExcludeFilterIteratorTest extends TestCase
      */
     public function testFilesAreAcceptedIfTheyAreIncludedAndNotExcluded()
     {
+        $include = $this->getMock('\Pants\FileSet\IncludeExcludeFilterIterator\Matcher');
+        $include->expects($this->at(0))
+            ->method('match')
+            ->with('one')
+            ->will($this->returnValue(true));
+
+        $include->expects($this->at(1))
+            ->method('match')
+            ->with('two')
+            ->will($this->returnValue(true));
+
+        $include->expects($this->at(2))
+            ->method('match')
+            ->with('three')
+            ->will($this->returnValue(false));
+
+        $include->expects($this->at(3))
+            ->method('match')
+            ->with('four')
+            ->will($this->returnValue(true));
+
+        $exclude = $this->getMock('\Pants\FileSet\IncludeExcludeFilterIterator\Matcher');
+        $exclude->expects($this->at(0))
+            ->method('match')
+            ->with('one')
+            ->will($this->returnValue(false));
+            
+        $exclude->expects($this->at(1))
+            ->method('match')
+            ->with('two')
+            ->will($this->returnValue(true));
+            
+        $exclude->expects($this->at(2))
+            ->method('match')
+            ->with('four')
+            ->will($this->returnValue(false));
+
         $this->filter
             ->setBaseDirectory(vfsStream::url('root'))
-            ->setExcludes(array('#^t#'))
-            ->setIncludes(array('#o#'));
+            ->setExcludes(array($exclude))
+            ->setIncludes(array($include));
 
         $results = iterator_to_array($this->filter);
 

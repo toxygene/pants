@@ -51,14 +51,14 @@ class IncludeExcludeFilterIterator extends FilterIterator
     /**
      * Exclude patterns
      *
-     * @var array
+     * @var Pants\FileSet\IncludeExcludeFilterIterator\Matcher[]
      */
     protected $excludes = array();
 
     /**
      * Include patterns
      *
-     * @var array
+     * @var Pants\FileSet\IncludeExcludeFilterIterator\Matcher[]
      */
     protected $includes = array();
 
@@ -69,16 +69,19 @@ class IncludeExcludeFilterIterator extends FilterIterator
      */
     public function accept()
     {
-        $path = preg_replace(
+        $pathname = preg_replace(
             "#^" . preg_quote($this->getBaseDirectory()) . "/?#",
             "",
-            $this->getInnerIterator()->current()->getPathname()
+            $this->getInnerIterator()
+                ->current()
+                ->getPathname()
         );
 
         foreach ($this->getIncludes() as $include) {
-            if (preg_match($include, $path)) {
+            if ($include->match($pathname)) {
                 foreach ($this->getExcludes() as $exclude) {
-                    if (preg_match($exclude, $path)) {
+                    $match = $exclude->match($pathname);
+                    if ($match) {
                         return false;
                     }
                 }
@@ -102,7 +105,7 @@ class IncludeExcludeFilterIterator extends FilterIterator
     /**
      * Get the exclude patterns
      *
-     * @return array
+     * @return Pants\FileSet\IncludeExcludeFilterIterator\Matcher[]
      */
     public function getExcludes()
     {
@@ -112,7 +115,7 @@ class IncludeExcludeFilterIterator extends FilterIterator
     /**
      * Get the include patterns
      *
-     * @return array
+     * @return Pants\FileSet\IncludeExcludeFilterIterator\Matcher[]
      */
     public function getIncludes()
     {
@@ -123,7 +126,7 @@ class IncludeExcludeFilterIterator extends FilterIterator
      * Set the base directory
      *
      * @param string $baseDirectory
-     * @return IncludeExcludeFilterIterator
+     * @return self
      */
     public function setBaseDirectory($baseDirectory)
     {
@@ -134,8 +137,8 @@ class IncludeExcludeFilterIterator extends FilterIterator
     /**
      * Set the exclude patterns
      *
-     * @param array $excludes
-     * @return IncludeExcludeFilterIterator
+     * @param Pants\FileSet\IncludeExcludeFilterIterator\Matcher[] $excludes
+     * @return self
      */
     public function setExcludes(array $excludes)
     {
@@ -146,8 +149,8 @@ class IncludeExcludeFilterIterator extends FilterIterator
     /**
      * Set the include patterns
      *
-     * @param array $includes
-     * @return IncludeExcludeFilterIterator
+     * @param Pants\FileSet\IncludeExcludeFilterIterator\Matcher[] $includes
+     * @return self
      */
     public function setIncludes(array $includes)
     {
