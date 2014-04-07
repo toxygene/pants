@@ -31,8 +31,6 @@
 
 namespace Pants\FileSet\IncludeExcludeFilterIterator;
 
-use SplFileInfo;
-
 /**
  * Matcher that does a regular expression match on the path
  *

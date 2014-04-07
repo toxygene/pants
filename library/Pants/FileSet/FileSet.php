@@ -33,7 +33,6 @@
 
 namespace Pants\FileSet;
 
-use FilesystemIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 

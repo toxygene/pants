@@ -31,7 +31,6 @@
 
 namespace PantsTest\FileSet;
 
-use FilesystemIterator;
 use org\bovigo\vfs\vfsStream;
 use Pants\FileSet\IncludeExcludeFilterIterator;
 use PHPUnit_Framework_TestCase as TestCase;

@@ -31,8 +31,6 @@
 
 namespace Pants\FileSet\IncludeExcludeFilterIterator;
 
-use SplFileInfo;
-
 /**
  * Matcher interface for the include/exclude filter iterator
  *

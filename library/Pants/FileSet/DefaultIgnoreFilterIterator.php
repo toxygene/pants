@@ -34,7 +34,6 @@
 namespace Pants\FileSet;
 
 use RecursiveFilterIterator;
-use RecursiveIterator;
 
 /**
  * Default ignore filter iterator
@@ -50,10 +49,10 @@ class DefaultIgnoreFilterIterator extends RecursiveFilterIterator
      * @var array
      */
     protected $patterns = array(
-        '#^.git$#',
-        '#^.gitignore$#',
-        '#^.svn$#',
-        '#^.*?\.swp#'
+        '#^\.git$#',
+        '#^\.gitignore$#',
+        '#^\.svn$#',
+        '#^.+?\.swp#'
     );
 
     /**
@@ -86,7 +85,7 @@ class DefaultIgnoreFilterIterator extends RecursiveFilterIterator
      * Set the patterns
      *
      * @param array $patterns
-     * @return DefaultIgnoreFilterIterator
+     * @return self
      */
     public function setPatterns(array $patterns)
     {

@@ -34,7 +34,6 @@ namespace PantsTest\FileSet;
 use org\bovigo\vfs\vfsStream;
 use Pants\FileSet\FileSet;
 use PHPUnit_Framework_TestCase as TestCase;
-use SplFileInfo;
 
 /**
  *
