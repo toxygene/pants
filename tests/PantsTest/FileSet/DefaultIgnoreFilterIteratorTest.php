@@ -72,9 +72,22 @@ class DefaultIgnoreFilterIteratorTest extends TestCase
      */
     public function testPatternsCanBeSet()
     {
-        $this->filter->setPatterns(array('one', 'two'));
+        $this->filter
+            ->setPatterns(array('one', 'two'));
 
         $this->assertEquals(array('one', 'two'), $this->filter->getPatterns());
+    }
+
+    /**
+     * @covers Pants\FileSet\DefaultIgnoreFilterIterator::getBaseDirectory
+     * @covers Pants\FileSet\DefaultIgnoreFilterIterator::setBaseDirectory
+     */
+    public function testBaseDirectoryCanBeSet()
+    {
+        $this->filter
+            ->setBaseDirectory('test');
+
+        $this->assertEquals('test', $this->filter->getBaseDirectory());
     }
 
     /**
@@ -82,6 +95,9 @@ class DefaultIgnoreFilterIteratorTest extends TestCase
      */
     public function testOnlyNonIgnoredFilesAreReturned()
     {
+        $this->filter
+            ->setBaseDirectory(vfsStream::url('root'));
+
         $results = iterator_to_array($this->filter);
 
         $this->assertEquals(1, count($results));

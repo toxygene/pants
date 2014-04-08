@@ -44,15 +44,22 @@ class DefaultIgnoreFilterIterator extends RecursiveFilterIterator
 {
 
     /**
+     * Base directory
+     *
+     * @var string
+     */
+    protected $baseDirectory;
+
+    /**
      * Default patterns
      *
      * @var array
      */
     protected $patterns = array(
-        '#^\.git$#',
-        '#^\.gitignore$#',
-        '#^\.svn$#',
-        '#^.+?\.swp#'
+        '#^\/\.git$#',
+        '#^\/\.gitignore$#',
+        '#^\/\.svn$#',
+        '#^\/.+?\.swp#'
     );
 
     /**
@@ -62,13 +69,31 @@ class DefaultIgnoreFilterIterator extends RecursiveFilterIterator
      */
     public function accept()
     {
+        $pathname = preg_replace(
+            '#^' . preg_quote($this->getBaseDirectory()) . '/?#',
+            '/',
+            $this->getInnerIterator()
+                ->current()
+                ->getPathname()
+        );
+
         foreach ($this->getPatterns() as $pattern) {
-            if (preg_match($pattern, $this->getInnerIterator()->current()->getFilename())) {
+            if (preg_match($pattern, $pathname)) {
                 return false;
             }
         }
         
         return true;
+    }
+
+    /**
+     * Get the base directory
+     *
+     * @return string
+     */
+    public function getBaseDirectory()
+    {
+        return $this->baseDirectory;
     }
 
     /**
@@ -79,6 +104,18 @@ class DefaultIgnoreFilterIterator extends RecursiveFilterIterator
     public function getPatterns()
     {
         return $this->patterns;
+    }
+
+    /**
+     * Set the base directory
+     *
+     * @param string $baseDirectory
+     * @return self
+     */
+    public function setBaseDirectory($baseDirectory)
+    {
+        $this->baseDirectory = $baseDirectory;
+        return $this;
     }
 
     /**

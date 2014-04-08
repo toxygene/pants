@@ -125,38 +125,38 @@ class IncludeExcludeFilterIteratorTest extends TestCase
         $include = $this->getMock('\Pants\FileSet\IncludeExcludeFilterIterator\Matcher');
         $include->expects($this->at(0))
             ->method('match')
-            ->with('one')
+            ->with('/one')
             ->will($this->returnValue(true));
 
         $include->expects($this->at(1))
             ->method('match')
-            ->with('two')
+            ->with('/two')
             ->will($this->returnValue(true));
 
         $include->expects($this->at(2))
             ->method('match')
-            ->with('three')
+            ->with('/three')
             ->will($this->returnValue(false));
 
         $include->expects($this->at(3))
             ->method('match')
-            ->with('four')
+            ->with('/four')
             ->will($this->returnValue(true));
 
         $exclude = $this->getMock('\Pants\FileSet\IncludeExcludeFilterIterator\Matcher');
         $exclude->expects($this->at(0))
             ->method('match')
-            ->with('one')
+            ->with('/one')
             ->will($this->returnValue(false));
             
         $exclude->expects($this->at(1))
             ->method('match')
-            ->with('two')
+            ->with('/two')
             ->will($this->returnValue(true));
             
         $exclude->expects($this->at(2))
             ->method('match')
-            ->with('four')
+            ->with('/four')
             ->will($this->returnValue(false));
 
         $this->filter

@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -70,8 +70,8 @@ class IncludeExcludeFilterIterator extends FilterIterator
     public function accept()
     {
         $pathname = preg_replace(
-            "#^" . preg_quote($this->getBaseDirectory()) . "/?#",
-            "",
+            '#^' . preg_quote($this->getBaseDirectory()) . '/?#',
+            '/',
             $this->getInnerIterator()
                 ->current()
                 ->getPathname()

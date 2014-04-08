@@ -29,50 +29,62 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Pants\FileSet\IncludeExcludeFilterIterator;
+namespace PantsTest\FileSet\IncludeExcludeFilterIterator;
+
+use Pants\FileSet\IncludeExcludeFilterIterator\Regexp;
+use PHPUnit_Framework_TestCase as TestCase;
 
 /**
- * Matcher that does a regular expression match on the path
- *
- * @package Pants\FileSet\IncludeExcludeFilterIterator
+ * Unit tests for the regex matcher
  */
-class RegexpPath implements Matcher
+class RegexpTest extends TestCase
 {
 
     /**
-     * Regular expression pattern to match against
+     * Regexp matcher
      *
-     * @var string
+     * @var Regexp
      */
-    protected $pattern;
+    protected $matcher;
     
     /**
-     * Get the regular expression pattern to match against
-     *
-     * @return string
+     * Setup the test case
      */
-    public function getPattern()
+    public function setUp()
     {
-        return $this->pattern;
-
-    /**
-     * {@inheritDoc}
-     */
-    public function match($pathname)
-    {
-        return preg_match($this->getPattern(), $pathname) > 0;
+        $this->matcher = new Regexp();
     }
     
     /**
-     * Set the regular expression pattern to match against
-     *
-     * @param string $pattern
-     * @return self
+     * Tear down the test case
      */
-    public function setPattern($pattern)
+    public function tearDown()
     {
-        $this->pattern = $pattern;
-        return $this;
+        unset($this->matcher);
+    }
+    
+    /**
+     * @covers Pants\FileSet\IncludeExcludeFilterIterator\Regexp::getPattern
+     * @covers Pants\FileSet\IncludeExcludeFilterIterator\Regexp::setPattern
+     */
+    public function testPatternCanBeSet()
+    {
+        $this->matcher
+            ->setPattern('asdf');
+
+        $this->assertEquals('asdf', $this->matcher->getPattern());
+    }
+    
+    /**
+     *
+     */
+    public function testRegexpIsComparedToSubjectToDetermineMatch()
+    {
+        $this->matcher
+            ->setPattern('#a#');
+
+        $this->assertTrue($this->matcher->match('a'));
+        $this->assertFalse($this->matcher->match('b'));
     }
 
 }

@@ -27,47 +27,53 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *
- * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
-namespace Pants\FileSet;
-
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
+namespace Pants\FileSet\IncludeExcludeFilterIterator;
 
 /**
- * Abstraction of a set of files
+ * Matcher that does a regular expression match on the path
  *
- * @package Pants\FileSet
+ * @package Pants\FileSet\IncludeExcludeFilterIterator
  */
-class FileSet extends RecursiveIteratorIterator
+class Regexp implements Matcher
 {
 
     /**
-     * Constructor
+     * Regular expression pattern to match against
      *
-     * @param string $baseDirectory
+     * @var string
      */
-    public function __construct($baseDirectory)
-    {
-        parent::__construct(
-            new RecursiveDirectoryIterator(
-                $baseDirectory
-            ),
-            RecursiveIteratorIterator::CHILD_FIRST
-        );
-    }
-
+    protected $pattern;
+    
     /**
-     * Return each file in the fileset as the pathname of the file
+     * Get the regular expression pattern to match against
      *
      * @return string
      */
-    public function current()
+    public function getPattern()
     {
-        return parent::current()
-            ->getPathname();
+        return $this->pattern;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function match($pathname)
+    {
+        return preg_match($this->getPattern(), $pathname) > 0;
+    }
+    
+    /**
+     * Set the regular expression pattern to match against
+     *
+     * @param string $pattern
+     * @return self
+     */
+    public function setPattern($pattern)
+    {
+        $this->pattern = $pattern;
+        return $this;
     }
 
 }
