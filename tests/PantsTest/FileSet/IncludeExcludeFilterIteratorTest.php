@@ -112,9 +112,9 @@ class IncludeExcludeFilterIteratorTest extends TestCase
     /**
      * @covers Pants\FileSet\IncludeExcludeFilterIterator::accept
      */
-    public function testEverythingIsIgnoredByDefault()
+    public function testEverythingIsIncludedByDefault()
     {
-        $this->assertEmpty(iterator_to_array($this->filter));
+        $this->assertCount(4, $this->filter);
     }
 
     /**

@@ -47,6 +47,16 @@ class Regexp implements Matcher
     protected $pattern;
     
     /**
+     * Constructor
+     *
+     * @param string $pattern
+     */
+    public function __construct($pattern = null)
+    {
+        $this->setPattern($pattern);
+    }
+    
+    /**
      * Get the regular expression pattern to match against
      *
      * @return string

@@ -77,19 +77,30 @@ class IncludeExcludeFilterIterator extends FilterIterator
                 ->getPathname()
         );
 
-        foreach ($this->getIncludes() as $include) {
-            if ($include->match($pathname)) {
-                foreach ($this->getExcludes() as $exclude) {
-                    $match = $exclude->match($pathname);
-                    if ($match) {
-                        return false;
+        if ($this->getIncludes()) {
+            foreach ($this->getIncludes() as $include) {
+                if ($include->match($pathname)) {
+                    foreach ($this->getExcludes() as $exclude) {
+                        $match = $exclude->match($pathname);
+                        if ($match) {
+                            return false;
+                        }
                     }
+                    return true;
                 }
-                return true;
             }
+            
+            return false;
+        } else {
+            foreach ($this->getExcludes() as $exclude) {
+                $match = $exclude->match($pathname);
+                if ($match) {
+                    return false;
+                }
+            }
+            
+            return true;
         }
-
-        return false;
     }
 
     /**
