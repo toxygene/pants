@@ -21,6 +21,8 @@
     },
     "require-dev": {
         "mikey179/vfsStream": "~1.2",
+        "pdepend/pdepend" : "~1.1",
+        "phpmd/phpmd": "~1.5",
         "phpunit/phpunit": "~3.7"
     }
 }
