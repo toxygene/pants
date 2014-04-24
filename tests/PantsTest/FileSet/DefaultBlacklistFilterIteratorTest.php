@@ -32,20 +32,20 @@
 namespace PantsTest\FileSet;
 
 use org\bovigo\vfs\vfsStream;
-use Pants\FileSet\DefaultIgnoreFilterIterator;
+use Pants\FileSet\DefaultBlacklistFilterIterator;
 use PHPUnit_Framework_TestCase as TestCase;
 use RecursiveDirectoryIterator;
 
 /**
  *
  */
-class DefaultIgnoreFilterIteratorTest extends TestCase
+class DefaultBlacklistFilterIteratorTest extends TestCase
 {
 
     /**
      * Filter
      *
-     * @var DefaultIgnoreFilterIterator
+     * @var DefaultBlacklistFilterIterator
      */
     protected $filter;
 
@@ -61,14 +61,14 @@ class DefaultIgnoreFilterIteratorTest extends TestCase
             'test' => array()
         ));
 
-        $this->filter = new DefaultIgnoreFilterIterator(new RecursiveDirectoryIterator(
+        $this->filter = new DefaultBlacklistFilterIterator(new RecursiveDirectoryIterator(
             vfsStream::url('root')
         ));
     }
 
     /**
-     * @covers Pants\FileSet\DefaultIgnoreFilterIterator::getPatterns
-     * @covers Pants\FileSet\DefaultIgnoreFilterIterator::setPatterns
+     * @covers Pants\FileSet\DefaultBlacklistFilterIterator::getPatterns
+     * @covers Pants\FileSet\DefaultBlacklistFilterIterator::setPatterns
      */
     public function testPatternsCanBeSet()
     {
@@ -79,8 +79,8 @@ class DefaultIgnoreFilterIteratorTest extends TestCase
     }
 
     /**
-     * @covers Pants\FileSet\DefaultIgnoreFilterIterator::getBaseDirectory
-     * @covers Pants\FileSet\DefaultIgnoreFilterIterator::setBaseDirectory
+     * @covers Pants\FileSet\DefaultBlacklistFilterIterator::getBaseDirectory
+     * @covers Pants\FileSet\DefaultBlacklistFilterIterator::setBaseDirectory
      */
     public function testBaseDirectoryCanBeSet()
     {
@@ -91,7 +91,7 @@ class DefaultIgnoreFilterIteratorTest extends TestCase
     }
 
     /**
-     * @covers Pants\FileSet\DefaultIgnoreFilterIterator::accept
+     * @covers Pants\FileSet\DefaultBlacklistFilterIterator::accept
      */
     public function testOnlyNonIgnoredFilesAreReturned()
     {

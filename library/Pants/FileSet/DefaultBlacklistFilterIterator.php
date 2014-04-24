@@ -36,11 +36,11 @@ namespace Pants\FileSet;
 use RecursiveFilterIterator;
 
 /**
- * Default ignore filter iterator
+ * Default blacklist filter iterator
  *
  * @package Pants\FileSet
  */
-class DefaultIgnoreFilterIterator extends RecursiveFilterIterator
+class DefaultBlacklistFilterIterator extends RecursiveFilterIterator
 {
 
     /**
