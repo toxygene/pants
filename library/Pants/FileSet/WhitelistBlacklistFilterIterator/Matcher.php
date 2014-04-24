@@ -29,62 +29,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace PantsTest\FileSet\IncludeExcludeFilterIterator;
-
-use Pants\FileSet\IncludeExcludeFilterIterator\Regexp;
-use PHPUnit_Framework_TestCase as TestCase;
+namespace Pants\FileSet\WhitelistBlacklistFilterIterator;
 
 /**
- * Unit tests for the regex matcher
+ * Matcher interface for the include/exclude filter iterator
+ *
+ * @package Pants\FileSet\WhitelistBlacklistFilterIterator
  */
-class RegexpTest extends TestCase
+interface Matcher
 {
 
     /**
-     * Regexp matcher
+     * Check if a pathname is a match
      *
-     * @var Regexp
+     * @param string $pathname
+     * @return boolean
      */
-    protected $matcher;
+    public function match($pathname);
     
-    /**
-     * Setup the test case
-     */
-    public function setUp()
-    {
-        $this->matcher = new Regexp();
-    }
-    
-    /**
-     * Tear down the test case
-     */
-    public function tearDown()
-    {
-        unset($this->matcher);
-    }
-    
-    /**
-     * @covers Pants\FileSet\IncludeExcludeFilterIterator\Regexp::getPattern
-     * @covers Pants\FileSet\IncludeExcludeFilterIterator\Regexp::setPattern
-     */
-    public function testPatternCanBeSet()
-    {
-        $this->matcher
-            ->setPattern('asdf');
-
-        $this->assertEquals('asdf', $this->matcher->getPattern());
-    }
-    
-    /**
-     *
-     */
-    public function testRegexpIsComparedToSubjectToDetermineMatch()
-    {
-        $this->matcher
-            ->setPattern('#a#');
-
-        $this->assertTrue($this->matcher->match('a'));
-        $this->assertFalse($this->matcher->match('b'));
-    }
-
 }

@@ -32,20 +32,20 @@
 namespace PantsTest\FileSet;
 
 use org\bovigo\vfs\vfsStream;
-use Pants\FileSet\IncludeExcludeFilterIterator;
+use Pants\FileSet\WhitelistBlacklistFilterIterator;
 use PHPUnit_Framework_TestCase as TestCase;
 use RecursiveDirectoryIterator;
 
 /**
  *
  */
-class IncludeExcludeFilterIteratorTest extends TestCase
+class WhitelistBlacklistFilterIteratorTest extends TestCase
 {
 
     /**
      * Filter
      *
-     * @var IncludeExcludeFilterIterator
+     * @var WhitelistBlacklistFilterIterator
      */
     protected $filter;
 
@@ -61,14 +61,14 @@ class IncludeExcludeFilterIteratorTest extends TestCase
             'four' => 'test'
         ));
 
-        $this->filter = new IncludeExcludeFilterIterator(new RecursiveDirectoryIterator(
+        $this->filter = new WhitelistBlacklistFilterIterator(new RecursiveDirectoryIterator(
             vfsStream::url('root')
         ));
     }
 
     /**
-     * @covers Pants\FileSet\IncludeExcludeFilterIterator::getBaseDirectory
-     * @covers Pants\FileSet\IncludeExcludeFilterIterator::setBaseDirectory
+     * @covers Pants\FileSet\WhitelistBlacklistFilterIterator::getBaseDirectory
+     * @covers Pants\FileSet\WhitelistBlacklistFilterIterator::setBaseDirectory
      */
     public function testBaseDirectoryCanBeSet()
     {
@@ -78,39 +78,39 @@ class IncludeExcludeFilterIteratorTest extends TestCase
     }
 
     /**
-     * @covers Pants\FileSet\IncludeExcludeFilterIterator::getExcludes
-     * @covers Pants\FileSet\IncludeExcludeFilterIterator::setExcludes
+     * @covers Pants\FileSet\WhitelistBlacklistFilterIterator::getExcludes
+     * @covers Pants\FileSet\WhitelistBlacklistFilterIterator::setExcludes
      */
-    public function testExcludePatternsCanBeSet()
+    public function testBlacklistMatchersCanBeSet()
     {
-        $matcher1 = $this->getMock('\Pants\FileSet\IncludeExcludeFilterIterator\Matcher');
-        $matcher2 = $this->getMock('\Pants\FileSet\IncludeExcludeFilterIterator\Matcher');
+        $matcher1 = $this->getMock('\Pants\FileSet\WhitelistBlacklistFilterIterator\Matcher');
+        $matcher2 = $this->getMock('\Pants\FileSet\WhitelistBlacklistFilterIterator\Matcher');
 
-        $this->filter->setExcludes(array($matcher1, $matcher2));
+        $this->filter->setBlacklistMatchers(array($matcher1, $matcher2));
 
-        $this->assertCount(2, $this->filter->getExcludes());
-        $this->assertContains($matcher1, $this->filter->getExcludes());
-        $this->assertContains($matcher2, $this->filter->getExcludes());
+        $this->assertCount(2, $this->filter->getBlacklistMatchers());
+        $this->assertContains($matcher1, $this->filter->getBlacklistMatchers());
+        $this->assertContains($matcher2, $this->filter->getBlacklistMatchers());
     }
 
     /**
-     * @covers Pants\FileSet\IncludeExcludeFilterIterator::getIncludes
-     * @covers Pants\FileSet\IncludeExcludeFilterIterator::setIncludes
+     * @covers Pants\FileSet\WhitelistBlacklistFilterIterator::getIncludes
+     * @covers Pants\FileSet\WhitelistBlacklistFilterIterator::setIncludes
      */
-    public function testIncludePatternsCanBeSet()
+    public function testWhitelistMatchersCanBeSet()
     {
-        $matcher1 = $this->getMock('\Pants\FileSet\IncludeExcludeFilterIterator\Matcher');
-        $matcher2 = $this->getMock('\Pants\FileSet\IncludeExcludeFilterIterator\Matcher');
+        $matcher1 = $this->getMock('\Pants\FileSet\WhitelistBlacklistFilterIterator\Matcher');
+        $matcher2 = $this->getMock('\Pants\FileSet\WhitelistBlacklistFilterIterator\Matcher');
 
-        $this->filter->setIncludes(array($matcher1, $matcher2));
+        $this->filter->setWhitelistMatchers(array($matcher1, $matcher2));
 
-        $this->assertCount(2, $this->filter->getIncludes());
-        $this->assertContains($matcher1, $this->filter->getIncludes());
-        $this->assertContains($matcher2, $this->filter->getIncludes());
+        $this->assertCount(2, $this->filter->getWhitelistMatchers());
+        $this->assertContains($matcher1, $this->filter->getWhitelistMatchers());
+        $this->assertContains($matcher2, $this->filter->getWhitelistMatchers());
     }
 
     /**
-     * @covers Pants\FileSet\IncludeExcludeFilterIterator::accept
+     * @covers Pants\FileSet\WhitelistBlacklistFilterIterator::accept
      */
     public function testEverythingIsIncludedByDefault()
     {
@@ -118,11 +118,11 @@ class IncludeExcludeFilterIteratorTest extends TestCase
     }
 
     /**
-     * @covers Pants\FileSet\IncludeExcludeFilterIterator::accept
+     * @covers Pants\FileSet\WhitelistBlacklistFilterIterator::accept
      */
     public function testFilesAreAcceptedIfTheyAreIncludedAndNotExcluded()
     {
-        $include = $this->getMock('\Pants\FileSet\IncludeExcludeFilterIterator\Matcher');
+        $include = $this->getMock('\Pants\FileSet\WhitelistBlacklistFilterIterator\Matcher');
         $include->expects($this->at(0))
             ->method('match')
             ->with('/one')
@@ -143,7 +143,7 @@ class IncludeExcludeFilterIteratorTest extends TestCase
             ->with('/four')
             ->will($this->returnValue(true));
 
-        $exclude = $this->getMock('\Pants\FileSet\IncludeExcludeFilterIterator\Matcher');
+        $exclude = $this->getMock('\Pants\FileSet\WhitelistBlacklistFilterIterator\Matcher');
         $exclude->expects($this->at(0))
             ->method('match')
             ->with('/one')
@@ -161,8 +161,8 @@ class IncludeExcludeFilterIteratorTest extends TestCase
 
         $this->filter
             ->setBaseDirectory(vfsStream::url('root'))
-            ->setExcludes(array($exclude))
-            ->setIncludes(array($include));
+            ->setBlacklistMatchers(array($exclude))
+            ->setWhitelistMatchers(array($include));
 
         $results = iterator_to_array($this->filter);
 

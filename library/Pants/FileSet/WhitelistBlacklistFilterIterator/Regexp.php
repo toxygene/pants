@@ -29,22 +29,61 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Pants\FileSet\IncludeExcludeFilterIterator;
+namespace Pants\FileSet\WhitelistBlacklistFilterIterator;
 
 /**
- * Matcher interface for the include/exclude filter iterator
+ * Matcher that does a regular expression match on the path
  *
- * @package Pants\FileSet\IncludeExcludeFilterIterator
+ * @package Pants\FileSet\WhitelistBlacklistFilterIterator
  */
-interface Matcher
+class Regexp implements Matcher
 {
 
     /**
-     * Check if a pathname is a match
+     * Regular expression pattern to match against
      *
-     * @param string $pathname
-     * @return boolean
+     * @var string
      */
-    public function match($pathname);
+    protected $pattern;
     
+    /**
+     * Constructor
+     *
+     * @param string $pattern
+     */
+    public function __construct($pattern = null)
+    {
+        $this->setPattern($pattern);
+    }
+    
+    /**
+     * Get the regular expression pattern to match against
+     *
+     * @return string
+     */
+    public function getPattern()
+    {
+        return $this->pattern;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function match($pathname)
+    {
+        return preg_match($this->getPattern(), $pathname) > 0;
+    }
+    
+    /**
+     * Set the regular expression pattern to match against
+     *
+     * @param string $pattern
+     * @return self
+     */
+    public function setPattern($pattern)
+    {
+        $this->pattern = $pattern;
+        return $this;
+    }
+
 }

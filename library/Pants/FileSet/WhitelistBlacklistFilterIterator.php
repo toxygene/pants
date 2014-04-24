@@ -34,11 +34,11 @@ namespace Pants\FileSet;
 use FilterIterator;
 
 /**
- * Include/exclude pattern filter iterator
+ * Whitelist/blacklist pattern filter iterator
  *
  * @package Pants\FileSet
  */
-class IncludeExcludeFilterIterator extends FilterIterator
+class WhitelistBlacklistFilterIterator extends FilterIterator
 {
 
     /**
@@ -49,18 +49,18 @@ class IncludeExcludeFilterIterator extends FilterIterator
     protected $baseDirectory;
 
     /**
-     * Exclude patterns
+     * Blacklist matchers
      *
-     * @var Pants\FileSet\IncludeExcludeFilterIterator\Matcher[]
+     * @var Pants\FileSet\WhitelistBlacklistFilterIterator\Matcher[]
      */
-    protected $excludes = array();
+    protected $blacklistMatchers = array();
 
     /**
-     * Include patterns
+     * Whitelist matchers
      *
-     * @var Pants\FileSet\IncludeExcludeFilterIterator\Matcher[]
+     * @var Pants\FileSet\WhitelistBlacklistFilterIterator\Matcher[]
      */
-    protected $includes = array();
+    protected $whitelistMatchers = array();
 
     /**
      * Check whether the current element of the iterator is acceptable
@@ -77,12 +77,11 @@ class IncludeExcludeFilterIterator extends FilterIterator
                 ->getPathname()
         );
 
-        if ($this->getIncludes()) {
-            foreach ($this->getIncludes() as $include) {
-                if ($include->match($pathname)) {
-                    foreach ($this->getExcludes() as $exclude) {
-                        $match = $exclude->match($pathname);
-                        if ($match) {
+        if ($this->getWhitelistMatchers()) {
+            foreach ($this->getWhitelistMatchers() as $whitelist) {
+                if ($whitelist->match($pathname)) {
+                    foreach ($this->getBlacklistMatchers() as $blacklist) {
+                        if ($blacklist->match($pathname)) {
                             return false;
                         }
                     }
@@ -92,9 +91,8 @@ class IncludeExcludeFilterIterator extends FilterIterator
             
             return false;
         } else {
-            foreach ($this->getExcludes() as $exclude) {
-                $match = $exclude->match($pathname);
-                if ($match) {
+            foreach ($this->getBlacklistMatchers() as $blacklist) {
+                if ($blacklist->match($pathname)) {
                     return false;
                 }
             }
@@ -114,23 +112,23 @@ class IncludeExcludeFilterIterator extends FilterIterator
     }
 
     /**
-     * Get the exclude patterns
+     * Get the blacklist matchers
      *
-     * @return Pants\FileSet\IncludeExcludeFilterIterator\Matcher[]
+     * @return Pants\FileSet\WhitelistBlacklistFilterIterator\Matcher[]
      */
-    public function getExcludes()
+    public function getBlacklistMatchers()
     {
-        return $this->excludes;
+        return $this->blacklistMatchers;
     }
 
     /**
-     * Get the include patterns
+     * Get the whitelist matchers
      *
-     * @return Pants\FileSet\IncludeExcludeFilterIterator\Matcher[]
+     * @return Pants\FileSet\WhitelistBlacklistFilterIterator\Matcher[]
      */
-    public function getIncludes()
+    public function getWhitelistMatchers()
     {
-        return $this->includes;
+        return $this->whitelistMatchers;
     }
 
     /**
@@ -148,24 +146,24 @@ class IncludeExcludeFilterIterator extends FilterIterator
     /**
      * Set the exclude patterns
      *
-     * @param Pants\FileSet\IncludeExcludeFilterIterator\Matcher[] $excludes
+     * @param Pants\FileSet\WhitelistBlacklistFilterIterator\Matcher[] $excludes
      * @return self
      */
-    public function setExcludes(array $excludes)
+    public function setBlacklistMatchers(array $blacklistMatchers)
     {
-        $this->excludes = $excludes;
+        $this->blacklistMatchers = $blacklistMatchers;
         return $this;
     }
 
     /**
      * Set the include patterns
      *
-     * @param Pants\FileSet\IncludeExcludeFilterIterator\Matcher[] $includes
+     * @param Pants\FileSet\WhitelistBlacklistFilterIterator\Matcher[] $includes
      * @return self
      */
-    public function setIncludes(array $includes)
+    public function setWhitelistMatchers(array $whitelistMatchers)
     {
-        $this->includes = $includes;
+        $this->whitelistMatchers = $whitelistMatchers;
         return $this;
     }
 

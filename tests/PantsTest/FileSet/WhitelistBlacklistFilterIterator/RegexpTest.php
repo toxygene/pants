@@ -29,61 +29,62 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Pants\FileSet\IncludeExcludeFilterIterator;
+namespace PantsTest\FileSet\WhitelistBlacklistFilterIterator;
+
+use Pants\FileSet\WhitelistBlacklistFilterIterator\Regexp;
+use PHPUnit_Framework_TestCase as TestCase;
 
 /**
- * Matcher that does a regular expression match on the path
- *
- * @package Pants\FileSet\IncludeExcludeFilterIterator
+ * Unit tests for the regex matcher
  */
-class Regexp implements Matcher
+class RegexpTest extends TestCase
 {
 
     /**
-     * Regular expression pattern to match against
+     * Regexp matcher
      *
-     * @var string
+     * @var Regexp
      */
-    protected $pattern;
+    protected $matcher;
     
     /**
-     * Constructor
-     *
-     * @param string $pattern
+     * Setup the test case
      */
-    public function __construct($pattern = null)
+    public function setUp()
     {
-        $this->setPattern($pattern);
+        $this->matcher = new Regexp();
     }
     
     /**
-     * Get the regular expression pattern to match against
-     *
-     * @return string
+     * Tear down the test case
      */
-    public function getPattern()
+    public function tearDown()
     {
-        return $this->pattern;
+        unset($this->matcher);
     }
+    
+    /**
+     * @covers Pants\FileSet\WhitelistBlacklistFilterIterator\Regexp::getPattern
+     * @covers Pants\FileSet\WhitelistBlacklistFilterIterator\Regexp::setPattern
+     */
+    public function testPatternCanBeSet()
+    {
+        $this->matcher
+            ->setPattern('asdf');
 
-    /**
-     * {@inheritDoc}
-     */
-    public function match($pathname)
-    {
-        return preg_match($this->getPattern(), $pathname) > 0;
+        $this->assertEquals('asdf', $this->matcher->getPattern());
     }
     
     /**
-     * Set the regular expression pattern to match against
-     *
-     * @param string $pattern
-     * @return self
+     * @covers Pants\FileSet\WhitelistBlacklistFilterIterator\Regexp::match
      */
-    public function setPattern($pattern)
+    public function testRegexpIsComparedToSubjectToDetermineMatch()
     {
-        $this->pattern = $pattern;
-        return $this;
+        $this->matcher
+            ->setPattern('#a#');
+
+        $this->assertTrue($this->matcher->match('a'));
+        $this->assertFalse($this->matcher->match('b'));
     }
 
 }
