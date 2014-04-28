@@ -72,7 +72,7 @@ class MoveTest extends TestCase
     /**
      * Tear down the test case
      */
-    public function testDown()
+    public function tearDown()
     {
         unset($this->file);
         unset($this->move);
