@@ -37,7 +37,7 @@ use Pale\Pale;
 use Pants\BuildException;
 
 /**
- * Move file(s) task
+ * Move file task
  *
  * @package Pants\Task
  */
@@ -61,7 +61,7 @@ class Move extends AbstractTask
     /**
      * Execute the task
      *
-     * @return Move
+     * @return self
      * @throw BuildException
      */
     public function execute()
@@ -108,7 +108,7 @@ class Move extends AbstractTask
      * Set the destination file
      *
      * @param string $destination
-     * @return Move
+     * @return self
      */
     public function setDestination($destination)
     {
@@ -120,7 +120,7 @@ class Move extends AbstractTask
      * Set the target file
      *
      * @param string $file
-     * @return Move
+     * @return self
      */
     public function setFile($file)
     {

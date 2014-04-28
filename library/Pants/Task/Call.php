@@ -2,7 +2,7 @@
 /**
  * Pants
  *
- * Copyright (c) 2011, Justin Hendrickson
+ * Copyright (c) 2014, Justin Hendrickson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -63,10 +63,8 @@ class Call extends AbstractTask
             throw new BuildException('No target set');
         }
 
-        $target = $this->filterProperties($this->getTarget());
-
         $this->getProject()
-            ->execute($target);
+            ->execute($this->filterProperties($this->getTarget()));
 
         return $this;
     }

@@ -62,16 +62,6 @@ class FileSet extends AbstractTask
     protected $id;
 
     /**
-     *
-     */
-    public function createInclude()
-    {
-        $include = new Pattern;
-        $this->includes[] = $include;
-        return $include;
-    }
-
-    /**
      * Execute a task
      *
      * @throws BuildException
@@ -86,18 +76,11 @@ class FileSet extends AbstractTask
 
         $fileSet->setBaseDirectory($this->getBaseDirectory());
 
-        $fileSet->setIncludes(array_map(
-            function($include) {
-                return $include->getPattern();
-            },
-            $this->includes
-        ));
-
-        // TODO populate file set object
+        // TODO setup the blacklist/whitelist patterns
 
         $this->getProject()
-             ->getTypes()
-             ->{$this->getId()} = $fileSet;
+            ->getTypes()
+            ->{$this->getId()} = $fileSet;
     }
 
     /**
@@ -124,7 +107,7 @@ class FileSet extends AbstractTask
      * Set the base directory
      *
      * @param string $baseDirectory
-     * @return FileSet
+     * @return self
      */
     public function setBaseDirectory($baseDirectory)
     {
@@ -136,7 +119,7 @@ class FileSet extends AbstractTask
      * Set the id
      *
      * @param string $id
-     * @return FileSet
+     * @return self
      */
     public function setId($id)
     {

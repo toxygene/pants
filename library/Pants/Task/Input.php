@@ -131,8 +131,8 @@ class Input extends AbstractTask
         }
 
         $this->getProject()
-             ->getProperties()
-             ->{$this->getPropertyName()} = $value;
+            ->getProperties()
+            ->{$this->getPropertyName()} = $value;
 
         return $this;
     }

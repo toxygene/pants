@@ -60,20 +60,6 @@ class Chgrp extends AbstractTask
     protected $group;
 
     /**
-     * Add files
-     *
-     * @param Traversable $files
-     * @return self
-     */
-    public function addFiles(Traversable $files)
-    {
-        foreach ($files as $file) {
-            $this->files[] = $file;
-        }
-        return $this;
-    }
-
-    /**
      * Execute the task
      *
      * @return self
@@ -92,7 +78,7 @@ class Chgrp extends AbstractTask
         $group = $this->filterProperties($this->getGroup());
 
         foreach ($this->getFiles() as $file) {
-            $file = $this->filterProperties($this->getFile());
+            $file = $this->filterProperties($file);
             Pale::run(function() use ($file, $group) {
                 return chgrp($file, $group);
             });
@@ -130,6 +116,18 @@ class Chgrp extends AbstractTask
     public function setFile($file)
     {
         $this->files = array($file);
+        return $this;
+    }
+
+    /**
+     * Set the target files
+     *
+     * @param Traversable $files
+     * @return self
+     */
+    public function setFiles(Traversable $files)
+    {
+        $this->files = $files;
         return $this;
     }
 

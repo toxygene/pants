@@ -60,20 +60,6 @@ class Chown extends AbstractTask
     protected $owner;
 
     /**
-     * Add files
-     *
-     * @param Traversable $files
-     * @return self
-     */
-    public function addFiles(Traversable $files)
-    {
-        foreach ($files as $file) {
-            $this->files[] = $file;
-        }
-        return $this;
-    }
-
-    /**
      * Execute the task
      *
      * @return Chown
@@ -92,7 +78,7 @@ class Chown extends AbstractTask
         $owner = $this->filterProperties($this->getOwner());
 
         foreach ($fileSet as $file) {
-            $file = $this->filterProperties($this->getFile());
+            $file = $this->filterProperties($file);
             Pale::run(function() use ($file, $owner) {
                 return chown($file, $owner);
             });
@@ -102,23 +88,13 @@ class Chown extends AbstractTask
     }
 
     /**
-     * Get the target file
+     * Get the target files
      *
      * @return string
      */
-    public function getFile()
+    public function getFiles()
     {
         return $this->file;
-    }
-
-    /**
-     * Get the file sets
-     *
-     * @return array
-     */
-    public function getFileSets()
-    {
-        return $this->fileSets;
     }
 
     /**
@@ -139,7 +115,19 @@ class Chown extends AbstractTask
      */
     public function setFile($file)
     {
-        $this->file = $file;
+        $this->files = array($file);
+        return $this;
+    }
+
+    /**
+     * Set the target files
+     *
+     * @param Traversable $files
+     * @return self
+     */
+    public function setFiles(Traversable $files)
+    {
+        $this->files = $files;
         return $this;
     }
 

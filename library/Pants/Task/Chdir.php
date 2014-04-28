@@ -2,7 +2,7 @@
 /**
  * Pants
  *
- * Copyright (c) 2011, Justin Hendrickson
+ * Copyright (c) 2014, Justin Hendrickson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without

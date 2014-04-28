@@ -39,7 +39,6 @@ use DocBlox_Parser_Abstract as ParserAbstract;
 use DocBlox_Parser_Files as Files;
 use DocBlox_Transformer as Transformer;
 use Pants\BuildException;
-use Pants\FileSet\FileSet;
 use sfEventDispatcher;
 use Zend\Loader\StandardAutoloader;
 
@@ -53,11 +52,11 @@ class Docblox extends AbstractTask
 {
 
     /**
-     * FileSet
+     * Files
      *
-     * @var FileSet
+     * @var string
      */
-    protected $fileSet;
+    protected $files = array();
 
     /**
      * Force documentation
@@ -169,8 +168,8 @@ class Docblox extends AbstractTask
 
         $files = new Files();
 
-        foreach ($this->getFileSet() as $file) {
-            $files->addFile($file->getPathname());
+        foreach ($this->getFiles() as $file) {
+            $files->addFile($this->filterProperties($file));
         }
 
         $xml = $parser->parseFiles($files);
@@ -205,13 +204,13 @@ class Docblox extends AbstractTask
     }
 
     /**
-     * Get the file set
+     * Get the files
      *
-     * @return FileSet
+     * @return array
      */
-    public function getFileSet()
+    public function getFiles()
     {
-        return $this->fileSet;
+        return $this->files;
     }
 
     /**
@@ -305,14 +304,14 @@ class Docblox extends AbstractTask
     }
 
     /**
-     * Set the file set
+     * Set the files
      *
-     * @param FileSet $fileSet
+     * @param array $files
      * @return Docblox
      */
-    public function setFileSet(FileSet $fileSet)
+    public function setFiles($files)
     {
-        $this->fileSet = $fileSet;
+        $this->files = $files;
         return $this;
     }
 

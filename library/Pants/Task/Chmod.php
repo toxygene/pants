@@ -60,20 +60,6 @@ class Chmod extends AbstractTask
     protected $mode;
 
     /**
-     * Add files
-     *
-     * @param Traversable $files
-     * @return self
-     */
-    public function addFiles(Traversable $files)
-    {
-        foreach ($files as $file) {
-            $this->files[] = $file;
-        }
-        return $this;
-    }
-
-    /**
      * Execute the task
      *
      * @return self
@@ -96,7 +82,7 @@ class Chmod extends AbstractTask
         }
 
         foreach ($this->getFiles() as $file) {
-            $mode = $this->filterProperties($this->getMode());
+            $file = $this->filterProperties($file);
             Pale::run(function() use ($file, $mode) {
                 return chmod($file, $mode);
             });
@@ -134,6 +120,18 @@ class Chmod extends AbstractTask
     public function setFile($file)
     {
         $this->files = array($file);
+        return $this;
+    }
+
+    /**
+     * Set the target files
+     *
+     * @param Traversable $files
+     * @return self
+     */
+    public function setFiles(Traversable $files)
+    {
+        $this->files = $files;
         return $this;
     }
 

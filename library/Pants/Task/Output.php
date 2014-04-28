@@ -52,7 +52,7 @@ class Output extends AbstractTask
     /**
      * Execute the task
      *
-     * @return Output
+     * @return self
      * @throws BuildException
      */
     public function execute()
@@ -80,7 +80,7 @@ class Output extends AbstractTask
      * Set the message
      *
      * @param string $message
-     * @return Output
+     * @return self
      */
     public function setMessage($message)
     {

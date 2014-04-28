@@ -35,9 +35,9 @@ namespace Pants\Task;
 
 use Pale\Pale;
 use Pants\BuildException;
-use Pants\FileSet\FileSet;
 use PHP_CodeSniffer as CodeSniffer;
 use PHP_CodeSniffer_Reporting as Reporting;
+use Traversable;
 
 /**
  * PHP CodeSniffer
@@ -50,11 +50,11 @@ class PhpCodeSniffer extends AbstractTask
 {
 
     /**
-     * FileSet
+     * Files
      *
-     * @var FileSet
+     * @var Files
      */
-    protected $fileSet;
+    protected $files;
 
     /**
      * Report file
@@ -101,7 +101,7 @@ class PhpCodeSniffer extends AbstractTask
     /**
      * Execute the task
      *
-     * @return Docblox
+     * @return self
      * @throw BuildException
      */
     public function execute()
@@ -120,11 +120,6 @@ class PhpCodeSniffer extends AbstractTask
             throw new BuildException("Invalid standard name");
         }
 
-        $files = array();
-        foreach ($this->getFileSet() as $file) {
-            $files[] = $file->getRealPath();
-        }
-
         // Clear out argv so PHP_CodeSniffer doesn"t freak out
         $oldArgv = $SERVER["argv"];
         $SERVER["argv"] = array();
@@ -135,7 +130,7 @@ class PhpCodeSniffer extends AbstractTask
 
         $codeSniffer = new CodeSniffer(0, 0, "UTF-8");
 
-        $codeSniffer->process($files, $this->filterProperties($this->getStandard()));
+        $codeSniffer->process($this->getFiles(), $this->filterProperties($this->getStandard()));
 
         // Restore the argv/c superglobals
         $SERVER["argv"] = $oldArgv;
@@ -160,13 +155,13 @@ class PhpCodeSniffer extends AbstractTask
     }
 
     /**
-     * Get the file set
+     * Get the files
      *
-     * @return FileSet
+     * @return array
      */
-    public function getFileSet()
+    public function getFiles()
     {
-        return $this->fileSet;
+        return $this->files;
     }
 
     /**
@@ -230,14 +225,26 @@ class PhpCodeSniffer extends AbstractTask
     }
 
     /**
-     * Set the file set
+     * Set the file
      *
-     * @param FileSet $fileSet
-     * @return PhpCodeSniffer
+     * @param string $file
+     * @return self
      */
-    public function setFileSet(FileSet $fileSet)
+    public function setFile($file)
     {
-        $this->fileSet = $fileSet;
+        $this->files = array($file);
+        return $this;
+    }
+
+    /**
+     * Set the files
+     *
+     * @param Traversable $files
+     * @return self
+     */
+    public function setFiles(Traversable $files)
+    {
+        $this->files = $files;
         return $this;
     }
 
@@ -245,7 +252,7 @@ class PhpCodeSniffer extends AbstractTask
      * Set the report file
      *
      * @param string $reportFile
-     * @return PhpCodeSniffer
+     * @return self
      */
     public function setReportFile($reportFile)
     {
@@ -257,7 +264,7 @@ class PhpCodeSniffer extends AbstractTask
      * Set the report type
      *
      * @param string $reportType
-     * @return PhpCodeSniffer
+     * @return self
      */
     public function setReportType($reportType)
     {
@@ -269,7 +276,7 @@ class PhpCodeSniffer extends AbstractTask
      * Set the report width
      *
      * @param integer $reportWidth
-     * @return PhpCodeSniffer
+     * @return self
      */
     public function setReportWidth($reportWidth)
     {
@@ -281,7 +288,7 @@ class PhpCodeSniffer extends AbstractTask
      * Set the show sources flag
      *
      * @param boolean $showSources
-     * @return PhpCodeSniffer
+     * @return self
      */
     public function setShowSources($showSources)
     {
@@ -293,7 +300,7 @@ class PhpCodeSniffer extends AbstractTask
      * Set the show warnings flag
      *
      * @param boolean $showWarnings
-     * @return PhpCodeSniffer
+     * @return self
      */
     public function setShowWarnings($showWarnings)
     {
@@ -305,7 +312,7 @@ class PhpCodeSniffer extends AbstractTask
      * Set the standard
      *
      * @param string $standard
-     * @return PhpCodeSniffer
+     * @return self
      */
     public function setStandard($standard)
     {

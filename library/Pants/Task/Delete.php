@@ -54,20 +54,6 @@ class Delete extends AbstractTask
     protected $files = array();
 
     /**
-     * Add a file
-     *
-     * @param Traversable $fileSet
-     * @return self
-     */
-    public function addFile(Traversable $files)
-    {
-        foreach ($files as $file) {
-            $this->files[] = $file;
-        }
-        return $this;
-    }
-
-    /**
      * Execute the task
      *
      * @return self
@@ -75,13 +61,12 @@ class Delete extends AbstractTask
      */
     public function execute()
     {
-        if (!$this->getFile() && !$this->getFileSets()) {
-            throw new BuildException("File not set");
+        if (!$this->getFiles()) {
+            throw new BuildException("Files are not set");
         }
 
-        $file = $this->filterProperties($this->getFile());
-
         foreach ($this->files as $file) {
+            $file = $this->filterProperties($file);
             Pale::run(function() use ($file) {
                 return unlink($file);
             });
@@ -104,11 +89,23 @@ class Delete extends AbstractTask
      * Set the target file
      *
      * @param string $file
-     * @return Delete
+     * @return self
      */
     public function setFile($file)
     {
         $this->files = array($file);
+        return $this;
+    }
+
+    /**
+     * Set the target files
+     *
+     * @param Traversable $files
+     * @return self
+     */
+    public function setFiles(Traversable $files)
+    {
+        $this->files = $files;
         return $this;
     }
 
