@@ -35,30 +35,22 @@ namespace Pants\Task;
 
 use Pale\Pale;
 use Pants\BuildException;
-use Pants\Task\FileSetable;
 use Traversable;
 
 /**
- * Change file(s) group task
+ * Change files group task
  *
  * @package Pants\Task
  */
-class Chgrp extends AbstractTask implements FileSetable
+class Chgrp extends AbstractTask
 {
 
     /**
-     * Target file
-     *
-     * @var string
-     */
-    protected $file;
-
-    /**
-     * FileSets
+     * Target files
      *
      * @var array
      */
-    protected $fileSets = array();
+    protected $files = array();
 
     /**
      * Group to set
@@ -68,83 +60,55 @@ class Chgrp extends AbstractTask implements FileSetable
     protected $group;
 
     /**
-     * Add a file set
+     * Add files
      *
-     * @param Traversable $fileSet
-     * @return Chgrp
+     * @param Traversable $files
+     * @return self
      */
-    public function addFileSet(Traversable $fileSet)
+    public function addFiles(Traversable $files)
     {
-        $this->fileSets[] = $fileSet;
+        foreach ($files as $file) {
+            $this->files[] = $file;
+        }
         return $this;
-    }
-
-    /**
-     * Create a file set tied to this task
-     *
-     * @return FileSet
-     */
-    public function createFileSet()
-    {
-        $fileSet = new FileSet();
-        $this->fileSets[] = $fileSet;
-        return $fileSet;
     }
 
     /**
      * Execute the task
      *
-     * @return Chgrp
+     * @return self
      * @throws BuildException
      */
     public function execute()
     {
-        if (!$this->getFile() && !$this->getFileSets()) {
-            throw new BuildException("File is not set");
+        if (!$this->getFiles()) {
+            throw new BuildException("Files are not set");
         }
 
         if (!$this->getGroup()) {
             throw new BuildException("Group is not set");
         }
 
-        $file  = $this->filterProperties($this->getFile());
         $group = $this->filterProperties($this->getGroup());
 
-        if ($file) {
+        foreach ($this->getFiles() as $file) {
+            $file = $this->filterProperties($this->getFile());
             Pale::run(function() use ($file, $group) {
                 return chgrp($file, $group);
             });
-        }
-
-        foreach ($this->getFileSets() as $fileSet) {
-            foreach ($fileSet as $file) {
-                Pale::run(function() use ($file, $group) {
-                    return chgrp($file, $group);
-                });
-            }
         }
 
         return $this;
     }
 
     /**
-     * Get the target file
-     *
-     * @return string
-     */
-    public function getFile()
-    {
-        return $this->file;
-    }
-
-    /**
-     * Get the file sets
+     * Get the target files
      *
      * @return array
      */
-    public function getFileSets()
+    public function getFiles()
     {
-        return $this->fileSets;
+        return $this->files;
     }
 
     /**
@@ -161,11 +125,11 @@ class Chgrp extends AbstractTask implements FileSetable
      * Set the target file
      *
      * @param string $file
-     * @return Chgrp
+     * @return self
      */
     public function setFile($file)
     {
-        $this->file = $file;
+        $this->files = array($file);
         return $this;
     }
 
@@ -173,7 +137,7 @@ class Chgrp extends AbstractTask implements FileSetable
      * Set the group
      *
      * @param string $group
-     * @return Chgrp
+     * @return self
      */
     public function setGroup($group)
     {

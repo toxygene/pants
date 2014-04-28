@@ -2,7 +2,7 @@
 /**
  * Pants
  *
- * Copyright (c) 2011, Justin Hendrickson
+ * Copyright (c) 2014, Justin Hendrickson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,63 +35,116 @@ namespace Pants\Task;
 
 use Pale\Pale;
 use Pants\BuildException;
+use Pants\Property\Properties;
+use Pants\Task\Task;
 
 /**
- * Change the current working directory task
+ * Symlink file task
  *
  * @package Pants\Task
  */
-class Chdir extends AbstractTask
+class Symlink implements Task
 {
 
     /**
-     * Target directory
+     * Properties
+     *
+     * @var Properties
+     */
+    protected $properties;
+
+    /**
+     * Source file
      *
      * @var string
      */
-    protected $directory;
+    protected $source;
+    
+    /**
+     * Target file
+     *
+     * @var string
+     */
+    protected $target;
+
+    /**
+     * Constructor
+     *
+     * @param Properties $properties
+     */
+    public function __construct(Properties $properties)
+    {
+        $this->properties = $properties;
+    }
 
     /**
      * Execute the task
      *
-     * @return self
+     * @return self 
      * @throws BuildException
      */
     public function execute()
     {
-        if (!$this->getDirectory()) {
-            throw new BuildException('Directory is not set');
+        if (!$this->getSource()) {
+            throw new BuildException("Source not set");
         }
-        
-        $directory = $this->filterProperties($this->getDirectory());
 
-        Pale::run(function() use ($directory) {
-            return chdir($directory);
+        if (!$this->getTarget()) {
+            throw new BuildException("Target not set");
+        }
+
+        $source = $this->filterProperties($this->getSource());
+        $target = $this->filterProperties($this->getTarget());
+
+        Pale::run(function() use ($source, $target) {
+            // symlink
         });
 
         return $this;
     }
 
     /**
-     * Get the target directory
+     * Get the source
      *
      * @return string
      */
-    public function getDirectory()
+    public function getSource()
     {
-        return $this->directory;
+        return $this->source;
     }
 
     /**
-     * Set the target directory
+     * Get the target
      *
-     * @param string $directory
+     * @return string
+     */
+    public function getTarget()
+    {
+        return $this->target;
+    }
+    
+    /**
+     * Set the source
+     *
+     * @param string $source
      * @return self
      */
-    public function setDirectory($directory)
+    public function setSource($source)
     {
-        $this->directory = $directory;
+        $this->source = $source;
         return $this;
     }
 
+    /**
+     * Set the target 
+     *
+     * @param string $target
+     * @return self
+     */
+    public function setTarget($target)
+    {
+        $this->target = $target;
+        return $this;
+    }
+    
 }

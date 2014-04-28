@@ -35,7 +35,6 @@ namespace Pants\Task;
 
 use Pale\Pale;
 use Pants\BuildException;
-use Pants\Task\FileSetable;
 use Traversable;
 
 /**
@@ -43,22 +42,15 @@ use Traversable;
  *
  * @package Pants\Task
  */
-class Chown extends AbstractTask implements FileSetable
+class Chown extends AbstractTask
 {
 
     /**
-     * Target file
-     *
-     * @var string
-     */
-    protected $file;
-
-    /**
-     * FileSets
+     * Target files
      *
      * @var array
      */
-    protected $fileSets = array();
+    protected $files = array();
 
     /**
      * Owner to set
@@ -68,27 +60,17 @@ class Chown extends AbstractTask implements FileSetable
     protected $owner;
 
     /**
-     * Add a file set
+     * Add files
      *
-     * @param Traversable $fileSet
-     * @return Chown
+     * @param Traversable $files
+     * @return self
      */
-    public function addFileSet(Traversable $fileSet)
+    public function addFiles(Traversable $files)
     {
-        $this->fileSets[] = $fileSet;
+        foreach ($files as $file) {
+            $this->files[] = $file;
+        }
         return $this;
-    }
-
-    /**
-     * Create a file set tied to this task
-     *
-     * @return FileSet
-     */
-    public function createFileSet()
-    {
-        $fileSet = new FileSet();
-        $this->fileSets[] = $fileSet;
-        return $fileSet;
     }
 
     /**
@@ -99,29 +81,21 @@ class Chown extends AbstractTask implements FileSetable
      */
     public function execute()
     {
-        if (!$this->getFile() && !$this->getFileSets()) {
-            throw new BuildException("File is not set");
+        if (!$this->getFiles()) {
+            throw new BuildException("Files are not set");
         }
 
         if (!$this->getOwner()) {
             throw new BuildException("Owner is not set");
         }
 
-        $file  = $this->filterProperties($this->getFile());
         $owner = $this->filterProperties($this->getOwner());
 
-        if ($file) {
+        foreach ($fileSet as $file) {
+            $file = $this->filterProperties($this->getFile());
             Pale::run(function() use ($file, $owner) {
                 return chown($file, $owner);
             });
-        }
-
-        foreach ($this->getFileSets() as $fileSet) {
-            foreach ($fileSet as $file) {
-                Pale::run(function() use ($file, $owner) {
-                    return chown($file, $owner);
-                });
-            }
         }
 
         return $this;
@@ -161,7 +135,7 @@ class Chown extends AbstractTask implements FileSetable
      * Set the target file
      *
      * @param string $file
-     * @return Chown
+     * @return self
      */
     public function setFile($file)
     {
@@ -173,7 +147,7 @@ class Chown extends AbstractTask implements FileSetable
      * Set the owner
      *
      * @param string $owner
-     * @return Chown
+     * @return self
      */
     public function setOwner($owner)
     {

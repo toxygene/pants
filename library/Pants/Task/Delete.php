@@ -35,7 +35,6 @@ namespace Pants\Task;
 
 use Pale\Pale;
 use Pants\BuildException;
-use Pants\Task\FileSetable;
 use Traversable;
 
 /**
@@ -44,51 +43,34 @@ use Traversable;
  * @package Pants
  * @subpackage Task
  */
-class Delete extends AbstractTask implements FileSetable
+class Delete extends AbstractTask
 {
 
     /**
-     * Target file
-     *
-     * @var string
-     */
-    protected $file;
-
-    /**
-     * FileSets
+     * Target files
      *
      * @var array
      */
-    protected $fileSets = array();
+    protected $files = array();
 
     /**
-     * Add a file set
+     * Add a file
      *
      * @param Traversable $fileSet
-     * @return Delete
+     * @return self
      */
-    public function addFileSet(Traversable $fileSet)
+    public function addFile(Traversable $files)
     {
-        $this->fileSets[] = $fileSet;
+        foreach ($files as $file) {
+            $this->files[] = $file;
+        }
         return $this;
-    }
-
-    /**
-     * Create a fileset tied to this task
-     *
-     * @return FileSet
-     */
-    public function createFileset()
-    {
-        $fileSet = new FileSet();
-        $this->fileSets[] = $fileSet;
-        return $fileSet;
     }
 
     /**
      * Execute the task
      *
-     * @return Delete
+     * @return self
      * @throws BuildException
      */
     public function execute()
@@ -99,41 +81,23 @@ class Delete extends AbstractTask implements FileSetable
 
         $file = $this->filterProperties($this->getFile());
 
-        if ($file) {
+        foreach ($this->files as $file) {
             Pale::run(function() use ($file) {
                 return unlink($file);
             });
-        }
-
-        foreach ($this->fileSets as $fileSet) {
-            foreach ($fileSet as $file) {
-                Pale::run(function() use ($file) {
-                    return unlink($file);
-                });
-            }
         }
 
         return $this;
     }
 
     /**
-     * Get the target file
+     * Get the target files
      *
      * @return string
      */
-    public function getFile()
+    public function getFiles()
     {
-        return $this->file;
-    }
-
-    /**
-     * Get the file sets
-     *
-     * @return array
-     */
-    public function getFileSets()
-    {
-        return $this->fileSets;
+        return $this->files;
     }
 
     /**
@@ -144,7 +108,7 @@ class Delete extends AbstractTask implements FileSetable
      */
     public function setFile($file)
     {
-        $this->file = $file;
+        $this->files = array($file);
         return $this;
     }
 

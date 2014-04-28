@@ -35,30 +35,22 @@ namespace Pants\Task;
 
 use Pale\Pale;
 use Pants\BuildException;
-use Pants\Task\FileSetable;
 use Traversable;
 
 /**
- * Change file(s) permissions
+ * Change files permissions
  *
  * @package Pants\Task
  */
-class Chmod extends AbstractTask implements FileSetable
+class Chmod extends AbstractTask
 {
 
     /**
-     * Target file
-     *
-     * @var string
-     */
-    protected $file;
-
-    /**
-     * FileSets
+     * Target files
      *
      * @var array
      */
-    protected $fileSets = array();
+    protected $files = array();
 
     /**
      * Mode to set
@@ -68,87 +60,59 @@ class Chmod extends AbstractTask implements FileSetable
     protected $mode;
 
     /**
-     * Add a file set
+     * Add files
      *
-     * @param Traversable $fileSet
-     * @return Chmod
+     * @param Traversable $files
+     * @return self
      */
-    public function addFileSet(Traversable $fileSet)
+    public function addFiles(Traversable $files)
     {
-        $this->fileSets[] = $fileSet;
+        foreach ($files as $file) {
+            $this->files[] = $file;
+        }
         return $this;
-    }
-
-    /**
-     * Create a file set tied to this task
-     *
-     * @return FileSet
-     */
-    public function createFileSet()
-    {
-        $fileSet = new FileSet();
-        $this->fileSets[] = $fileSet;
-        return $fileSet;
     }
 
     /**
      * Execute the task
      *
-     * @return Chmod
+     * @return self
      * @throws BuildException
      */
     public function execute()
     {
-        if (!$this->getFile() && !$this->getFileSets()) {
-            throw new BuildException("File is not set");
+        if (!$this->getFiles()) {
+            throw new BuildException("Files are not set");
         }
 
         if (!$this->getMode()) {
             throw new BuildException("Mode is not set");
         }
 
-        $file = $this->filterProperties($this->getFile());
         $mode = $this->filterProperties($this->getMode());
 
         if (is_string($mode)) {
             $mode = octdec($mode);
         }
 
-        if ($file) {
+        foreach ($this->getFiles() as $file) {
+            $mode = $this->filterProperties($this->getMode());
             Pale::run(function() use ($file, $mode) {
                 return chmod($file, $mode);
             });
-        }
-
-        foreach ($this->getFileSets() as $fileSet) {
-            foreach ($fileSet as $file) {
-                Pale::run(function() use ($file, $mode) {
-                    return chmod($file, $mode);
-                });
-            }
         }
 
         return $this;
     }
 
     /**
-     * Get the target file
-     *
-     * @return string
-     */
-    public function getFile()
-    {
-        return $this->file;
-    }
-
-    /**
-     * Get the file sets
+     * Get the target files
      *
      * @return array
      */
-    public function getFileSets()
+    public function getFiles()
     {
-        return $this->fileSets;
+        return $this->files;
     }
 
     /**
@@ -165,11 +129,11 @@ class Chmod extends AbstractTask implements FileSetable
      * Set the target file
      *
      * @param string $file
-     * @return Chmod
+     * @return self
      */
     public function setFile($file)
     {
-        $this->file = $file;
+        $this->files = array($file);
         return $this;
     }
 
@@ -177,7 +141,7 @@ class Chmod extends AbstractTask implements FileSetable
      * Set the mode
      *
      * @param string $mode
-     * @return Chmod
+     * @return self
      */
     public function setMode($mode)
     {

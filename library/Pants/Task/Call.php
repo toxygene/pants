@@ -54,7 +54,7 @@ class Call extends AbstractTask
     /**
      * Execute the task
      *
-     * @return Call
+     * @return self
      * @throws BuildException
      */
     public function execute()
@@ -85,7 +85,7 @@ class Call extends AbstractTask
      * Set the name of the target to call
      *
      * @param string $target
-     * @return Call
+     * @return self
      */
     public function setTarget($target)
     {
