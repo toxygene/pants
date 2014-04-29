@@ -77,7 +77,7 @@ class Chown extends AbstractTask
 
         $owner = $this->filterProperties($this->getOwner());
 
-        foreach ($fileSet as $file) {
+        foreach ($this->getFiles() as $file) {
             $file = $this->filterProperties($file);
             Pale::run(function() use ($file, $owner) {
                 return chown($file, $owner);
@@ -94,7 +94,7 @@ class Chown extends AbstractTask
      */
     public function getFiles()
     {
-        return $this->file;
+        return $this->files;
     }
 
     /**
