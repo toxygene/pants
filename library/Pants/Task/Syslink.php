@@ -47,19 +47,19 @@ class Symlink implements Task
 {
 
     /**
+     * Link file
+     *
+     * @var string
+     */
+    protected $link;
+
+    /**
      * Properties
      *
      * @var Properties
      */
     protected $properties;
 
-    /**
-     * Source file
-     *
-     * @var string
-     */
-    protected $source;
-    
     /**
      * Target file
      *
@@ -93,24 +93,24 @@ class Symlink implements Task
             throw new BuildException("Target not set");
         }
 
-        $source = $this->filterProperties($this->getSource());
-        $target = $this->filterProperties($this->getTarget());
+        $link   = $this->getProperties()->filter($this->getLink());
+        $target = $this->getProperties()->filter($this->getTarget());
 
-        Pale::run(function() use ($source, $target) {
-            // symlink
+        Pale::run(function() use ($target, $link) {
+            return symlink($target, $link);
         });
 
         return $this;
     }
 
     /**
-     * Get the source
+     * Get the link
      *
      * @return string
      */
-    public function getSource()
+    public function getLink()
     {
-        return $this->source;
+        return $this->link;
     }
 
     /**
@@ -124,14 +124,14 @@ class Symlink implements Task
     }
     
     /**
-     * Set the source
+     * Set the link
      *
-     * @param string $source
+     * @param string $link
      * @return self
      */
-    public function setSource($source)
+    public function setLink($link)
     {
-        $this->source = $source;
+        $this->link = $link;
         return $this;
     }
 

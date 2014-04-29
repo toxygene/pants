@@ -73,22 +73,9 @@ class TokenFilter extends AbstractTask
     protected $startingCharacter = "@";
 
     /**
-     * Add a replacement
-     *
-     * @param string $token
-     * @param string $value
-     * @return TokenFilter
-     */
-    public function addReplacement($token, $value)
-    {
-        $this->replacements[$token] = $value;
-        return $this;
-    }
-
-    /**
      * Execute the task
      *
-     * @return TokenFilter
+     * @return self 
      * @throws BuildException
      */
     public function execute()
@@ -101,7 +88,6 @@ class TokenFilter extends AbstractTask
         $file              = $this->filterProperties($this->getFile());
         $replacements      = $this->getReplacements();
         $startingCharacter = $this->filterProperties($this->getStartingCharacter());
-
 
         Pale::run(function() use ($file, $replacements, $endingCharacter, $startingCharacter) {
             $contents = file_get_contents($file);
@@ -167,7 +153,7 @@ class TokenFilter extends AbstractTask
      * Set the ending character
      *
      * @param string $endingCharacter
-     * @return TokenFilter
+     * @return self
      */
     public function setEndingCharacter($endingCharacter)
     {
@@ -179,7 +165,7 @@ class TokenFilter extends AbstractTask
      * Set the target file
      *
      * @param string $file
-     * @return TokenFilter
+     * @return self
      */
     public function setFile($file)
     {
@@ -188,10 +174,23 @@ class TokenFilter extends AbstractTask
     }
 
     /**
+     * Set a replacement
+     *
+     * @param string $token
+     * @param string $value
+     * @return self
+     */
+    public function addReplacement($token, $value)
+    {
+        $this->replacements[$token] = $value;
+        return $this;
+    }
+
+    /**
      * Set the starting character
      *
      * @param string $startingCharacter
-     * @return TokenFilter
+     * @return self
      */
     public function setStartingCharacter($startingCharacter)
     {
