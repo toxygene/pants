@@ -2,7 +2,7 @@
 /**
  * Pants
  *
- * Copyright (c) 2011, Justin Hendrickson
+ * Copyright (c) 2014, Justin Hendrickson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -39,6 +39,7 @@ use DocBlox_Parser_Abstract as ParserAbstract;
 use DocBlox_Parser_Files as Files;
 use DocBlox_Transformer as Transformer;
 use Pants\BuildException;
+use Pants\Property\Properties;
 use sfEventDispatcher;
 use Zend\Loader\StandardAutoloader;
 
@@ -48,7 +49,7 @@ use Zend\Loader\StandardAutoloader;
  * @package Pants\Task
  * @TODO figure out what needs to be filtered
  */
-class Docblox extends AbstractTask
+class Docblox implements Task
 {
 
     /**
@@ -87,6 +88,13 @@ class Docblox extends AbstractTask
     protected $parsePrivate;
 
     /**
+     * Properties
+     *
+     * @var Propreties
+     */
+    protected $properties;
+
+    /**
      * Target
      *
      * @var string
@@ -120,6 +128,16 @@ class Docblox extends AbstractTask
      * @var boolean
      */
     protected $validate;
+    
+    /**
+     * Constructor
+     *
+     * @param Properties $properties
+     */
+    public function __construct(Properties $properties)
+    {
+        $this->properties = $properties;
+    }
 
     /**
      * Execute the task
@@ -129,9 +147,9 @@ class Docblox extends AbstractTask
      */
     public function execute()
     {
-        if (!class_exists("Parser")) {
+        if (!class_exists('Parser')) {
             if (!$this->getLibraryPath()) {
-                throw new BuildException("No Docblox library path set");
+                throw new BuildException('No Docblox library path set');
             }
 
             $libraryPath = $this->filterProperties($this->getLibraryPath());
@@ -141,8 +159,8 @@ class Docblox extends AbstractTask
             require_once 'markdown.php';
 
             $autoloader = new StandardAutoloader();
-            $autoloader->registerPrefix("Zend", "{$libraryPath}/Zend")
-                       ->registerPrefix("DocBlox", "{$libraryPath}/DocBlox")
+            $autoloader->registerPrefix('Zend', "{$libraryPath}/Zend")
+                       ->registerPrefix('DocBlox',"{$libraryPath}/DocBlox")
                        ->setFallbackAutoloader(true)
                        ->register();
         }
@@ -251,6 +269,16 @@ class Docblox extends AbstractTask
     public function getParsePrivate()
     {
         return $this->parsePrivate;
+    }
+
+    /**
+     * Get the properties
+     *
+     * @return Properties
+     */
+    public function getProperties()
+    {
+        return $this->properties;
     }
 
     /**

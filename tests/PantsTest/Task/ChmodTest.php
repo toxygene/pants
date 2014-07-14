@@ -32,7 +32,6 @@
 namespace PantsTest\Task;
 
 use org\bovigo\vfs\vfsStream;
-use Pants\Project;
 use Pants\Task\Chmod;
 use PHPUnit_Framework_TestCase as TestCase;
 
@@ -62,9 +61,10 @@ class ChmodTest extends TestCase
         vfsStream::setup('root', null, array(
             'one' => 'test'
         ));
-        
-        $this->chmod = new Chmod();
-        $this->chmod->setProject(new Project());
+
+        $properties = $this->getMock('\Pants\Property\Properties');
+
+        $this->chmod = new Chmod($properties);
 
         $this->file = vfsStream::url('root/one');
     }
@@ -108,6 +108,20 @@ class ChmodTest extends TestCase
     public function testPermissionsIsSet()
     {
         $this->chmod
+            ->getProperties()
+            ->expects($this->at(0))
+            ->method('filter')
+            ->with(0654)
+            ->will($this->returnArgument(0));
+
+        $this->chmod
+            ->getProperties()
+            ->expects($this->at(1))
+            ->method('filter')
+            ->with($this->file)
+            ->will($this->returnArgument(0));
+
+        $this->chmod
             ->setFile($this->file)
             ->setMode(0654)
             ->execute();
@@ -121,8 +135,22 @@ class ChmodTest extends TestCase
     public function testPermissionsAsAStringCanBeSet()
     {
         $this->chmod
+            ->getProperties()
+            ->expects($this->at(0))
+            ->method('filter')
+            ->with('654')
+            ->will($this->returnArgument(0));
+
+        $this->chmod
+            ->getProperties()
+            ->expects($this->at(1))
+            ->method('filter')
+            ->with($this->file)
+            ->will($this->returnArgument(0));
+
+        $this->chmod
             ->setFile($this->file)
-            ->setMode("654")
+            ->setMode('654')
             ->execute();
 
         $this->assertTrue((fileperms($this->file) & 0777) === 0654);

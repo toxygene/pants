@@ -63,8 +63,7 @@ class TokenFilterTest extends TestCase
             'one' => '@asdf@ $qwer$'
         ));
         
-        $this->tokenFilter = new TokenFilter();
-        $this->tokenFilter->setProject(new Project());
+        $this->tokenFilter = new TokenFilter($this->getMock('\Pants\Property\Properties'));
 
         $this->file = vfsStream::url('root/one');
     }
@@ -119,6 +118,27 @@ class TokenFilterTest extends TestCase
      */
     public function testTokensAreReplacedInTheFileOnExecute()
     {
+        $this->tokenFilter
+            ->getProperties()
+            ->expects($this->at(0))
+            ->method('filter')
+            ->with('@')
+            ->will($this->returnValue('@'));
+            
+        $this->tokenFilter
+            ->getProperties()
+            ->expects($this->at(1))
+            ->method('filter')
+            ->with($this->file)
+            ->will($this->returnValue($this->file));
+            
+        $this->tokenFilter
+            ->getProperties()
+            ->expects($this->at(2))
+            ->method('filter')
+            ->with('@')
+            ->will($this->returnValue('@'));
+            
         $this->tokenFilter
             ->setFile($this->file)
             ->addReplacement('asdf', 'fdsa')

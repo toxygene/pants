@@ -32,7 +32,6 @@
 namespace PantsTest\Task;
 
 use org\bovigo\vfs\vfsStream;
-use Pants\Project;
 use Pants\Task\Touch;
 use PHPUnit_Framework_TestCase as TestCase;
 
@@ -59,8 +58,7 @@ class TouchTest extends TestCase
      */
     public function setUp()
     {
-        $this->touch = new Touch();
-        $this->touch->setProject(new Project());
+        $this->touch = new Touch($this->getMock('\Pants\Property\Properties'));
         
         vfsStream::setup('root', null, array(
             'one' => 'test'

@@ -31,9 +31,8 @@
 
 namespace PantsTest\Task;
 
-use Pants\Project,
-    Pants\Task\Output,
-    PHPUnit_Framework_TestCase as TestCase;
+use Pants\Task\Output;
+use PHPUnit_Framework_TestCase as TestCase;
 
 /**
  *
@@ -52,8 +51,7 @@ class OutputTest extends TestCase
      */
     public function setUp()
     {
-        $this->task = new Output();
-        $this->task->setProject(new Project());
+        $this->task = new Output($this->getMock('\Pants\Property\Properties'));
     }
     
     /**
@@ -90,6 +88,13 @@ class OutputTest extends TestCase
      */
     public function testMessageIsPrintedOnExecute()
     {
+        $this->task
+            ->getProperties()
+            ->expects($this->once())
+            ->method('filter')
+            ->with('one')
+            ->will($this->returnValue('one'));
+
         $this->task->setMessage('one');
 
         ob_start();

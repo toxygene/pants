@@ -2,7 +2,7 @@
 /**
  * Pants
  *
- * Copyright (c) 2011, Justin Hendrickson
+ * Copyright (c) 2014, Justin Hendrickson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,6 @@
 namespace PantsTest\Task;
 
 use org\bovigo\vfs\vfsStream;
-use Pants\Project;
 use Pants\Task\Delete;
 use PHPUnit_Framework_TestCase as TestCase;
 
@@ -41,12 +40,6 @@ use PHPUnit_Framework_TestCase as TestCase;
  */
 class DeleteTest extends TestCase
 {
-
-    /**
-     * Delete task
-     * @var Delete
-     */
-    protected $delete;
     
     /**
      * File to delete
@@ -55,20 +48,19 @@ class DeleteTest extends TestCase
     protected $file;
 
     /**
-     * Virtual file system
-     * @var vfsStream
+     * Delete task
+     * @var Delete
      */
-    protected $vfs;
+    protected $task;
 
     /**
      * Setup the test
      */
     public function setUp()
     {
-        $this->delete = new Delete();
-        $this->delete->setProject(new Project());
+        $this->task = new Delete($this->getMock('\Pants\Property\Properties'));
         
-        $this->vfs = vfsStream::setup('root', null, array(
+        vfsStream::setup('root', null, array(
             'test' => 'test'
         ));
         
@@ -82,7 +74,7 @@ class DeleteTest extends TestCase
     {
         $this->setExpectedException('\Pants\BuildException');
 
-        $this->delete
+        $this->task
             ->execute();
     }
 
@@ -93,7 +85,7 @@ class DeleteTest extends TestCase
     {
         $this->setExpectedException('\ErrorException');
 
-        $this->delete
+        $this->task
             ->setFile('something-that-does-not-exist')
             ->execute();
     }
@@ -103,7 +95,14 @@ class DeleteTest extends TestCase
      */
     public function testFileIsDeleted()
     {
-        $this->delete
+        $this->task
+            ->getProperties()
+            ->expects($this->once())
+            ->method('filter')
+            ->with($this->file)
+            ->will($this->returnArgument(0));
+
+        $this->task
             ->setFile($this->file)
             ->execute();
              

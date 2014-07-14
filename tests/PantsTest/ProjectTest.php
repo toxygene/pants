@@ -31,7 +31,11 @@
 
 namespace PantsTest;
 
+use ArrayIterator;
 use Pants\Project;
+use Pants\Property\Properties;
+use Pants\Target\Targets;
+use Pants\Task\Tasks;
 use PHPUnit_Framework_TestCase as TestCase;
 
 /**
@@ -45,13 +49,35 @@ class ProjectTest extends TestCase
      * @var Project
      */
     protected $project;
+    
+    /**
+     * Properties mock
+     *
+     * @var Properties
+     */
+    protected $properties;
+    
+    /**
+     * Targets mock
+     *
+     * @var Targets
+     */
+    protected $targets;
 
     /**
      * Setup the test case
      */
     public function setUp()
     {
-        $this->project = new Project();
+        $this->properties = $this->getMock('\Pants\Property\Properties');
+        $this->targets    = $this->getMock('\Pants\Target\Targets');
+        $this->tasks      = $this->getMock('\Pants\Task\Tasks');
+
+        $this->project = new Project(
+            $this->properties,
+            $this->targets,
+            $this->tasks
+        );
     }
     
     /**
@@ -86,20 +112,17 @@ class ProjectTest extends TestCase
      */
     public function testTasksAreExecutedBeforeTargets()
     {
-        $task = $this->getMock('\Pants\Task\AbstractTask');
-
-        $task->expects($this->once())
-            ->method('setProject')
-            ->with($this->project)
-            ->will($this->returnValue($task));
+        $task = $this->getMock('\Pants\Task\Task');
 
         $task->expects($this->once())
             ->method('execute')
-            ->will($this->returnValue($task));
+            ->will($this->returnSelf());
 
         $this->project
             ->getTasks()
-            ->add($task);
+            ->expects($this->once())
+            ->method('getIterator')
+            ->will($this->returnValue(new ArrayIterator(array($task))));
 
         $this->project
             ->execute();
@@ -110,27 +133,29 @@ class ProjectTest extends TestCase
      */
     public function testDefaultTargetIsExecutedIfNoTargetsAreSpecified()
     {
-        $target = $this->getMock('\Pants\Target\Target');
-
-        $target->expects($this->once())
-              ->method('getName')
-              ->will($this->returnValue('default'));
-
-        $target->expects($this->once())
-              ->method('setProject')
-              ->with($this->project)
-              ->will($this->returnValue($target));
+        $target = $this->getMockBuilder('\Pants\Target\Target')
+            ->setConstructorArgs(array($this->getMock('\Pants\Target\Targets'), $this->getMock('\Pants\Property\Properties'), $this->getMock('\Pants\Task\Tasks')))
+            ->getMock();
 
         $target->expects($this->once())
               ->method('execute')
               ->will($this->returnValue($target));
 
         $this->project
-            ->setDefault('default')
-            ->getTargets()
-            ->add($target);
+            ->getTasks()
+            ->expects($this->once())
+            ->method('getIterator')
+            ->will($this->returnValue(new ArrayIterator()));
 
         $this->project
+            ->getTargets()
+            ->expects($this->once())
+            ->method('__get')
+            ->with('default')
+            ->will($this->returnValue($target));
+
+        $this->project
+            ->setDefault('default')
             ->execute();
     }
 
@@ -139,10 +164,22 @@ class ProjectTest extends TestCase
      */
     public function testBaseDirChangesTheCurrentWorkingDirectory()
     {
+        $task = $this->getMock('\Pants\Task\Task');
+
+        $task->expects($this->once())
+            ->method('execute')
+            ->will($this->returnSelf());
+
+        $this->project
+            ->getTasks()
+            ->expects($this->once())
+            ->method('getIterator')
+            ->will($this->returnValue(new ArrayIterator(array($task))));
+
         $cwd = getcwd();
 
         $this->project
-            ->setBaseDir('/')
+            ->setBaseDirectory('/')
             ->execute();
 
         $this->assertEquals('/', getcwd());

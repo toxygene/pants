@@ -34,13 +34,14 @@
 namespace Pants\Task;
 
 use Pants\BuildException;
+use Pants\Property\Properties;
 
 /**
  * Set properties from a file task
  *
  * @package Pants\Task
  */
-class PropertyFile extends AbstractTask
+class PropertyFile implements Task
 {
 
     /**
@@ -49,6 +50,23 @@ class PropertyFile extends AbstractTask
      * @var string
      */
     protected $file;
+
+    /**
+     * Properties
+     *
+     * @var Propreties
+     */
+    protected $properties;
+
+    /**
+     * Constructor
+     *
+     * @param Properties $properties
+     */
+    public function __construct(Properties $properties)
+    {
+        $this->properties = $properties;
+    }
 
     /**
      * Set the properties
@@ -62,16 +80,26 @@ class PropertyFile extends AbstractTask
             throw new BuildException("File not set");
         }
 
-        $file = $this->filterProperties($this->getFile());
+        $file = $this->getProperties()->filter($this->getFile());
 
         foreach (parse_ini_file($file, false, INI_SCANNER_RAW) as $name => $value) {
-            $name  = $this->filterProperties($name);
-            $value = $this->filterProperties($value);
+            $name  = $this->getProperties()->filter($name);
+            $value = $this->getProperties()->filter($value);
 
-            $this->getProject()->getProperties()->{$name} = $value;
+            $this->getProperties()->{$name} = $value;
         }
 
         return $this;
+    }
+
+    /**
+     * Get the properties
+     *
+     * @return Properties
+     */
+    public function getProperties()
+    {
+        return $this->properties;
     }
 
     /**

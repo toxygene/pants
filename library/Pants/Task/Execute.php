@@ -35,6 +35,7 @@ namespace Pants\Task;
 
 use Pale\Pale;
 use Pants\BuildException;
+use Pants\Property\Properties;
 use Pants\Task\Execute\CommandReturnedErrorException;
 
 /**
@@ -42,7 +43,7 @@ use Pants\Task\Execute\CommandReturnedErrorException;
  *
  * @package Pants\Task
  */
-class Execute extends AbstractTask
+class Execute implements Task
 {
 
     /**
@@ -60,6 +61,23 @@ class Execute extends AbstractTask
     protected $directory;
 
     /**
+     * Properties
+     *
+     * @var Propreties
+     */
+    protected $properties;
+
+    /**
+     * Constructor
+     *
+     * @param Properties $properties
+     */
+    public function __construct(Properties $properties)
+    {
+        $this->properties = $properties;
+    }
+
+    /**
      * Execute the task
      *
      * @return Exec
@@ -71,8 +89,8 @@ class Execute extends AbstractTask
             throw new BuildException('Command is not set');
         }
 
-        $command   = $this->filterProperties($this->getCommand());
-        $directory = $this->filterProperties($this->getDirectory());
+        $command   = $this->getProperties()->filter($this->getCommand());
+        $directory = $this->getProperties()->filter($this->getDirectory());
 
         $result = Pale::run(function() use ($command, $directory) {
             $descriptorSpec = array(
@@ -108,7 +126,7 @@ class Execute extends AbstractTask
                 'return' => $return
             );
         });
-        
+
         if ($result['return']) {
             throw new CommandReturnedErrorException(
                 $command,
@@ -140,6 +158,16 @@ class Execute extends AbstractTask
     public function getDirectory()
     {
         return $this->directory;
+    }
+
+    /**
+     * Get the properties
+     *
+     * @return Properties
+     */
+    public function getProperties()
+    {
+        return $this->properties;
     }
 
     /**

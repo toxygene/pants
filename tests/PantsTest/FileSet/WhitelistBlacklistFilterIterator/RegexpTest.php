@@ -31,6 +31,8 @@
 
 namespace PantsTest\FileSet\WhitelistBlacklistFilterIterator;
 
+use org\bovigo\vfs\vfsStream;
+use SplFileInfo;
 use Pants\FileSet\WhitelistBlacklistFilterIterator\Regexp;
 use PHPUnit_Framework_TestCase as TestCase;
 
@@ -53,6 +55,15 @@ class RegexpTest extends TestCase
     public function setUp()
     {
         $this->matcher = new Regexp();
+        
+        vfsStream::setup('root', null, array(
+            'one' => array(
+                'two' => array(
+                    'asdf' => '',
+                    'qwerty' => ''
+                )
+            )
+        ));
     }
     
     /**
@@ -81,10 +92,11 @@ class RegexpTest extends TestCase
     public function testRegexpIsComparedToSubjectToDetermineMatch()
     {
         $this->matcher
-            ->setPattern('#a#');
+            ->setBaseDirectory(vfsStream::url('one/two'))
+            ->setPattern('#^asdf$#');
 
-        $this->assertTrue($this->matcher->match('a'));
-        $this->assertFalse($this->matcher->match('b'));
+        $this->assertTrue($this->matcher->match(new SplFileInfo(vfsStream::url('one/two/asdf'))));
+        $this->assertFalse($this->matcher->match(new SplFileInfo(vfsStream::url('one/two/qwerty'))));
     }
 
 }

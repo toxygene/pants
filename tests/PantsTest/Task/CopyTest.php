@@ -32,7 +32,6 @@
 namespace PantsTest\Task;
 
 use org\bovigo\vfs\vfsStream;
-use Pants\Project;
 use Pants\Task\Copy;
 use PHPUnit_Framework_TestCase as TestCase;
 
@@ -43,30 +42,25 @@ class CopyTest extends TestCase
 {
 
     /**
-     * Copy task
-     * @var Copy
-     */
-    protected $copy;
-
-    /**
      * File to copy
      * @var string
      */
     protected $file;
-    
+
     /**
-     * Virtual file system
-     * @var vfsStream
+     * Copy task
+     * @var Copy
      */
-    protected $vfs;
+    protected $task;
 
     /**
      * Setup the test
      */
     public function setUp()
     {
-        $this->copy = new Copy();
-        $this->copy->setProject(new Project());
+        $properties = $this->getMock('\Pants\Property\Properties');
+        
+        $this->task = new Copy($properties);
 
         vfsStream::setup('root', null, array(
             'test' => 'testing'
@@ -80,7 +74,7 @@ class CopyTest extends TestCase
      */
     public function tearDown()
     {
-        unset($this->copy);
+        unset($this->task);
         unset($this->file);
     }
 
@@ -91,7 +85,7 @@ class CopyTest extends TestCase
     {
         $this->setExpectedException('\Pants\BuildException');
 
-        $this->copy
+        $this->task
             ->setDestination($this->file . '_1')
             ->execute();
     }
@@ -103,7 +97,7 @@ class CopyTest extends TestCase
     {
         $this->setExpectedException('\Pants\BuildException');
 
-        $this->copy
+        $this->task
             ->setFile($this->file)
             ->execute();
     }
@@ -113,13 +107,30 @@ class CopyTest extends TestCase
      */
     public function testFileIsCopied()
     {
-        $this->copy
-            ->setFile($this->file)
-            ->setDestination($this->file . '_1')
+        $source = $this->file;
+        $destination = $this->file . '_1';
+        
+        $this->task
+            ->getProperties()
+            ->expects($this->at(0))
+            ->method('filter')
+            ->with($source)
+            ->will($this->returnArgument(0));
+        
+        $this->task
+            ->getProperties()
+            ->expects($this->at(1))
+            ->method('filter')
+            ->with($destination)
+            ->will($this->returnArgument(0));
+        
+        $this->task
+            ->setFile($source)
+            ->setDestination($destination)
             ->execute();
 
-        $this->assertTrue(file_exists($this->file . '_1'));
-        $this->assertEquals('testing', file_get_contents($this->file . '_1'));
+        $this->assertTrue(file_exists($destination));
+        $this->assertEquals('testing', file_get_contents($destination));
     }
 
 }

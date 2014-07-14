@@ -35,6 +35,7 @@ namespace Pants\Task;
 
 use Pale\Pale;
 use Pants\BuildException;
+use Pants\Property\Properties;
 use Traversable;
 
 /**
@@ -42,7 +43,7 @@ use Traversable;
  *
  * @package Pants\Task
  */
-class Chown extends AbstractTask
+class Chown implements Task
 {
 
     /**
@@ -60,6 +61,23 @@ class Chown extends AbstractTask
     protected $owner;
 
     /**
+     * Properties
+     *
+     * @var Propreties
+     */
+    protected $properties;
+    
+    /**
+     * Constructor
+     *
+     * @param Properties $properties
+     */
+    public function __construct(Properties $properties)
+    {
+        $this->properties = $properties;
+    }
+
+    /**
      * Execute the task
      *
      * @return Chown
@@ -75,10 +93,10 @@ class Chown extends AbstractTask
             throw new BuildException("Owner is not set");
         }
 
-        $owner = $this->filterProperties($this->getOwner());
+        $owner = $this->getProperties()->filter($this->getOwner());
 
-        foreach ($fileSet as $file) {
-            $file = $this->filterProperties($file);
+        foreach ($this->getFiles() as $file) {
+            $file = $this->getProperties()->filter($file);
             Pale::run(function() use ($file, $owner) {
                 return chown($file, $owner);
             });
@@ -94,7 +112,7 @@ class Chown extends AbstractTask
      */
     public function getFiles()
     {
-        return $this->file;
+        return $this->files;
     }
 
     /**
@@ -105,6 +123,16 @@ class Chown extends AbstractTask
     public function getOwner()
     {
         return $this->owner;
+    }
+    
+    /**
+     * Get the properties
+     *
+     * @return Properties
+     */
+    public function getProperties()
+    {
+        return $this->properties;
     }
 
     /**

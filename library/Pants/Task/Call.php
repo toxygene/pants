@@ -35,14 +35,23 @@ namespace Pants\Task;
 
 use InvalidArgumentException;
 use Pants\BuildException;
+use Pants\Property\Properties;
+use Pants\Target\Targets;
 
 /**
  * Call another target task
  *
  * @package Pants\Task
  */
-class Call extends AbstractTask
+class Call implements Task
 {
+    
+    /**
+     * Properties
+     *
+     * @var Properties
+     */
+    protected $properties;
 
     /**
      * Name of target to call
@@ -50,6 +59,25 @@ class Call extends AbstractTask
      * @var string
      */
     protected $target;
+    
+    /**
+     * Targets
+     *
+     * @var Targets
+     */
+    protected $targets;
+    
+    /**
+     * Constructor
+     *
+     * @param Properties $properties
+     * @param Targets $targets
+     */
+    public function __construct(Properties $properties, Targets $targets)
+    {
+        $this->properties = $properties;
+        $this->targets    = $targets;
+    }
 
     /**
      * Execute the task
@@ -62,11 +90,25 @@ class Call extends AbstractTask
         if (!$this->getTarget()) {
             throw new BuildException('No target set');
         }
-
-        $this->getProject()
-            ->execute($this->filterProperties($this->getTarget()));
+        
+        $target = $this->getProperties()
+            ->filter($this->getTarget());
+        
+        $this->getTargets()
+            ->$target
+            ->execute();
 
         return $this;
+    }
+
+    /**
+     * Get the properties
+     *
+     * @return Properties
+     */
+    public function getProperties()
+    {
+        return $this->properties;
     }
 
     /**
@@ -77,6 +119,16 @@ class Call extends AbstractTask
     public function getTarget()
     {
         return $this->target;
+    }
+    
+    /**
+     * Get the targets
+     *
+     * @return Targets
+     */
+    public function getTargets()
+    {
+        return $this->targets;
     }
 
     /**

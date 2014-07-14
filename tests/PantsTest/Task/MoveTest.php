@@ -32,7 +32,6 @@
 namespace PantsTest\Task;
 
 use org\bovigo\vfs\vfsStream;
-use Pants\Project;
 use Pants\Task\Move;
 use PHPUnit_Framework_TestCase as TestCase;
 
@@ -59,8 +58,7 @@ class MoveTest extends TestCase
      */
     public function setUp()
     {
-        $this->move = new Move();
-        $this->move->setProject(new Project());
+        $this->move = new Move($this->getMock('\Pants\Property\Properties'));
         
         vfsStream::setup('root', null, array(
             'one' => 'test'
@@ -107,6 +105,20 @@ class MoveTest extends TestCase
      */
     public function testFileIsMoved()
     {
+        $this->move
+            ->getProperties()
+            ->expects($this->at(0))
+            ->method('filter')
+            ->with($this->file)
+            ->will($this->returnValue($this->file));
+            
+        $this->move
+            ->getProperties()
+            ->expects($this->at(1))
+            ->method('filter')
+            ->with($this->file . '_1')
+            ->will($this->returnValue($this->file . '_1'));
+    
         $this->move
             ->setFile($this->file)
             ->setDestination($this->file . '_1')

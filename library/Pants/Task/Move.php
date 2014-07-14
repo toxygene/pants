@@ -35,13 +35,14 @@ namespace Pants\Task;
 
 use Pale\Pale;
 use Pants\BuildException;
+use Pants\Property\Properties;
 
 /**
  * Move file task
  *
  * @package Pants\Task
  */
-class Move extends AbstractTask
+class Move implements Task
 {
 
     /**
@@ -59,6 +60,23 @@ class Move extends AbstractTask
     protected $destination;
 
     /**
+     * Properties
+     *
+     * @var Propreties
+     */
+    protected $properties;
+
+    /**
+     * Constructor
+     *
+     * @param Properties $properties
+     */
+    public function __construct(Properties $properties)
+    {
+        $this->properties = $properties;
+    }
+
+    /**
      * Execute the task
      *
      * @return self
@@ -74,8 +92,8 @@ class Move extends AbstractTask
             throw new BuildException("Destination not set");
         }
 
-        $file        = $this->filterProperties($this->getFile());
-        $destination = $this->filterProperties($this->getDestination());
+        $file        = $this->getProperties()->filter($this->getFile());
+        $destination = $this->getProperties()->filter($this->getDestination());
 
         Pale::run(function() use ($file, $destination) {
             return rename($file, $destination);
@@ -102,6 +120,16 @@ class Move extends AbstractTask
     public function getFile()
     {
         return $this->file;
+    }
+
+    /**
+     * Get the properties
+     *
+     * @return Properties
+     */
+    public function getProperties()
+    {
+        return $this->properties;
     }
 
     /**

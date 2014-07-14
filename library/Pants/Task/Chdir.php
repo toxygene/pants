@@ -35,13 +35,14 @@ namespace Pants\Task;
 
 use Pale\Pale;
 use Pants\BuildException;
+use Pants\Property\Properties;
 
 /**
  * Change the current working directory task
  *
  * @package Pants\Task
  */
-class Chdir extends AbstractTask
+class Chdir implements Task
 {
 
     /**
@@ -50,6 +51,23 @@ class Chdir extends AbstractTask
      * @var string
      */
     protected $directory;
+    
+    /**
+     * Properties
+     *
+     * @var Properties
+     */
+    protected $properties;
+    
+    /**
+     * Constructor
+     *
+     * @param Properties $properties
+     */
+    public function __construct(Properties $properties)
+    {
+        $this->properties = $properties;
+    }
 
     /**
      * Execute the task
@@ -62,8 +80,9 @@ class Chdir extends AbstractTask
         if (!$this->getDirectory()) {
             throw new BuildException('Directory is not set');
         }
-        
-        $directory = $this->filterProperties($this->getDirectory());
+
+        $directory = $this->getProperties()
+            ->filter($this->getDirectory());
 
         Pale::run(function() use ($directory) {
             return chdir($directory);
@@ -80,6 +99,16 @@ class Chdir extends AbstractTask
     public function getDirectory()
     {
         return $this->directory;
+    }
+
+    /**
+     * Get the properties
+     *
+     * @return Properties
+     */
+    public function getProperties()
+    {
+        return $this->properties;
     }
 
     /**

@@ -35,15 +35,15 @@ namespace Pants\Task;
 
 use Pale\Pale;
 use Pants\BuildException;
+use Pants\Property\Properties;
 use Traversable;
 
 /**
  * Delete file(s) task
  *
- * @package Pants
- * @subpackage Task
+ * @package Pants\Task
  */
-class Delete extends AbstractTask
+class Delete implements Task
 {
 
     /**
@@ -52,6 +52,23 @@ class Delete extends AbstractTask
      * @var array
      */
     protected $files = array();
+
+    /**
+     * Properties
+     *
+     * @var Propreties
+     */
+    protected $properties;
+    
+    /**
+     * Constructor
+     *
+     * @param Properties $properties
+     */
+    public function __construct(Properties $properties)
+    {
+        $this->properties = $properties;
+    }
 
     /**
      * Execute the task
@@ -66,7 +83,7 @@ class Delete extends AbstractTask
         }
 
         foreach ($this->files as $file) {
-            $file = $this->filterProperties($file);
+            $file = $this->getProperties()->filter($file);
             Pale::run(function() use ($file) {
                 return unlink($file);
             });
@@ -95,6 +112,16 @@ class Delete extends AbstractTask
     {
         $this->files = array($file);
         return $this;
+    }
+    
+    /**
+     * Get the properties
+     *
+     * @return Properties
+     */
+    public function getProperties()
+    {
+        return $this->properties;
     }
 
     /**

@@ -31,7 +31,6 @@
 
 namespace PantsTest\Task;
 
-use Pants\Project;
 use Pants\Task\PropertyFile;
 use PHPUnit_Framework_TestCase as TestCase;
 
@@ -52,8 +51,7 @@ class PropertyFileTest extends TestCase
      */
     public function setUp()
     {
-        $this->task = new PropertyFile();
-        $this->task->setProject(new Project());
+        $this->task = new PropertyFile($this->getMock('\Pants\Property\Properties'));
     }
     
     /**
@@ -81,11 +79,59 @@ class PropertyFileTest extends TestCase
     public function testPropertiesAreAdded()
     {
         $this->task
+            ->getProperties()
+            ->expects($this->at(0))
+            ->method('filter')
+            ->with(__DIR__ . '/_files/properties-1.ini')
+            ->will($this->returnArgument(0));
+
+        $this->task
+            ->getProperties()
+            ->expects($this->at(1))
+            ->method('filter')
+            ->with('one.two')
+            ->will($this->returnArgument(0));
+
+        $this->task
+            ->getProperties()
+            ->expects($this->at(2))
+            ->method('filter')
+            ->with('three')
+            ->will($this->returnArgument(0));
+
+        $this->task
+            ->getProperties()
+            ->expects($this->at(3))
+            ->method('filter')
+            ->with('four.five')
+            ->will($this->returnArgument(0));
+
+        $this->task
+            ->getProperties()
+            ->expects($this->at(4))
+            ->method('filter')
+            ->with('six')
+            ->will($this->returnArgument(0));
+
+        $this->task
+            ->getProperties()
+            ->expects($this->at(5))
+            ->method('filter')
+            ->with('seven.eight')
+            ->will($this->returnArgument(0));
+
+        $this->task
+            ->getProperties()
+            ->expects($this->at(6))
+            ->method('filter')
+            ->with('${one.two}')
+            ->will($this->returnValue('three'));
+
+        $this->task
             ->setFile(__DIR__ . '/_files/properties-1.ini')
             ->execute();
 
         $properties = $this->task
-            ->getProject()
             ->getProperties();
 
         $this->assertEquals('three', $properties->{'one.two'});

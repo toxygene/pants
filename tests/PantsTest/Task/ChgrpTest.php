@@ -32,7 +32,6 @@
 namespace PantsTest\Task;
 
 use org\bovigo\vfs\vfsStream;
-use Pants\Project;
 use Pants\Task\Chgrp;
 use PHPUnit_Framework_TestCase as TestCase;
 
@@ -62,9 +61,10 @@ class ChgrpTest extends TestCase
         vfsStream::setup('root', null, array(
             'test' => 'test'
         ));
-    
-        $this->chgrp = new Chgrp();
-        $this->chgrp->setProject(new Project());
+
+        $properties = $this->getMock('\Pants\Property\Properties');
+
+        $this->chgrp = new Chgrp($properties);
         
         $this->file = vfsStream::url('root/test');
     }
@@ -108,6 +108,20 @@ class ChgrpTest extends TestCase
      */
     public function testGroupIsSet()
     {
+        $this->chgrp
+            ->getProperties()
+            ->expects($this->at(0))
+            ->method('filter')
+            ->with(1000)
+            ->will($this->returnArgument(0));
+
+        $this->chgrp
+            ->getProperties()
+            ->expects($this->at(1))
+            ->method('filter')
+            ->with($this->file)
+            ->will($this->returnArgument(0));
+
         $this->chgrp
             ->setFile($this->file)
             ->setGroup(1000)

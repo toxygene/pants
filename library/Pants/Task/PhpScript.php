@@ -34,6 +34,7 @@
 namespace Pants\Task;
 
 use Pale\Pale;
+use Pants\Property\Properties;
 use Pants\BuildException;
 
 /**
@@ -41,7 +42,7 @@ use Pants\BuildException;
  *
  * @package Pants\Task
  */
-class PhpScript extends AbstractTask
+class PhpScript implements Task
 {
 
     /**
@@ -50,6 +51,23 @@ class PhpScript extends AbstractTask
      * @var string
      */
     protected $file;
+
+    /**
+     * Properties
+     *
+     * @var Propreties
+     */
+    protected $properties;
+
+    /**
+     * Constructor
+     *
+     * @param Properties $properties
+     */
+    public function __construct(Properties $properties)
+    {
+        $this->properties = $properties;
+    }
 
     /**
      * Execute the task
@@ -63,7 +81,7 @@ class PhpScript extends AbstractTask
             throw new BuildException("File not set");
         }
 
-        $file = $this->filterProperties($this->getFile());
+        $file = $this->getProperties()->filter($this->getFile());
 
         Pale::run(function() use ($file) {
             require $file;
@@ -80,6 +98,16 @@ class PhpScript extends AbstractTask
     public function getFile()
     {
         return $this->file;
+    }
+
+    /**
+     * Get the properties
+     *
+     * @return Properties
+     */
+    public function getProperties()
+    {
+        return $this->properties;
     }
 
     /**

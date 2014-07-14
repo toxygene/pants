@@ -35,13 +35,14 @@ namespace Pants\Task;
 
 use Pale\Pale;
 use Pants\BuildException;
+use Pants\Property\Properties;
 
 /**
  * Replace tokens in file(s) task
  *
  * @package Pants\Task
  */
-class TokenFilter extends AbstractTask
+class TokenFilter implements Task
 {
 
     /**
@@ -59,6 +60,13 @@ class TokenFilter extends AbstractTask
     protected $file;
 
     /**
+     * Properties
+     *
+     * @var Propreties
+     */
+    protected $properties;
+
+    /**
      * Replacements
      *
      * @var array
@@ -71,6 +79,16 @@ class TokenFilter extends AbstractTask
      * @var string
      */
     protected $startingCharacter = "@";
+
+    /**
+     * Constructor
+     *
+     * @param Properties $properties
+     */
+    public function __construct(Properties $properties)
+    {
+        $this->properties = $properties;
+    }
 
     /**
      * Add a replacement
@@ -97,11 +115,10 @@ class TokenFilter extends AbstractTask
             throw new BuildException("File not set");
         }
 
-        $endingCharacter   = $this->filterProperties($this->getEndingCharacter());
-        $file              = $this->filterProperties($this->getFile());
+        $endingCharacter   = $this->getProperties()->filter($this->getEndingCharacter());
+        $file              = $this->getProperties()->filter($this->getFile());
         $replacements      = $this->getReplacements();
-        $startingCharacter = $this->filterProperties($this->getStartingCharacter());
-
+        $startingCharacter = $this->getProperties()->filter($this->getStartingCharacter());
 
         Pale::run(function() use ($file, $replacements, $endingCharacter, $startingCharacter) {
             $contents = file_get_contents($file);
@@ -141,6 +158,16 @@ class TokenFilter extends AbstractTask
     public function getFile()
     {
         return $this->file;
+    }
+
+    /**
+     * Get the properties
+     *
+     * @return Properties
+     */
+    public function getProperties()
+    {
+        return $this->properties;
     }
 
     /**

@@ -31,7 +31,7 @@
 
 namespace PantsTest\Task;
 
-use Pants\Project;
+use InvalidArgumentException;
 use Pants\Task\Call;
 use PHPUnit_Framework_TestCase as TestCase;
 
@@ -43,19 +43,26 @@ class CallTest extends TestCase
 
     /**
      * Call task
+     *
      * @var Call
      */
-    protected $call;
+    protected $task;
 
     /**
      * Setup the test case
      */
     public function setUp()
     {
-        $this->call = new Call();
-
-        $this->call
-            ->setProject(new Project());
+        $properties = $this->getMock('\Pants\Property\Properties');
+        
+        $targets = $this->getMockBuilder('\Pants\Target\Targets')
+            ->disableOriginalConstructor()
+            ->getMock();
+    
+        $this->task = new Call(
+            $properties,
+            $targets
+        );
     }
     
     /**
@@ -63,7 +70,7 @@ class CallTest extends TestCase
      */
     public function tearDown()
     {
-        unset($this->call);
+        unset($this->task);
     }
 
     /**
@@ -73,7 +80,7 @@ class CallTest extends TestCase
     {
         $this->setExpectedException('\Pants\BuildException');
 
-        $this->call
+        $this->task
             ->execute();
     }
 
@@ -83,10 +90,10 @@ class CallTest extends TestCase
      */
     public function testTargetIsConfigurable()
     {
-        $this->call
+        $this->task
             ->setTarget('asdf');
 
-        $this->assertEquals('asdf', $this->call->getTarget());
+        $this->assertEquals('asdf', $this->task->getTarget());
     }
 
     /**
@@ -95,8 +102,21 @@ class CallTest extends TestCase
     public function testAValidTargetIsRequired()
     {
         $this->setExpectedException('\InvalidArgumentException');
+        
+        $this->task
+            ->getProperties()
+            ->expects($this->once())
+            ->method('filter')
+            ->with('asdf')
+            ->will($this->returnArgument(0));
 
-        $this->call
+        $this->task
+            ->getTargets()
+            ->expects($this->once())
+            ->method('__get')
+            ->will($this->throwException(new InvalidArgumentException()));
+
+        $this->task
             ->setTarget('asdf')
             ->execute();
     }
@@ -106,31 +126,29 @@ class CallTest extends TestCase
      */
     public function testRequestedTargetIsExecuted()
     {
-        $project = new Project();
-
-        // Setup the mock target that will be called
-        $mock = $this->getMock('Pants\Target\Target');
-
-        $mock->expects($this->any())
-            ->method('getName')
-            ->will($this->returnValue('asdf'));
-
-        $mock->expects($this->once())
-            ->method('setProject')
-            ->with($project)
-            ->will($this->returnValue($mock));
-
-        $mock->expects($this->once())
+        $this->task
+            ->getProperties()
+            ->expects($this->once())
+            ->method('filter')
+            ->with('asdf')
+            ->will($this->returnArgument(0));
+            
+        $target = $this->getMockBuilder('\Pants\Target\Target')
+            ->disableOriginalConstructor()
+            ->getMock();
+        
+        $target->expects($this->once())
             ->method('execute')
-            ->will($this->returnValue($mock));
+            ->will($this->returnSelf());
 
-        // Add the mock target to the project
-        $project->getTargets()
-            ->add($mock);
+        $this->task
+            ->getTargets()
+            ->expects($this->once())
+            ->method('__get')
+            ->with('asdf')
+            ->will($this->returnValue($target));
 
-        // Call the mock target in the project
-        $this->call
-            ->setProject($project)
+        $this->task
             ->setTarget('asdf')
             ->execute();
     }

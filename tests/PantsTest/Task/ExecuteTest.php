@@ -31,7 +31,6 @@
 
 namespace PantsTest\Task;
 
-use Pants\Project;
 use Pants\Task\Execute;
 use PHPUnit_Framework_TestCase as TestCase;
 
@@ -45,15 +44,14 @@ class ExecuteTest extends TestCase
      * Execute task
      * @var Delete
      */
-    protected $execute;
+    protected $task;
 
     /**
      * Setup the test
      */
     public function setUp()
     {
-        $this->execute = new Execute();
-        $this->execute->setProject(new Project());
+        $this->task = new Execute($this->getMock('\Pants\Property\Properties'));
     }
 
     /**
@@ -61,7 +59,7 @@ class ExecuteTest extends TestCase
      */
     public function tearDown()
     {
-        unset($this->execute);
+        unset($this->task);
     }
 
     /**
@@ -71,7 +69,7 @@ class ExecuteTest extends TestCase
     {
         $this->setExpectedException('\Pants\BuildException');
 
-        $this->execute
+        $this->task
             ->execute();
     }
 
@@ -82,7 +80,7 @@ class ExecuteTest extends TestCase
     {
         $this->setExpectedException('\Pants\BuildException');
 
-        $this->execute
+        $this->task
             ->execute();
     }
 
@@ -91,7 +89,7 @@ class ExecuteTest extends TestCase
      */
     public function testExecuteRunsCommand()
     {
-        $this->execute
+        $this->task
             ->setCommand('php success.php')
             ->setDirectory(__DIR__ . '/_files')
             ->execute();
@@ -103,10 +101,27 @@ class ExecuteTest extends TestCase
     public function testFailedCommandThrowsException()
     {
         $this->setExpectedException('Pants\Task\Execute\CommandReturnedErrorException');
+        
+        $command   = 'php failure.php';
+        $directory = __DIR__ . '/_files';
 
-        $this->execute
-            ->setCommand('php failure.php')
-            ->setDirectory(__DIR__ . '/_files')
+        $this->task
+            ->getProperties()
+            ->expects($this->at(0))
+            ->method('filter')
+            ->with($command)
+            ->will($this->returnArgument(0));
+
+        $this->task
+            ->getProperties()
+            ->expects($this->at(1))
+            ->method('filter')
+            ->with($directory)
+            ->will($this->returnArgument(0));
+
+        $this->task
+            ->setCommand($command)
+            ->setDirectory($directory)
             ->execute();
     }
     
@@ -116,10 +131,10 @@ class ExecuteTest extends TestCase
      */
     public function testCommandCanBeSet()
     {
-        $this->execute
+        $this->task
             ->setCommand('asdf');
             
-        $this->assertEquals('asdf', $this->execute->getCommand());
+        $this->assertEquals('asdf', $this->task->getCommand());
     }
     
     /**
@@ -128,10 +143,10 @@ class ExecuteTest extends TestCase
      */
     public function testDirectoryCanBeSet()
     {
-        $this->execute
+        $this->task
             ->setDirectory('asdf');
             
-        $this->assertEquals('asdf', $this->execute->getDirectory());
+        $this->assertEquals('asdf', $this->task->getDirectory());
     }
 
 }

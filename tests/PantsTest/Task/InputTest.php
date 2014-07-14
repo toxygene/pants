@@ -31,7 +31,6 @@
 
 namespace PantsTest\Task;
 
-use Pants\Project;
 use Pants\Task\Input;
 use PHPUnit_Framework_TestCase as TestCase;
 
@@ -53,8 +52,7 @@ class InputTest extends TestCase
      */
     public function setUp()
     {
-        $this->task = new Input();
-        $this->task->setProject(new Project());
+        $this->task = new Input($this->getMock('\Pants\Property\Properties'));
     }
     
     /**
@@ -173,6 +171,22 @@ class InputTest extends TestCase
      */
     public function testMessageIsOutput()
     {
+        $message = 'message';
+        
+        $this->task
+            ->getProperties()
+            ->expects($this->at(0))
+            ->method('filter')
+            ->with($message)
+            ->will($this->returnArgument(0));
+
+        $this->task
+            ->getProperties()
+            ->expects($this->at(1))
+            ->method('filter')
+            ->with('?')
+            ->will($this->returnArgument(0));
+            
         $input = fopen('php://memory', 'a+');
         fwrite($input, PHP_EOL);
         fseek($input, 0);
@@ -183,7 +197,7 @@ class InputTest extends TestCase
             ->setInputStream($input)
             ->setOutputStream($output)
             ->setPropertyName('test')
-            ->setMessage('message');
+            ->setMessage($message);
 
         $this->task->execute();
 
@@ -199,6 +213,15 @@ class InputTest extends TestCase
      */
     public function testPromptCharacterIsOutput()
     {
+        $promptCharacter = ':';
+        
+        $this->task
+            ->getProperties()
+            ->expects($this->at(0))
+            ->method('filter')
+            ->with(':')
+            ->will($this->returnArgument(0));
+        
         $input = fopen('php://memory', 'a+');
         fwrite($input, PHP_EOL);
         fseek($input, 0);
@@ -209,7 +232,7 @@ class InputTest extends TestCase
             ->setInputStream($input)
             ->setOutputStream($output)
             ->setPropertyName('test')
-            ->setPromptCharacter(':');
+            ->setPromptCharacter($promptCharacter);
 
         $this->task->execute();
         
@@ -222,6 +245,29 @@ class InputTest extends TestCase
      */
     public function testDefaultValueIsUsedWhenThereInNoInput()
     {
+        $defaultValue = 'test';
+
+        $this->task
+            ->getProperties()
+            ->expects($this->at(0))
+            ->method('filter')
+            ->with('?')
+            ->will($this->returnArgument(0));
+
+        $this->task
+            ->getProperties()
+            ->expects($this->at(1))
+            ->method('filter')
+            ->with($defaultValue)
+            ->will($this->returnArgument(0));
+            
+        $this->task
+            ->getProperties()
+            ->expects($this->once())
+            ->method('__get')
+            ->with('test')
+            ->will($this->returnValue($defaultValue));
+    
         $input = fopen('php://memory', 'a+');
         fwrite($input, PHP_EOL);
         fseek($input, 0);
@@ -231,12 +277,13 @@ class InputTest extends TestCase
         $this->task
             ->setInputStream($input)
             ->setOutputStream($output)
-            ->setDefaultValue('test')
+            ->setDefaultValue($defaultValue)
             ->setPropertyName('test');
 
-        $this->task->execute();
-        
-        $this->assertEquals('test', $this->task->getProject()->getProperties()->test);
+        $this->task
+            ->execute();
+
+        $this->assertEquals('test', $this->task->getProperties()->test);
     }
     
     /**
@@ -251,12 +298,27 @@ class InputTest extends TestCase
         $output = fopen('php://memory', 'a+');
 
         $this->task
+            ->getProperties()
+            ->expects($this->at(0))
+            ->method('filter')
+            ->with('one')
+            ->will($this->returnValue('one'));
+            
+        $this->task
+            ->getProperties()
+            ->expects($this->at(1))
+            ->method('filter')
+            ->with('two')
+            ->will($this->returnValue('two'));
+            
+        $this->task
             ->setInputStream($input)
             ->setOutputStream($output)
             ->setPropertyName('test')
             ->setValidArgs(array('one', 'two'));
 
-        $this->task->execute();
+        $this->task
+            ->execute();
 
         fseek($output, 0);
         $this->assertContains('[one/two]', stream_get_contents($output));

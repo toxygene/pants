@@ -31,7 +31,6 @@
 
 namespace PantsTest\Task;
 
-use Pants\Project;
 use Pants\Task\PhpScript;
 use PHPUnit_Framework_TestCase as TestCase;
 
@@ -52,8 +51,7 @@ class PhpScriptTest extends TestCase
      */
     public function setUp()
     {
-        $this->task = new PhpScript();
-        $this->task->setProject(new Project());
+        $this->task = new PhpScript($this->getMock('\Pants\Property\Properties'));
     }
     
     /**
@@ -82,7 +80,7 @@ class PhpScriptTest extends TestCase
         $this->setExpectedException('\Pants\BuildException');
 
         $this->task
-             ->execute();
+            ->execute();
     }
 
     /**
@@ -91,12 +89,19 @@ class PhpScriptTest extends TestCase
     public function testScriptIsIncludedOnExecute()
     {
         $this->task
-             ->setFile(__DIR__ . '/_files/php-script-1.php');
+            ->getProperties()
+            ->expects($this->once())
+            ->method('filter')
+            ->with(__DIR__ . '/_files/php-script-1.php')
+            ->will($this->returnArgument(0));
+        
+        $this->task
+            ->setFile(__DIR__ . '/_files/php-script-1.php');
 
         ob_start();
 
         $this->task
-             ->execute();
+            ->execute();
 
         $output = ob_get_contents();
         ob_end_clean();

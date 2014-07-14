@@ -38,7 +38,7 @@ $autoloader->registerNamespace('Pants', './library/Pants')
     ->register();
 
 // Setup PHPUnit autoloading
-require_once 'PHPUnit/Autoload.php';
+//require_once 'PHPUnit/Autoload.php';
 
 // Set the error reporting
 error_reporting(E_ALL | E_STRICT);

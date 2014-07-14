@@ -34,13 +34,14 @@
 namespace Pants\Task;
 
 use Pants\BuildException;
+use Pants\Property\Properties;
 
 /**
  * Output task
  *
  * @package Pants\Task
  */
-class Output extends AbstractTask
+class Output implements Task
 {
 
     /**
@@ -48,6 +49,23 @@ class Output extends AbstractTask
      * @var string
      */
     protected $message;
+
+    /**
+     * Properties
+     *
+     * @var Propreties
+     */
+    protected $properties;
+
+    /**
+     * Constructor
+     *
+     * @param Properties $properties
+     */
+    public function __construct(Properties $properties)
+    {
+        $this->properties = $properties;
+    }
 
     /**
      * Execute the task
@@ -61,7 +79,7 @@ class Output extends AbstractTask
             throw new BuildException("Message not set");
         }
 
-        echo $this->filterProperties($this->getMessage());
+        echo $this->getProperties()->filter($this->getMessage());
 
         return $this;
     }
@@ -74,6 +92,16 @@ class Output extends AbstractTask
     public function getMessage()
     {
         return $this->message;
+    }
+
+    /**
+     * Get the properties
+     *
+     * @return Properties
+     */
+    public function getProperties()
+    {
+        return $this->properties;
     }
 
     /**

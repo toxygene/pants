@@ -35,6 +35,7 @@ namespace Pants\Task;
 
 use Pale\Pale;
 use Pants\BuildException;
+use Pants\Property\Properties;
 use PHP_CodeSniffer as CodeSniffer;
 use PHP_CodeSniffer_Reporting as Reporting;
 use Traversable;
@@ -46,7 +47,7 @@ use Traversable;
  * @todo Support multiple formatters
  * @todo Filter properties
  */
-class PhpCodeSniffer extends AbstractTask
+class PhpCodeSniffer implements Task
 {
 
     /**
@@ -56,6 +57,13 @@ class PhpCodeSniffer extends AbstractTask
      */
     protected $files;
 
+    /**
+     * Properties
+     *
+     * @var Propreties
+     */
+    protected $properties;
+    
     /**
      * Report file
      *
@@ -97,6 +105,16 @@ class PhpCodeSniffer extends AbstractTask
      * @var string
      */
     protected $standard;
+
+    /**
+     * Constructor
+     *
+     * @param Properties $properties
+     */
+    public function __construct(Properties $properties)
+    {
+        $this->properties = $properties;
+    }
 
     /**
      * Execute the task
@@ -162,6 +180,16 @@ class PhpCodeSniffer extends AbstractTask
     public function getFiles()
     {
         return $this->files;
+    }
+
+    /**
+     * Get the properties
+     *
+     * @return Properties
+     */
+    public function getProperties()
+    {
+        return $this->properties;
     }
 
     /**

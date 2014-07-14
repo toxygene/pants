@@ -32,7 +32,6 @@
 namespace PantsTest\Task;
 
 use org\bovigo\vfs\vfsStream;
-use Pants\Project;
 use Pants\Task\Chown;
 use PHPUnit_Framework_TestCase as TestCase;
 
@@ -63,8 +62,9 @@ class ChownTest extends TestCase
             'one' => 'test'
         ));
         
-        $this->chown = new Chown();
-        $this->chown->setProject(new Project());
+        $properties = $this->getMock('\Pants\Property\Properties');
+        
+        $this->chown = new Chown($properties);
 
         $this->file = vfsStream::url('root/one');
     }
@@ -107,6 +107,20 @@ class ChownTest extends TestCase
      */
     public function testOwnerIsSet()
     {
+        $this->chown
+            ->getProperties()
+            ->expects($this->at(0))
+            ->method('filter')
+            ->with(1000)
+            ->will($this->returnArgument(0));
+            
+        $this->chown
+            ->getProperties()
+            ->expects($this->at(1))
+            ->method('filter')
+            ->with($this->file)
+            ->will($this->returnArgument(0));
+            
         $this->chown
             ->setFile($this->file)
             ->setOwner(1000)

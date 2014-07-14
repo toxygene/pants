@@ -67,17 +67,6 @@ class WhitelistBlacklistFilterIteratorTest extends TestCase
     }
 
     /**
-     * @covers Pants\FileSet\WhitelistBlacklistFilterIterator::getBaseDirectory
-     * @covers Pants\FileSet\WhitelistBlacklistFilterIterator::setBaseDirectory
-     */
-    public function testBaseDirectoryCanBeSet()
-    {
-        $this->filter->setBaseDirectory(vfsStream::url('one'));
-
-        $this->assertEquals(vfsStream::url('one'), $this->filter->getBaseDirectory());
-    }
-
-    /**
      * @covers Pants\FileSet\WhitelistBlacklistFilterIterator::getExcludes
      * @covers Pants\FileSet\WhitelistBlacklistFilterIterator::setExcludes
      */
@@ -122,47 +111,41 @@ class WhitelistBlacklistFilterIteratorTest extends TestCase
      */
     public function testFilesAreAcceptedIfTheyAreIncludedAndNotExcluded()
     {
-        $include = $this->getMock('\Pants\FileSet\WhitelistBlacklistFilterIterator\Matcher');
-        $include->expects($this->at(0))
+        $whitelist = $this->getMock('\Pants\FileSet\WhitelistBlacklistFilterIterator\Matcher');
+
+        $whitelist->expects($this->at(0))
             ->method('match')
-            ->with('/one')
             ->will($this->returnValue(true));
 
-        $include->expects($this->at(1))
+        $whitelist->expects($this->at(1))
             ->method('match')
-            ->with('/two')
             ->will($this->returnValue(true));
 
-        $include->expects($this->at(2))
+        $whitelist->expects($this->at(2))
             ->method('match')
-            ->with('/three')
             ->will($this->returnValue(false));
 
-        $include->expects($this->at(3))
+        $whitelist->expects($this->at(3))
             ->method('match')
-            ->with('/four')
             ->will($this->returnValue(true));
+                    
+        $blacklist = $this->getMock('\Pants\FileSet\WhitelistBlacklistFilterIterator\Matcher');
 
-        $exclude = $this->getMock('\Pants\FileSet\WhitelistBlacklistFilterIterator\Matcher');
-        $exclude->expects($this->at(0))
+        $blacklist->expects($this->at(0))
             ->method('match')
-            ->with('/one')
             ->will($this->returnValue(false));
             
-        $exclude->expects($this->at(1))
+        $blacklist->expects($this->at(1))
             ->method('match')
-            ->with('/two')
             ->will($this->returnValue(true));
             
-        $exclude->expects($this->at(2))
+        $blacklist->expects($this->at(2))
             ->method('match')
-            ->with('/four')
             ->will($this->returnValue(false));
 
         $this->filter
-            ->setBaseDirectory(vfsStream::url('root'))
-            ->setBlacklistMatchers(array($exclude))
-            ->setWhitelistMatchers(array($include));
+            ->setBlacklistMatchers(array($blacklist))
+            ->setWhitelistMatchers(array($whitelist));
 
         $results = iterator_to_array($this->filter);
 

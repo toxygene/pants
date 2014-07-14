@@ -2,7 +2,7 @@
 /**
  * Pants
  *
- * Copyright (c) 2011, Justin Hendrickson
+ * Copyright (c) 2014, Justin Hendrickson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -31,23 +31,54 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
-namespace Pants\Task;
+namespace Pants;
 
 use Pants\Project;
+use Pants\Property\Properties;
+use Pants\Target\Targets;
+use Pants\Task\Container as TaskContainer;
+use Pants\Task\Tasks;
+use Pimple;
 
 /**
- * Task interface
+ * Dependency injection container
  *
- * @package Pants\Tasks
+ * @package Pants
  */
-interface Task
+class Container extends Pimple
 {
 
     /**
-     * Execute the task
-     *
-     * @return Task
+     * {@inheritDoc}
      */
-    public function execute();
+    public function __construct(array $values = array())
+    {
+        parent::__construct($values);
+
+        $this['project'] = function() {
+            return new Project(
+                $this['properties'],
+                $this['targets'],
+                $this['tasks']
+            );
+        };
+
+        $this['properties'] = function() {
+            return new Properties();
+        };
+
+        $this['targets'] = function() {
+            return new Targets();
+        };
+        
+        $this['task'] = new TaskContainer(array(
+            'properties' => $this['properties'],
+            'targets'    => $this['targets']
+        ));
+        
+        $this['tasks'] = $this->factory(function() {
+            return new Tasks();
+        });
+    }
 
 }

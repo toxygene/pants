@@ -31,8 +31,9 @@
 
 namespace PantsTest;
 
-use Pants\Project;
+use ArrayIterator;
 use Pants\Target\Target;
+use Pants\Task\Tasks;
 use PHPUnit_Framework_TestCase as TestCase;
 
 /**
@@ -40,13 +41,6 @@ use PHPUnit_Framework_TestCase as TestCase;
  */
 class TargetTest extends TestCase
 {
-
-    /**
-     * Project
-     *
-     * @var Project
-     */
-    protected $project;
 
     /**
      * Target
@@ -60,10 +54,11 @@ class TargetTest extends TestCase
      */
     public function setUp()
     {
-        $this->target = new Target();
-        $this->project = new Project();
-
-        $this->target->setProject($this->project);
+        $targets    = $this->getMock('\Pants\Target\Targets');
+        $properties = $this->getMock('\Pants\Property\Properties');
+        $tasks      = $this->getMock('\Pants\Task\Tasks');
+        
+        $this->target = new Target($targets, $properties, $tasks);
     }
 
     /**
@@ -104,18 +99,14 @@ class TargetTest extends TestCase
         $task = $this->getMock('\Pants\Task\Task');
 
         $task->expects($this->exactly(2))
-            ->method('setProject')
-            ->with($this->project)
-            ->will($this->returnValue($task));
-
-        $task->expects($this->exactly(2))
             ->method('execute')
             ->will($this->returnValue($task));
-
+            
         $this->target
             ->getTasks()
-            ->add($task)
-            ->add($task);
+            ->expects($this->once())
+            ->method('getIterator')
+            ->will($this->returnValue(new ArrayIterator(array($task, $task))));
 
         $this->target
             ->execute();
@@ -152,12 +143,16 @@ class TargetTest extends TestCase
 
         $this->target
             ->getTasks()
-            ->add($task);
+            ->expects($this->any())
+            ->method('getIterator')
+            ->will($this->returnValue(new ArrayIterator(array($task))));
 
         $this->target
-            ->getProject()
             ->getProperties()
-            ->one = true;
+            ->expects($this->once())
+            ->method('__get')
+            ->with('one')
+            ->will($this->returnValue(true));
 
         $this->target
             ->setUnless(array('one'))
@@ -169,14 +164,28 @@ class TargetTest extends TestCase
      */
     public function testDependIsExecuted()
     {
-        $project = $this->getMock('\Pants\Project');
-        
-        $project->expects($this->once())
+        $target = $this->getMockBuilder('\Pants\Target\Target')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $target->expects($this->once())
             ->method('execute')
-            ->with('test');
+            ->will($this->returnSelf());
 
         $this->target
-            ->setProject($project)
+            ->getTargets()
+            ->expects($this->once())
+            ->method('__get')
+            ->with('test')
+            ->will($this->returnValue($target));
+
+        $this->target
+            ->getTasks()
+            ->expects($this->once())
+            ->method('getIterator')
+            ->will($this->returnValue(new ArrayIterator()));
+
+        $this->target
             ->setDepends(array('test'))
             ->execute();
     }

@@ -31,6 +31,8 @@
 
 namespace Pants\FileSet\WhitelistBlacklistFilterIterator;
 
+use SplFileInfo;
+
 /**
  * Matcher interface for the include/exclude filter iterator
  *
@@ -42,9 +44,9 @@ interface Matcher
     /**
      * Check if a pathname is a match
      *
-     * @param string $pathname
+     * @param SplFileInfo $file
      * @return boolean
      */
-    public function match($pathname);
+    public function match(SplFileInfo $file);
     
 }

@@ -2,7 +2,7 @@
 /**
  * Pants
  *
- * Copyright (c) 2011, Justin Hendrickson
+ * Copyright (c) 2014, Justin Hendrickson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -35,13 +35,14 @@ namespace Pants\Task;
 
 use Pale\Pale;
 use Pants\BuildException;
+use Pants\Property\Properties;
 
 /**
  * Copy file(s) task
  *
  * @package Pants\Task
  */
-class Copy extends AbstractTask
+class Copy implements Task
 {
 
     /**
@@ -59,6 +60,23 @@ class Copy extends AbstractTask
     protected $file;
 
     /**
+     * Properties
+     *
+     * @var Propreties
+     */
+    protected $properties;
+    
+    /**
+     * Constructor
+     *
+     * @param Properties $properties
+     */
+    public function __construct(Properties $properties)
+    {
+        $this->properties = $properties;
+    }
+
+    /**
      * Execute the task
      *
      * @return Copy
@@ -67,15 +85,15 @@ class Copy extends AbstractTask
     public function execute()
     {
         if (!$this->getFile()) {
-            throw new BuildException("File is not set");
+            throw new BuildException('File is not set');
         }
 
         if (!$this->getDestination()) {
-            throw new BuildException("Destination is not set");
+            throw new BuildException('Destination is not set');
         }
 
-        $file        = $this->filterProperties($this->getFile());
-        $destination = $this->filterProperties($this->getDestination());
+        $file        = $this->getProperties()->filter($this->getFile());
+        $destination = $this->getProperties()->filter($this->getDestination());
 
         Pale::run(function() use($file, $destination) {
             return copy($file, $destination);
@@ -102,6 +120,16 @@ class Copy extends AbstractTask
     public function getFile()
     {
         return $this->file;
+    }
+
+    /**
+     * Get the properties
+     *
+     * @return Properties
+     */
+    public function getProperties()
+    {
+        return $this->properties;
     }
 
     /**

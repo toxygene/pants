@@ -35,6 +35,7 @@ namespace Pants\Task;
 
 use Pale\Pale;
 use Pants\BuildException;
+use Pants\Property\Properties;
 use Traversable;
 
 /**
@@ -42,7 +43,7 @@ use Traversable;
  *
  * @package Pants\Task
  */
-class Chmod extends AbstractTask
+class Chmod implements Task
 {
 
     /**
@@ -58,6 +59,23 @@ class Chmod extends AbstractTask
      * @var string
      */
     protected $mode;
+    
+    /**
+     * Properties
+     *
+     * @var Properties
+     */
+    protected $properties;
+    
+    /**
+     * Constructor
+     *
+     * @param Properties $properties
+     */
+    public function __construct(Properties $properties)
+    {
+        $this->properties = $properties;
+    }
 
     /**
      * Execute the task
@@ -75,14 +93,14 @@ class Chmod extends AbstractTask
             throw new BuildException("Mode is not set");
         }
 
-        $mode = $this->filterProperties($this->getMode());
+        $mode = $this->getProperties()->filter($this->getMode());
 
         if (is_string($mode)) {
             $mode = octdec($mode);
         }
 
         foreach ($this->getFiles() as $file) {
-            $file = $this->filterProperties($file);
+            $file = $this->getProperties()->filter($file);
             Pale::run(function() use ($file, $mode) {
                 return chmod($file, $mode);
             });
@@ -109,6 +127,16 @@ class Chmod extends AbstractTask
     public function getMode()
     {
         return $this->mode;
+    }
+
+    /**
+     * Get the properties
+     *
+     * @return Properties
+     */
+    public function getProperties()
+    {
+        return $this->properties;
     }
 
     /**

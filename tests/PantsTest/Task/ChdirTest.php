@@ -32,7 +32,6 @@
 namespace PantsTest\Task;
 
 use org\bovigo\vfs\vfsStream;
-use Pants\Project;
 use Pants\Task\Chdir;
 use PHPUnit_Framework_TestCase as TestCase;
 
@@ -61,8 +60,9 @@ class ChdirTest extends TestCase
     {
         $this->cwd = getcwd();
         
-        $this->task = new Chdir();
-        $this->task->setProject(new Project());
+        $properties = $this->getMock('\Pants\Property\Properties');
+        
+        $this->task = new Chdir($properties);
     }
 
     /**
@@ -114,8 +114,17 @@ class ChdirTest extends TestCase
      */
     public function testChdirChangesTheCurrentWorkingDirectory()
     {
+        $directory = __DIR__ . '/_files';
+        
         $this->task
-            ->setDirectory(__DIR__ . '/_files')
+            ->getProperties()
+            ->expects($this->once())
+            ->method('filter')
+            ->with($directory)
+            ->will($this->returnArgument(0));
+    
+        $this->task
+            ->setDirectory($directory)
             ->execute();
             
         $this->assertEquals(realPath(__DIR__ . '/_files'), getcwd());

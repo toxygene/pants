@@ -34,13 +34,14 @@
 namespace Pants\Task;
 
 use Pants\BuildException;
+use Pants\Property\Properties;
 
 /**
  * Set a property task
  *
  * @package Pants\Task
  */
-class Property extends AbstractTask
+class Property implements Task
 {
 
     /**
@@ -51,11 +52,28 @@ class Property extends AbstractTask
     protected $name;
 
     /**
+     * Properties
+     *
+     * @var Propreties
+     */
+    protected $properties;
+
+    /**
      * Value
      *
      * @var string
      */
     protected $value;
+
+    /**
+     * Constructor
+     *
+     * @param Properties $properties
+     */
+    public function __construct(Properties $properties)
+    {
+        $this->properties = $properties;
+    }
 
     /**
      * Set the property
@@ -69,12 +87,10 @@ class Property extends AbstractTask
             throw new BuildException("Name not set");
         }
 
-        $name  = $this->filterProperties($this->getName());
-        $value = $this->filterProperties($this->getValue());
+        $name  = $this->getProperties()->filter($this->getName());
+        $value = $this->getProperties()->filter($this->getValue());
 
-        $this->getProject()
-             ->getProperties()
-             ->{$name} = $value;
+        $this->getProperties()->{$name} = $value;
 
         return $this;
     }
@@ -87,6 +103,16 @@ class Property extends AbstractTask
     public function getName()
     {
         return $this->name;
+    }
+
+    /**
+     * Get the properties
+     *
+     * @return Properties
+     */
+    public function getProperties()
+    {
+        return $this->properties;
     }
 
     /**

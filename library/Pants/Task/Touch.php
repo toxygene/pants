@@ -35,13 +35,14 @@ namespace Pants\Task;
 
 use Pale\Pale;
 use Pants\BuildException;
+use Pants\Property\Properties;
 
 /**
  * Touch file(s) task
  *
  * @package Pants\Task
  */
-class Touch extends AbstractTask
+class Touch implements Task
 {
 
     /**
@@ -50,6 +51,13 @@ class Touch extends AbstractTask
      * @var string
      */
     protected $file;
+
+    /**
+     * Properties
+     *
+     * @var Propreties
+     */
+    protected $properties;
     
     /**
      * Time to touch the file with
@@ -57,6 +65,16 @@ class Touch extends AbstractTask
      * @var string
      */
     protected $time;
+
+    /**
+     * Constructor
+     *
+     * @param Properties $properties
+     */
+    public function __construct(Properties $properties)
+    {
+        $this->properties = $properties;
+    }
 
     /**
      * Execute the task
@@ -70,8 +88,8 @@ class Touch extends AbstractTask
             throw new BuildException("File not set");
         }
 
-        $file = $this->filterProperties($this->getFile());
-        $time = $this->filterProperties($this->getTime());
+        $file = $this->getProperties()->filter($this->getFile());
+        $time = $this->getProperties()->filter($this->getTime());
 
         Pale::run(function() use ($file, $time) {
             return touch($file, $time);
@@ -88,6 +106,16 @@ class Touch extends AbstractTask
     public function getFile()
     {
         return $this->file;
+    }
+
+    /**
+     * Get the properties
+     *
+     * @return Properties
+     */
+    public function getProperties()
+    {
+        return $this->properties;
     }
     
     /**

@@ -33,7 +33,9 @@
 
 namespace Pants\Target;
 
-use Pants\Task\AbstractTask;
+use Pants\Property\Properties;
+use Pants\Target\Targets;
+use Pants\Task\Task;
 use Pants\Task\Tasks;
 
 /**
@@ -41,7 +43,7 @@ use Pants\Task\Tasks;
  *
  * @package Pants\Target
  */
-class Target extends AbstractTask
+class Target implements Task
 {
 
     /**
@@ -78,6 +80,20 @@ class Target extends AbstractTask
      * @var string
      */
     protected $name;
+    
+    /**
+     * Properties
+     *
+     * @var Properties
+     */
+    protected $properties;
+    
+    /**
+     * Targets
+     *
+     * @var Targets
+     */
+    protected $targets;
 
     /**
      * Tasks
@@ -96,45 +112,44 @@ class Target extends AbstractTask
     /**
      * Constructor
      *
-     * @param array $options
+     * @param Targets $targets
+     * @param Properties $properties
+     * @param Tasks $tasks
      */
-    public function __construct($options = array())
+    public function __construct(Targets $targets, Properties $properties, Tasks $tasks)
     {
-        parent::__construct($options);
-
-        $this->tasks = new Tasks();
+        $this->targets    = $targets;
+        $this->properties = $properties;
+        $this->tasks      = $tasks;
     }
 
     /**
      * Execute the target
      *
-     * @return Target
+     * @return self
      */
     public function execute()
     {
         foreach ($this->getDepends() as $depends) {
-            $this->getProject()
-                ->execute($depends);
+            $this->getTargets()
+                ->$depends
+                ->execute();
         }
 
-        $properties = $this->getProject()
-            ->getProperties();
-
         foreach ($this->getIf() as $if) {
-            if (!isset($properties->$if) || !$properties->$if) {
+            if (!isset($this->getProperties()->$if) || !$this->getProperties()->$if) {
                 return $this;
             }
         }
 
         foreach ($this->getUnless() as $unless) {
-            if (isset($properties->$unless) || $properties->$unless) {
+            if (isset($this->getProperties()->$unless) || $this->getProperties()->$unless) {
                 return $this;
             }
         }
 
         foreach ($this->getTasks() as $task) {
-            $task->setProject($this->getProject())
-                ->execute();
+            $task->execute();
         }
 
         return $this;
@@ -191,6 +206,26 @@ class Target extends AbstractTask
     }
 
     /**
+     * Get the properties
+     *
+     * @return Properties
+     */
+    public function getProperties()
+    {
+        return $this->properties;
+    }
+
+    /**
+     * Get the targets
+     *
+     * @return selfs
+     */
+    public function getTargets()
+    {
+        return $this->targets;
+    }
+
+    /**
      * Get the tasks
      *
      * @return Tasks
@@ -214,7 +249,7 @@ class Target extends AbstractTask
      * Set the depends
      *
      * @param array $depends
-     * @return Target
+     * @return self
      */
     public function setDepends(array $depends)
     {
@@ -226,7 +261,7 @@ class Target extends AbstractTask
      * Set the description
      *
      * @param string $description
-     * @return Target
+     * @return self
      */
     public function setDescription($description)
     {
@@ -238,7 +273,7 @@ class Target extends AbstractTask
      * Set the hidden flag
      *
      * @param boolean $hidden
-     * @return Target
+     * @return self
      */
     public function setHidden($hidden)
     {
@@ -250,7 +285,7 @@ class Target extends AbstractTask
      * Set the if conditionals
      *
      * @param array $if
-     * @return Target
+     * @return self
      */
     public function setIf(array $if)
     {
@@ -262,7 +297,7 @@ class Target extends AbstractTask
      * Set the name
      *
      * @param string $name
-     * @return Target
+     * @return self
      */
     public function setName($name)
     {
@@ -271,10 +306,34 @@ class Target extends AbstractTask
     }
 
     /**
+     * Set properties
+     *
+     * @param Properties $properties
+     * @return self
+     */
+    public function setProperties(Properties $properties)
+    {
+        $this->properties = $properties;
+        return $this;
+    }
+
+    /**
+     * Set the targets
+     *
+     * @param Targets $targets
+     * @return self
+     */
+    public function setTargets(Targets $targets)
+    {
+        $this->targets = $targets;
+        return $this;
+    }
+
+    /**
      * Set the unless conditionals
      *
      * @param array $unless
-     * @return Target
+     * @return self
      */
     public function setUnless(array $unless)
     {

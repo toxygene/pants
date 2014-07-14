@@ -31,7 +31,6 @@
 
 namespace PantsTest\Task;
 
-use Pants\Project;
 use Pants\Task\Tasks;
 use PHPUnit_Framework_TestCase as TestCase;
 

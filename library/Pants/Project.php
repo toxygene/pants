@@ -2,7 +2,7 @@
 /**
  * Pants
  *
- * Copyright (c) 2011, Justin Hendrickson
+ * Copyright (c) 2014, Justin Hendrickson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -37,7 +37,6 @@ use Pale\Pale;
 use Pants\Property\Properties;
 use Pants\Target\Targets;
 use Pants\Task\Tasks;
-use Pants\Type\Types;
 
 /**
  * Project
@@ -48,11 +47,11 @@ class Project
 {
 
     /**
-     * Basedir
+     * Base directory
      *
      * @var string
      */
-    protected $baseDir;
+    protected $baseDirectory;
 
     /**
      * Default task name
@@ -83,21 +82,16 @@ class Project
     protected $tasks;
 
     /**
-     * Types
-     *
-     * @var Types
-     */
-    protected $types;
-
-    /**
      * Constructor
+     *
+     * @param Properties $properties
+     * @param Targets $targets
      */
-    public function __construct()
+    public function __construct(Properties $properties, Targets $targets, Tasks $tasks)
     {
-        $this->properties = new Properties();
-        $this->targets    = new Targets();
-        $this->tasks      = new Tasks();
-        $this->types      = new Types();
+        $this->properties = $properties;
+        $this->targets    = $targets;
+        $this->tasks      = $tasks;
     }
 
     /**
@@ -108,12 +102,11 @@ class Project
      */
     public function execute($targets = array())
     {
-        $this->setupBaseDir()
-             ->setupBuiltinProperties();
+        $this->setupBaseDirectory()
+            ->setupBuiltinProperties();
 
         foreach ($this->getTasks() as $task) {
-            $task->setProject($this)
-                 ->execute();
+            $task->execute();
         }
 
         if (!$targets) {
@@ -128,9 +121,8 @@ class Project
 
         foreach ($targets as $target) {
             $this->getTargets()
-                 ->{$target}
-                 ->setProject($this)
-                 ->execute();
+                ->$target
+                ->execute();
         }
 
         return $this;
@@ -141,9 +133,9 @@ class Project
      *
      * @return string
      */
-    public function getBaseDir()
+    public function getBaseDirectory()
     {
-        return $this->baseDir;
+        return $this->baseDirectory;
     }
 
     /**
@@ -187,24 +179,14 @@ class Project
     }
 
     /**
-     * Get the types
-     *
-     * @return Types
-     */
-    public function getTypes()
-    {
-        return $this->types;
-    }
-
-    /**
      * Set the base directory
      *
-     * @param string $baseDir
+     * @param string $baseDirectory
      * @return Project
      */
-    public function setBaseDir($baseDir)
+    public function setBaseDirectory($baseDirectory)
     {
-        $this->baseDir = $baseDir;
+        $this->baseDirectory = $baseDirectory;
         return $this;
     }
 
@@ -225,12 +207,12 @@ class Project
      *
      * @return Project
      */
-    protected function setupBaseDir()
+    protected function setupBaseDirectory()
     {
-        if ($this->getBaseDir()) {
+        if ($this->getBaseDirectory()) {
             $project = $this;
             Pale::run(function() use ($project) {
-                return chdir($project->getBaseDir());
+                return chdir($project->getBaseDirectory());
             });
         }
 

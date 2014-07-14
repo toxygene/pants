@@ -31,7 +31,6 @@
 
 namespace PantsTest\Task;
 
-use Pants\Project;
 use Pants\Task\Property;
 use PHPUnit_Framework_TestCase as TestCase;
 
@@ -52,8 +51,7 @@ class PropertyTest extends TestCase
      */
     public function setUp()
     {
-        $this->task = new Property();
-        $this->task->setProject(new Project());
+        $this->task = new Property($this->getMock('\Pants\Property\Properties'));
     }
     
     /**
@@ -102,11 +100,32 @@ class PropertyTest extends TestCase
     public function testPropertiesAreSetOnTheProjectOnExecute()
     {
         $this->task
+            ->getProperties()
+            ->expects($this->at(0))
+            ->method('filter')
+            ->with('one')
+            ->will($this->returnArgument(0));
+            
+        $this->task
+            ->getProperties()
+            ->expects($this->at(1))
+            ->method('filter')
+            ->with('two')
+            ->will($this->returnArgument(0));
+            
+        $this->task
+            ->getProperties()
+            ->expects($this->once())
+            ->method(' __get')
+            ->with('one')
+            ->will($this->returnValue('two'));
+            
+        $this->task
             ->setName('one')
             ->setValue('two')
             ->execute();
 
-        $this->assertEquals('two', $this->task->getProject()->getProperties()->one);
+        $this->assertEquals('two', $this->task->getProperties()->one);
     }
 
 }

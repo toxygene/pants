@@ -35,6 +35,7 @@ namespace Pants\Task;
 
 use Pale\Pale;
 use Pants\BuildException;
+use Pants\Property\Properties;
 use Traversable;
 
 /**
@@ -42,7 +43,7 @@ use Traversable;
  *
  * @package Pants\Task
  */
-class Chgrp extends AbstractTask
+class Chgrp implements Task
 {
 
     /**
@@ -58,6 +59,23 @@ class Chgrp extends AbstractTask
      * @var string
      */
     protected $group;
+    
+    /**
+     * Properties
+     *
+     * @var Properties
+     */
+    protected $properties;
+    
+    /**
+     * Constructor
+     *
+     * @param Properties $properties
+     */
+    public function __construct(Properties $properties)
+    {
+        $this->properties = $properties;
+    }
 
     /**
      * Execute the task
@@ -75,10 +93,11 @@ class Chgrp extends AbstractTask
             throw new BuildException("Group is not set");
         }
 
-        $group = $this->filterProperties($this->getGroup());
+        $group = $this->getProperties()
+            ->filter($this->getGroup());
 
         foreach ($this->getFiles() as $file) {
-            $file = $this->filterProperties($file);
+            $file = $this->getProperties()->filter($file);
             Pale::run(function() use ($file, $group) {
                 return chgrp($file, $group);
             });
@@ -105,6 +124,16 @@ class Chgrp extends AbstractTask
     public function getGroup()
     {
         return $this->group;
+    }
+
+    /**
+     * Get the properties
+     *
+     * @return Properties
+     */
+    public function getProperties()
+    {
+        return $this->properties;
     }
 
     /**

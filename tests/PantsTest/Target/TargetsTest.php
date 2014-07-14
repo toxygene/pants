@@ -52,8 +52,6 @@ class TargetsTest extends TestCase
      */
     public function setUp()
     {
-        $this->project = $this->getMock('\Pants\Project');
-
         $this->targets = new Targets();
     }
 
@@ -63,7 +61,9 @@ class TargetsTest extends TestCase
      */
     public function testTargetsCanBeAdded()
     {
-        $target = $this->getMock('\Pants\Target\Target');
+        $target = $this->getMockBuilder('\Pants\Target\Target')
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $target->expects($this->once())
               ->method('getName')
@@ -90,7 +90,9 @@ class TargetsTest extends TestCase
      */
     public function testTargetsCanBeCheckedForExistance()
     {
-        $target = $this->getMock('\Pants\Target\Target');
+        $target = $this->getMockBuilder('\Pants\Target\Target')
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $target->expects($this->once())
             ->method('getName')
@@ -108,7 +110,9 @@ class TargetsTest extends TestCase
      */
     public function testTargetsCanBeRemoved()
     {
-        $target = $this->getMock('\Pants\Target\Target');
+        $target = $this->getMockBuilder('\Pants\Target\Target')
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $target->expects($this->once())
             ->method('getName')
@@ -141,7 +145,9 @@ class TargetsTest extends TestCase
     {
         $this->setExpectedException('InvalidArgumentException');
 
-        $target = $this->getMock('\Pants\Target\Target');
+        $target = $this->getMockBuilder('\Pants\Target\Target')
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $target->expects($this->any())
             ->method('getName')
@@ -157,7 +163,9 @@ class TargetsTest extends TestCase
      */
     public function testDescriptionsCanBeRetrieved()
     {
-        $target = $this->getMock('\Pants\Target\Target');
+        $target = $this->getMockBuilder('\Pants\Target\Target')
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $target->expects($this->once())
             ->method('getName')
@@ -178,7 +186,9 @@ class TargetsTest extends TestCase
      */
     public function testHiddenTargetsAreNotAddedToDescriptions()
     {
-        $target = $this->getMock('\Pants\Target\Target');
+        $target = $this->getMockBuilder('\Pants\Target\Target')
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $target->expects($this->once())
             ->method('getName')

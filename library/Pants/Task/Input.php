@@ -34,22 +34,15 @@
 namespace Pants\Task;
 
 use Pants\BuildException;
-use Pants\Task\AbstractTask;
+use Pants\Property\Properties;
 
 /**
  * Read input task
  *
  * @package Pants\Task
  */
-class Input extends AbstractTask
+class Input implements Task
 {
-
-    /**
-     * Property to set
-     *
-     * @var string
-     */
-    protected $propertyName;
 
     /**
      * Default value
@@ -87,11 +80,35 @@ class Input extends AbstractTask
     protected $promptCharacter = '?';
 
     /**
+     * Properties
+     *
+     * @var Propreties
+     */
+    protected $properties;
+
+    /**
+     * Property to set
+     *
+     * @var string
+     */
+    protected $propertyName;
+
+    /**
      * Valid arguments
      *
      * @var array
      */
     protected $validArgs = array();
+
+    /**
+     * Constructor
+     *
+     * @param Properties $properties
+     */
+    public function __construct(Properties $properties)
+    {
+        $this->properties = $properties;
+    }
 
     /**
      * Execute the task
@@ -105,33 +122,32 @@ class Input extends AbstractTask
         }
 
         if ($this->getMessage()) {
-            fwrite($this->getOutputStream(), $this->filterProperties($this->getMessage()));
+            fwrite($this->getOutputStream(), $this->getProperties()->filter($this->getMessage()));
         }
 
         $validArgs = array();
 
         foreach ($this->getValidArgs() as $validArg) {
-            $validArgs[] = $this->filterProperties($validArg);
+            $validArgs[] = $this->getProperties()->filter($validArg);
         }
-        
+
         if ($validArgs) {
             fwrite($this->getOutputStream(), ' [' . implode('/', $validArgs) . ']');
         }
 
-        fwrite($this->getOutputStream(), $this->filterProperties($this->getPromptCharacter()) . ' ');
+        fwrite($this->getOutputStream(), $this->getProperties()->filter($this->getPromptCharacter()) . ' ');
 
         $value = trim(fgets($this->getInputStream()));
 
         if (trim($value) == '') {
-            $value = $this->filterProperties($this->getDefaultValue());
+            $value = $this->getProperties()->filter($this->getDefaultValue());
         }
 
         if ($validArgs && !in_array($value, $validArgs)) {
             throw new BuildException('Invalid argument');
         }
 
-        $this->getProject()
-            ->getProperties()
+        $this->getProperties()
             ->{$this->getPropertyName()} = $value;
 
         return $this;
@@ -185,6 +201,16 @@ class Input extends AbstractTask
     public function getPromptCharacter()
     {
         return $this->promptCharacter;
+    }
+
+    /**
+     * Get the properties
+     *
+     * @return Properties
+     */
+    public function getProperties()
+    {
+        return $this->properties;
     }
 
     /**

@@ -42,13 +42,6 @@ class WhitelistBlacklistFilterIterator extends FilterIterator
 {
 
     /**
-     * Base directory
-     *
-     * @var string
-     */
-    protected $baseDirectory;
-
-    /**
      * Blacklist matchers
      *
      * @var Pants\FileSet\WhitelistBlacklistFilterIterator\Matcher[]
@@ -69,19 +62,11 @@ class WhitelistBlacklistFilterIterator extends FilterIterator
      */
     public function accept()
     {
-        $pathname = preg_replace(
-            '#^' . preg_quote($this->getBaseDirectory()) . '/?#',
-            '/',
-            $this->getInnerIterator()
-                ->current()
-                ->getPathname()
-        );
-
         if ($this->getWhitelistMatchers()) {
             foreach ($this->getWhitelistMatchers() as $whitelist) {
-                if ($whitelist->match($pathname)) {
+                if ($whitelist->match($this->getInnerIterator()->current())) {
                     foreach ($this->getBlacklistMatchers() as $blacklist) {
-                        if ($blacklist->match($pathname)) {
+                        if ($blacklist->match($this->getInnerIterator()->current())) {
                             return false;
                         }
                     }
@@ -92,23 +77,13 @@ class WhitelistBlacklistFilterIterator extends FilterIterator
             return false;
         } else {
             foreach ($this->getBlacklistMatchers() as $blacklist) {
-                if ($blacklist->match($pathname)) {
+                if ($blacklist->match($this->getInnerIterator()->current())) {
                     return false;
                 }
             }
             
             return true;
         }
-    }
-
-    /**
-     * Get the base directory
-     *
-     * @return string
-     */
-    public function getBaseDirectory()
-    {
-        return $this->baseDirectory;
     }
 
     /**
@@ -129,18 +104,6 @@ class WhitelistBlacklistFilterIterator extends FilterIterator
     public function getWhitelistMatchers()
     {
         return $this->whitelistMatchers;
-    }
-
-    /**
-     * Set the base directory
-     *
-     * @param string $baseDirectory
-     * @return self
-     */
-    public function setBaseDirectory($baseDirectory)
-    {
-        $this->baseDirectory = $baseDirectory;
-        return $this;
     }
 
     /**

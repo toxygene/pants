@@ -36,15 +36,14 @@ namespace Pants\Task;
 use Pants\BuildException;
 use Pants\FileSet\FileSet as FileSetType;
 use Pants\FileSet\Pattern;
-use Pants\Task\AbstractTask;
-use StdClass;
+use Pants\Property\Properties;
 
 /**
  * FileSet task
  *
  * @package Pants\Task
  */
-class FileSet extends AbstractTask
+class FileSet implements Task
 {
 
     /**
@@ -60,6 +59,23 @@ class FileSet extends AbstractTask
      * @var string
      */
     protected $id;
+
+    /**
+     * Properties
+     *
+     * @var Propreties
+     */
+    protected $properties;
+
+    /**
+     * Constructor
+     *
+     * @param Properties $properties
+     */
+    public function __construct(Properties $properties)
+    {
+        $this->properties = $properties;
+    }
 
     /**
      * Execute a task
@@ -101,6 +117,16 @@ class FileSet extends AbstractTask
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * Get the properties
+     *
+     * @return Properties
+     */
+    public function getProperties()
+    {
+        return $this->properties;
     }
 
     /**
