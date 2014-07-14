@@ -215,19 +215,6 @@ class TokenFilter implements Task
     }
 
     /**
-     * Set a replacement
-     *
-     * @param string $token
-     * @param string $value
-     * @return self
-     */
-    public function addReplacement($token, $value)
-    {
-        $this->replacements[$token] = $value;
-        return $this;
-    }
-
-    /**
      * Set the starting character
      *
      * @param string $startingCharacter
