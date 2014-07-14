@@ -116,16 +116,13 @@ class PropertyTest extends TestCase
         $this->task
             ->getProperties()
             ->expects($this->once())
-            ->method(' __get')
-            ->with('one')
-            ->will($this->returnValue('two'));
+            ->method('__set')
+            ->with('one', 'two');
             
         $this->task
             ->setName('one')
             ->setValue('two')
             ->execute();
-
-        $this->assertEquals('two', $this->task->getProperties()->one);
     }
 
 }

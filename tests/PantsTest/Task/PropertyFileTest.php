@@ -98,34 +98,52 @@ class PropertyFileTest extends TestCase
             ->method('filter')
             ->with('three')
             ->will($this->returnArgument(0));
-
+            
         $this->task
             ->getProperties()
             ->expects($this->at(3))
+            ->method('__set')
+            ->with('one.two', 'three');
+
+        $this->task
+            ->getProperties()
+            ->expects($this->at(4))
             ->method('filter')
             ->with('four.five')
             ->will($this->returnArgument(0));
 
         $this->task
             ->getProperties()
-            ->expects($this->at(4))
+            ->expects($this->at(5))
             ->method('filter')
             ->with('six')
             ->will($this->returnArgument(0));
+            
+        $this->task
+            ->getProperties()
+            ->expects($this->at(6))
+            ->method('__set')
+            ->with('four.five', 'six');
 
         $this->task
             ->getProperties()
-            ->expects($this->at(5))
+            ->expects($this->at(7))
             ->method('filter')
             ->with('seven.eight')
             ->will($this->returnArgument(0));
 
         $this->task
             ->getProperties()
-            ->expects($this->at(6))
+            ->expects($this->at(8))
             ->method('filter')
             ->with('${one.two}')
             ->will($this->returnValue('three'));
+            
+        $this->task
+            ->getProperties()
+            ->expects($this->at(9))
+            ->method('__set')
+            ->with('seven.eight', 'three');
 
         $this->task
             ->setFile(__DIR__ . '/_files/properties-1.ini')
@@ -133,10 +151,6 @@ class PropertyFileTest extends TestCase
 
         $properties = $this->task
             ->getProperties();
-
-        $this->assertEquals('three', $properties->{'one.two'});
-        $this->assertEquals('six', $properties->{'four.five'});
-        $this->assertEquals('three', $properties->{'seven.eight'});
     }
 
 }
