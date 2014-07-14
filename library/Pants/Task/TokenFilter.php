@@ -106,7 +106,7 @@ class TokenFilter implements Task
     /**
      * Execute the task
      *
-     * @return TokenFilter
+     * @return self 
      * @throws BuildException
      */
     public function execute()
@@ -194,7 +194,7 @@ class TokenFilter implements Task
      * Set the ending character
      *
      * @param string $endingCharacter
-     * @return TokenFilter
+     * @return self
      */
     public function setEndingCharacter($endingCharacter)
     {
@@ -206,7 +206,7 @@ class TokenFilter implements Task
      * Set the target file
      *
      * @param string $file
-     * @return TokenFilter
+     * @return self
      */
     public function setFile($file)
     {
@@ -215,10 +215,23 @@ class TokenFilter implements Task
     }
 
     /**
+     * Set a replacement
+     *
+     * @param string $token
+     * @param string $value
+     * @return self
+     */
+    public function addReplacement($token, $value)
+    {
+        $this->replacements[$token] = $value;
+        return $this;
+    }
+
+    /**
      * Set the starting character
      *
      * @param string $startingCharacter
-     * @return TokenFilter
+     * @return self
      */
     public function setStartingCharacter($startingCharacter)
     {

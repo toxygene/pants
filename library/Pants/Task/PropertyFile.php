@@ -71,7 +71,7 @@ class PropertyFile implements Task
     /**
      * Set the properties
      *
-     * @return PropertyFile
+     * @return self
      * @throws BuildException
      */
     public function execute()
@@ -116,7 +116,7 @@ class PropertyFile implements Task
      * Set the file
      *
      * @param string $file
-     * @return Property
+     * @return self
      */
     public function setFile($file)
     {

@@ -78,7 +78,7 @@ class Property implements Task
     /**
      * Set the property
      *
-     * @return Property
+     * @return self
      * @throws BuildException
      */
     public function execute()
@@ -129,7 +129,7 @@ class Property implements Task
      * Set the name
      *
      * @param string $name
-     * @return Property
+     * @return self
      */
     public function setName($name)
     {
@@ -141,7 +141,7 @@ class Property implements Task
      * Set the value
      *
      * @param string $value
-     * @return Property
+     * @return self
      */
     public function setValue($value)
     {
