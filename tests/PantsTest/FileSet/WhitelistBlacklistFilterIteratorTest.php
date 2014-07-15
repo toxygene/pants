@@ -67,8 +67,8 @@ class WhitelistBlacklistFilterIteratorTest extends TestCase
     }
 
     /**
-     * @covers Pants\FileSet\WhitelistBlacklistFilterIterator::getExcludes
-     * @covers Pants\FileSet\WhitelistBlacklistFilterIterator::setExcludes
+     * @covers Pants\FileSet\WhitelistBlacklistFilterIterator::getBlacklistMatchers
+     * @covers Pants\FileSet\WhitelistBlacklistFilterIterator::setBlacklistMatchers
      */
     public function testBlacklistMatchersCanBeSet()
     {
@@ -83,8 +83,8 @@ class WhitelistBlacklistFilterIteratorTest extends TestCase
     }
 
     /**
-     * @covers Pants\FileSet\WhitelistBlacklistFilterIterator::getIncludes
-     * @covers Pants\FileSet\WhitelistBlacklistFilterIterator::setIncludes
+     * @covers Pants\FileSet\WhitelistBlacklistFilterIterator::getWhitelistMatchers
+     * @covers Pants\FileSet\WhitelistBlacklistFilterIterator::setWhitelistMatchers
      */
     public function testWhitelistMatchersCanBeSet()
     {
