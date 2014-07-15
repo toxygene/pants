@@ -85,16 +85,16 @@ class Symlink implements Task
      */
     public function execute()
     {
-        if (!$this->getSource()) {
-            throw new BuildException("Source not set");
+        if (!$this->getLink()) {
+            throw new BuildException("Link not set");
         }
 
         if (!$this->getTarget()) {
             throw new BuildException("Target not set");
         }
 
-        $link   = $this->getProperties()->filter($this->getLink());
         $target = $this->getProperties()->filter($this->getTarget());
+        $link   = $this->getProperties()->filter($this->getLink());
 
         Pale::run(function() use ($target, $link) {
             return symlink($target, $link);
@@ -111,6 +111,16 @@ class Symlink implements Task
     public function getLink()
     {
         return $this->link;
+    }
+    
+    /**
+     * Get the properties
+     *
+     * @return Properties
+     */
+    public function getProperties()
+    {
+        return $this->properties;
     }
 
     /**
