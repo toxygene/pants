@@ -153,5 +153,37 @@ class WhitelistBlacklistFilterIteratorTest extends TestCase
         $this->assertContains(vfsStream::url('root/one'), $results);
         $this->assertContains(vfsStream::url('root/four'), $results);
     }
+    
+    /**
+     * @covers Pants\FileSet\WhitelistBlacklistFilterIterator::accept
+     */
+    public function testFilesAreRejectedIfTheyAreExcluded()
+    {
+        $blacklist = $this->getMock('\Pants\FileSet\WhitelistBlacklistFilterIterator\Matcher');
+
+        $blacklist->expects($this->at(0))
+            ->method('match')
+            ->will($this->returnValue(true));
+
+        $blacklist->expects($this->at(1))
+            ->method('match')
+            ->will($this->returnValue(true));
+
+        $blacklist->expects($this->at(2))
+            ->method('match')
+            ->will($this->returnValue(false));
+
+        $blacklist->expects($this->at(3))
+            ->method('match')
+            ->will($this->returnValue(true));
+            
+        $this->filter
+            ->setBlacklistMatchers(array($blacklist));
+
+        $results = iterator_to_array($this->filter);
+        
+        $this->assertEquals(1, count($results));
+        $this->assertContains(vfsStream::url('root/three'), $results);
+    }
 
 }

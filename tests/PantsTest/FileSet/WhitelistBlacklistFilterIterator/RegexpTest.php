@@ -54,7 +54,7 @@ class RegexpTest extends TestCase
      */
     public function setUp()
     {
-        $this->matcher = new Regexp();
+        $this->matcher = new Regexp('test');
         
         vfsStream::setup('root', null, array(
             'one' => array(
@@ -75,11 +75,14 @@ class RegexpTest extends TestCase
     }
     
     /**
+     * @covers Pants\FileSet\WhitelistBlacklistFilterIterator\Regexp::__construct
      * @covers Pants\FileSet\WhitelistBlacklistFilterIterator\Regexp::getPattern
      * @covers Pants\FileSet\WhitelistBlacklistFilterIterator\Regexp::setPattern
      */
     public function testPatternCanBeSet()
     {
+        $this->assertEquals('test', $this->matcher->getPattern());
+        
         $this->matcher
             ->setPattern('asdf');
 
@@ -98,5 +101,18 @@ class RegexpTest extends TestCase
         $this->assertTrue($this->matcher->match(new SplFileInfo(vfsStream::url('one/two/asdf'))));
         $this->assertFalse($this->matcher->match(new SplFileInfo(vfsStream::url('one/two/qwerty'))));
     }
+    
+    /**
+     * @covers Pants\FileSet\WhitelistBlacklistFilterIterator\Regexp::getBaseDirectory
+     * @covers Pants\FileSet\WhitelistBlacklistFilterIterator\Regexp::setBaseDirectory
+     */
+    public function testBaseDirectoryCanBeSet()
+    {
+        $this->matcher
+            ->setBaseDirectory('test');
+
+        $this->assertEquals('test', $this->matcher->getBaseDirectory());
+    }
+    
 
 }
