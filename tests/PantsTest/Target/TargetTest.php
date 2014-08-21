@@ -50,26 +50,47 @@ class TargetTest extends TestCase
     protected $target;
 
     /**
+     * Properties mock object
+     *
+     * @var \Pants\Property\Properties
+     */
+    protected $properties;
+
+    /**
+     * Targets mock object
+     *
+     * @var \Pants\Target\Targets
+     */
+    protected $targets;
+
+    /**
+     * Tasks mock object
+     *
+     * @var \Pants\Task\Tasks
+     */
+    protected $tasks;
+
+    /**
      * Setup the test case
      */
     public function setUp()
     {
-        $targets    = $this->getMock('\Pants\Target\Targets');
-        $properties = $this->getMock('\Pants\Property\Properties');
-        $tasks      = $this->getMock('\Pants\Task\Tasks');
+        $this->targets    = $this->getMock('\Pants\Target\Targets');
+        $this->properties = $this->getMock('\Pants\Property\Properties');
+        $this->tasks      = $this->getMock('\Pants\Task\Tasks');
         
-        $this->target = new Target($targets, $properties, $tasks);
+        $this->target = new Target($this->targets, $this->properties, $this->tasks);
     }
 
     /**
-     * @covers Pants\Target\Target::getName
-     * @covers Pants\Target\Target::setName
+     * @covers Pants\Target\Target::getDepends
+     * @covers Pants\Target\Target::setDepends
      */
-    public function testNameCanBeSet()
+    public function testDependsCanBeSet()
     {
-        $this->target->setName('test');
+        $this->target->setDepends(array('depends'));
 
-        $this->assertEquals('test', $this->target->getName());
+        $this->assertEquals(array('depends'), $this->target->getDepends());
     }
 
     /**
@@ -84,14 +105,51 @@ class TargetTest extends TestCase
     }
 
     /**
-     * @covers Pants\Target\Target::getTasks
+     * @covers Pants\Target\Target::getHidden
+     * @covers Pants\Target\Target::setHidden
      */
-    public function testTasksCanBeRetrieved()
+    public function testHiddenCanBeSet()
     {
-        $this->assertInstanceOf('\Pants\Task\Tasks', $this->target->getTasks());
+        $this->target->setHidden(true);
+
+        $this->assertTrue($this->target->getHidden());
     }
 
     /**
+     * @covers Pants\Target\Target::getIf
+     * @covers Pants\Target\Target::setIf
+     */
+    public function testIfCanBeSet()
+    {
+        $this->target->setIf(array('if'));
+
+        $this->assertEquals(array('if'), $this->target->getIf());
+    }
+
+    /**
+     * @covers Pants\Target\Target::getName
+     * @covers Pants\Target\Target::setName
+     */
+    public function testNameCanBeSet()
+    {
+        $this->target->setName('test');
+
+        $this->assertEquals('test', $this->target->getName());
+    }
+
+    /**
+     * @covers Pants\Target\Target::getUnless
+     * @covers Pants\Target\Target::setUnless
+     */
+    public function testUnlessCanBeSet()
+    {
+        $this->target->setUnless(array('unless'));
+
+        $this->assertEquals(array('unless'), $this->target->getUnless());
+    }
+
+    /**
+     * @covers Pants\Target\Target::__construct
      * @covers Pants\Target\Target::execute
      */
     public function testTasksAreExecutedOnTargetExecute()
@@ -102,8 +160,7 @@ class TargetTest extends TestCase
             ->method('execute')
             ->will($this->returnValue($task));
             
-        $this->target
-            ->getTasks()
+        $this->tasks
             ->expects($this->once())
             ->method('getIterator')
             ->will($this->returnValue(new ArrayIterator(array($task, $task))));
@@ -113,6 +170,7 @@ class TargetTest extends TestCase
     }
 
     /**
+     * @covers Pants\Target\Target::__construct
      * @covers Pants\Target\Target::execute
      */
     public function testTasksAreNotExecutedIfIfIsNotSet()
@@ -122,8 +180,7 @@ class TargetTest extends TestCase
         $task->expects($this->never())
             ->method('execute');
 
-        $this->target
-            ->getTasks()
+        $this->tasks
             ->add($task);
 
         $this->target
@@ -132,6 +189,7 @@ class TargetTest extends TestCase
     }
 
     /**
+     * @covers Pants\Target\Target::__construct
      * @covers Pants\Target\Target::execute
      */
     public function testTasksAreNotExecutedIfUnlessIsSet()
@@ -141,14 +199,12 @@ class TargetTest extends TestCase
         $task->expects($this->never())
             ->method('execute');
 
-        $this->target
-            ->getTasks()
+        $this->tasks
             ->expects($this->any())
             ->method('getIterator')
             ->will($this->returnValue(new ArrayIterator(array($task))));
 
-        $this->target
-            ->getProperties()
+        $this->properties
             ->expects($this->once())
             ->method('__get')
             ->with('one')
@@ -160,6 +216,7 @@ class TargetTest extends TestCase
     }
     
     /**
+     * @covers Pants\Target\Target::__construct
      * @covers Pants\Target\Target::execute
      */
     public function testDependIsExecuted()
@@ -172,15 +229,13 @@ class TargetTest extends TestCase
             ->method('execute')
             ->will($this->returnSelf());
 
-        $this->target
-            ->getTargets()
+        $this->targets
             ->expects($this->once())
             ->method('__get')
             ->with('test')
             ->will($this->returnValue($target));
 
-        $this->target
-            ->getTasks()
+        $this->tasks
             ->expects($this->once())
             ->method('getIterator')
             ->will($this->returnValue(new ArrayIterator()));

@@ -131,24 +131,24 @@ class Target implements Task
     public function execute()
     {
         foreach ($this->getDepends() as $depends) {
-            $this->getTargets()
+            $this->targets
                 ->$depends
                 ->execute();
         }
 
         foreach ($this->getIf() as $if) {
-            if (!isset($this->getProperties()->$if) || !$this->getProperties()->$if) {
+            if (!isset($this->properties->$if) || !$this->properties->$if) {
                 return $this;
             }
         }
 
         foreach ($this->getUnless() as $unless) {
-            if (isset($this->getProperties()->$unless) || $this->getProperties()->$unless) {
+            if (isset($this->properties->$unless) || $this->properties->$unless) {
                 return $this;
             }
         }
 
-        foreach ($this->getTasks() as $task) {
+        foreach ($this->tasks as $task) {
             $task->execute();
         }
 
@@ -203,36 +203,6 @@ class Target implements Task
     public function getName()
     {
         return $this->name;
-    }
-
-    /**
-     * Get the properties
-     *
-     * @return Properties
-     */
-    public function getProperties()
-    {
-        return $this->properties;
-    }
-
-    /**
-     * Get the targets
-     *
-     * @return selfs
-     */
-    public function getTargets()
-    {
-        return $this->targets;
-    }
-
-    /**
-     * Get the tasks
-     *
-     * @return Tasks
-     */
-    public function getTasks()
-    {
-        return $this->tasks;
     }
 
     /**
@@ -302,30 +272,6 @@ class Target implements Task
     public function setName($name)
     {
         $this->name = $name;
-        return $this;
-    }
-
-    /**
-     * Set properties
-     *
-     * @param Properties $properties
-     * @return self
-     */
-    public function setProperties(Properties $properties)
-    {
-        $this->properties = $properties;
-        return $this;
-    }
-
-    /**
-     * Set the targets
-     *
-     * @param Targets $targets
-     * @return self
-     */
-    public function setTargets(Targets $targets)
-    {
-        $this->targets = $targets;
         return $this;
     }
 
