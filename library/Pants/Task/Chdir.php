@@ -81,7 +81,7 @@ class Chdir implements Task
             throw new BuildException('Directory is not set');
         }
 
-        $directory = $this->getProperties()
+        $directory = $this->properties
             ->filter($this->getDirectory());
 
         Pale::run(function() use ($directory) {
@@ -99,16 +99,6 @@ class Chdir implements Task
     public function getDirectory()
     {
         return $this->directory;
-    }
-
-    /**
-     * Get the properties
-     *
-     * @return Properties
-     */
-    public function getProperties()
-    {
-        return $this->properties;
     }
 
     /**

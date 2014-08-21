@@ -43,12 +43,21 @@ class ChdirTest extends TestCase
 
     /**
      * Current working directory
+     *
      * @var string
      */
     protected $cwd;
 
     /**
+     * Properties mock object
+     *
+     * @var \Pats\Property\Properties
+     */
+    protected $properties;
+
+    /**
      * Chdir task
+     *
      * @var Chdir
      */
     protected $task;
@@ -58,11 +67,9 @@ class ChdirTest extends TestCase
      */
     public function setUp()
     {
-        $this->cwd = getcwd();
-        
-        $properties = $this->getMock('\Pants\Property\Properties');
-        
-        $this->task = new Chdir($properties);
+        $this->cwd        = getcwd();
+        $this->properties = $this->getMock('\Pants\Property\Properties');
+        $this->task       = new Chdir($this->properties);
     }
 
     /**
@@ -71,6 +78,9 @@ class ChdirTest extends TestCase
     public function tearDown()
     {
         chdir($this->cwd);
+
+        unset($this->cwd);
+        unset($this->properties);
         unset($this->task);
     }
 
@@ -110,14 +120,14 @@ class ChdirTest extends TestCase
     }
     
     /**
+     * @covers Pants\Task\Chdir::__construct
      * @covers Pants\Task\Chdir::execute
      */
     public function testChdirChangesTheCurrentWorkingDirectory()
     {
         $directory = __DIR__ . '/_files';
         
-        $this->task
-            ->getProperties()
+        $this->properties
             ->expects($this->once())
             ->method('filter')
             ->with($directory)
