@@ -43,18 +43,18 @@ class TargetTest extends TestCase
 {
 
     /**
-     * Target
-     *
-     * @var Target
-     */
-    protected $target;
-
-    /**
      * Properties mock object
      *
      * @var \Pants\Property\Properties
      */
     protected $properties;
+
+    /**
+     * Target
+     *
+     * @var Target
+     */
+    protected $target;
 
     /**
      * Targets mock object
@@ -81,6 +81,18 @@ class TargetTest extends TestCase
         
         $this->target = new Target($this->targets, $this->properties, $this->tasks);
     }
+
+    /**
+     * Tear down the test case
+     */
+    public function tearDown()
+    {
+        unset($this->properties);
+        unset($this->target);
+        unset($this->targets);
+        unset($this->tasks);
+    }
+
 
     /**
      * @covers Pants\Target\Target::getDepends
