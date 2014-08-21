@@ -91,24 +91,14 @@ class Call implements Task
             throw new BuildException('No target set');
         }
         
-        $target = $this->getProperties()
+        $target = $this->properties
             ->filter($this->getTarget());
         
-        $this->getTargets()
+        $this->targets
             ->$target
             ->execute();
 
         return $this;
-    }
-
-    /**
-     * Get the properties
-     *
-     * @return Properties
-     */
-    public function getProperties()
-    {
-        return $this->properties;
     }
 
     /**
@@ -119,16 +109,6 @@ class Call implements Task
     public function getTarget()
     {
         return $this->target;
-    }
-    
-    /**
-     * Get the targets
-     *
-     * @return Targets
-     */
-    public function getTargets()
-    {
-        return $this->targets;
     }
 
     /**

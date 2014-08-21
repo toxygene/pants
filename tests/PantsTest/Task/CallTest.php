@@ -42,6 +42,20 @@ class CallTest extends TestCase
 {
 
     /**
+     * Properties mock object
+     *
+     * @var \Pants\Property\Properties
+     */
+    protected $properties;
+
+    /**
+     * Targets mock object
+     *
+     * @var \Pants\Target\Targets
+     */
+    protected $targets;
+
+    /**
      * Call task
      *
      * @var Call
@@ -53,15 +67,15 @@ class CallTest extends TestCase
      */
     public function setUp()
     {
-        $properties = $this->getMock('\Pants\Property\Properties');
+        $this->properties = $this->getMock('\Pants\Property\Properties');
         
-        $targets = $this->getMockBuilder('\Pants\Target\Targets')
+        $this->targets = $this->getMockBuilder('\Pants\Target\Targets')
             ->disableOriginalConstructor()
             ->getMock();
     
         $this->task = new Call(
-            $properties,
-            $targets
+            $this->properties,
+            $this->targets
         );
     }
     
@@ -70,6 +84,8 @@ class CallTest extends TestCase
      */
     public function tearDown()
     {
+        unset($this->properties);
+        unset($this->targets);
         unset($this->task);
     }
 
@@ -97,21 +113,20 @@ class CallTest extends TestCase
     }
 
     /**
+     * @covers Pants\Task\Call::__construct
      * @covers Pants\Task\Call::execute
      */
     public function testAValidTargetIsRequired()
     {
         $this->setExpectedException('\InvalidArgumentException');
         
-        $this->task
-            ->getProperties()
+        $this->properties
             ->expects($this->once())
             ->method('filter')
             ->with('asdf')
             ->will($this->returnArgument(0));
 
-        $this->task
-            ->getTargets()
+        $this->targets
             ->expects($this->once())
             ->method('__get')
             ->will($this->throwException(new InvalidArgumentException()));
@@ -122,12 +137,12 @@ class CallTest extends TestCase
     }
 
     /**
+     * @covers Pants\Task\Call::__construct
      * @covers Pants\Task\Call::execute
      */
     public function testRequestedTargetIsExecuted()
     {
-        $this->task
-            ->getProperties()
+        $this->properties
             ->expects($this->once())
             ->method('filter')
             ->with('asdf')
@@ -141,8 +156,7 @@ class CallTest extends TestCase
             ->method('execute')
             ->will($this->returnSelf());
 
-        $this->task
-            ->getTargets()
+        $this->targets
             ->expects($this->once())
             ->method('__get')
             ->with('asdf')
