@@ -48,6 +48,13 @@ class TouchTest extends TestCase
     protected $file;
 
     /**
+     * Properties mock object
+     *
+     * @var \Pants\Property\Properties
+     */
+    protected $properties;
+
+    /**
      * Touch task
      * @var Touch
      */
@@ -58,13 +65,13 @@ class TouchTest extends TestCase
      */
     public function setUp()
     {
-        $this->touch = new Touch($this->getMock('\Pants\Property\Properties'));
-        
         vfsStream::setup('root', null, array(
             'one' => 'test'
         ));
         
-        $this->file = vfsStream::url('root/one');
+        $this->file       = vfsStream::url('root/one');
+        $this->properties = $this->getMock('\Pants\Property\Properties');
+        $this->touch      = new Touch($this->properties);
     }
     
     /**
@@ -73,6 +80,7 @@ class TouchTest extends TestCase
     public function tearDown()
     {
         unset($this->file);
+        unset($this->properties);
         unset($this->touch);
     }
     
@@ -112,19 +120,33 @@ class TouchTest extends TestCase
     }
 
     /**
+     * @covers Pants\Task\Touch::__construct
      * @covers Pants\Task\Touch::execute
      */
     public function testTouchingANonExistentFileCreatesItAndSetsTheModifiedTime()
     {
+        $file = vfsStream::url('root') . DIRECTORY_SEPARATOR . 'two';
         $time = time();
 
+        $this->properties
+            ->expects($this->at(0))
+            ->method('filter')
+            ->with($file)
+            ->will($this->returnArgument(0));
+
+        $this->properties
+            ->expects($this->at(1))
+            ->method('filter')
+            ->with($time)
+            ->will($this->returnArgument(0));
+
         $this->touch
-            ->setFile($this->file)
+            ->setFile($file)
             ->setTime($time)
             ->execute();
 
-        $this->assertTrue(file_exists($this->file));
-        $this->assertEquals($time, filemtime($this->file));
+        $this->assertTrue(file_exists($file));
+        $this->assertEquals($time, filemtime($file));
     }
 
 }
