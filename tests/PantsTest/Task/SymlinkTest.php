@@ -36,10 +36,17 @@ use Pants\Task\Symlink;
 use PHPUnit_Framework_TestCase as TestCase;
 
 /**
- *
+ * Unit tests for the symlink task
  */
 class SymlinkTest extends TestCase
 {
+
+    /**
+     * Properties mock object
+     *
+     * @var \Pants\Property\Properties
+     */
+    protected $properties;
 
     /**
      * Symlink task
@@ -53,13 +60,8 @@ class SymlinkTest extends TestCase
      */
     public function setUp()
     {
-        $this->task = new Symlink($this->getMock('\Pants\Property\Properties'));
-        
-        vfsStream::setup('root', null, array(
-            'one' => 'test'
-        ));
-        
-        $this->link = vfsStream::url('root/one');
+        $this->properties = $this->getMock('\Pants\Property\Properties');
+        $this->task = new Symlink($this->properties);
     }
     
     /**
@@ -67,7 +69,7 @@ class SymlinkTest extends TestCase
      */
     public function tearDown()
     {
-        unset($this->file);
+        unset($this->properties);
         unset($this->task);
     }
     

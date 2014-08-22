@@ -35,7 +35,7 @@ use Pants\Task\Tasks;
 use PHPUnit_Framework_TestCase as TestCase;
 
 /**
- *
+ * Unit tests for the tasks container
  */
 class TasksTest extends TestCase
 {

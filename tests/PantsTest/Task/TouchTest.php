@@ -36,7 +36,7 @@ use Pants\Task\Touch;
 use PHPUnit_Framework_TestCase as TestCase;
 
 /**
- *
+ * Unit tests for the touch task
  */
 class TouchTest extends TestCase
 {

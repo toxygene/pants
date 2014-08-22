@@ -37,7 +37,7 @@ use Pants\Task\TokenFilter;
 use PHPUnit_Framework_TestCase as TestCase;
 
 /**
- *
+ * Unit tests for the token filter task
  */
 class TokenFilterTest extends TestCase
 {
