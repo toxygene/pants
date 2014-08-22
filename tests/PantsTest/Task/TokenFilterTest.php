@@ -49,6 +49,13 @@ class TokenFilterTest extends TestCase
     protected $file;
 
     /**
+     * Properties mock object
+     *
+     * @var \Pants\Property\Properties
+     */
+    protected $properties;
+
+    /**
      * TokenFilter task
      * @var TokenFilter
      */
@@ -62,10 +69,10 @@ class TokenFilterTest extends TestCase
         vfsStream::setup('root', null, array(
             'one' => '@asdf@ $qwer$'
         ));
-        
-        $this->tokenFilter = new TokenFilter($this->getMock('\Pants\Property\Properties'));
 
-        $this->file = vfsStream::url('root/one');
+        $this->file        = vfsStream::url('root/one');
+        $this->properties  = $this->getMock('\Pants\Property\Properties');
+        $this->tokenFilter = new TokenFilter($this->properties);
     }
 
     /**
@@ -74,6 +81,7 @@ class TokenFilterTest extends TestCase
     public function tearDown()
     {
         unset($this->file);
+        unset($this->properties);
         unset($this->tokenFilter);
     }
 
@@ -114,26 +122,24 @@ class TokenFilterTest extends TestCase
     }
 
     /**
+     * @covers Pants\Task\TokenFilter::__construct
      * @covers Pants\Task\TokenFilter::execute
      */
     public function testTokensAreReplacedInTheFileOnExecute()
     {
-        $this->tokenFilter
-            ->getProperties()
+        $this->properties
             ->expects($this->at(0))
             ->method('filter')
             ->with('@')
             ->will($this->returnValue('@'));
             
-        $this->tokenFilter
-            ->getProperties()
+        $this->properties
             ->expects($this->at(1))
             ->method('filter')
             ->with($this->file)
             ->will($this->returnValue($this->file));
             
-        $this->tokenFilter
-            ->getProperties()
+        $this->properties
             ->expects($this->at(2))
             ->method('filter')
             ->with('@')

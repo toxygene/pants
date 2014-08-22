@@ -115,10 +115,10 @@ class TokenFilter implements Task
             throw new BuildException("File not set");
         }
 
-        $endingCharacter   = $this->getProperties()->filter($this->getEndingCharacter());
-        $file              = $this->getProperties()->filter($this->getFile());
+        $endingCharacter   = $this->properties->filter($this->getEndingCharacter());
+        $file              = $this->properties->filter($this->getFile());
         $replacements      = $this->getReplacements();
-        $startingCharacter = $this->getProperties()->filter($this->getStartingCharacter());
+        $startingCharacter = $this->properties->filter($this->getStartingCharacter());
 
         Pale::run(function() use ($file, $replacements, $endingCharacter, $startingCharacter) {
             $contents = file_get_contents($file);
@@ -158,16 +158,6 @@ class TokenFilter implements Task
     public function getFile()
     {
         return $this->file;
-    }
-
-    /**
-     * Get the properties
-     *
-     * @return Properties
-     */
-    public function getProperties()
-    {
-        return $this->properties;
     }
 
     /**
