@@ -46,6 +46,13 @@ class CopyTest extends TestCase
      * @var string
      */
     protected $file;
+    
+    /**
+     * Properties mock object
+     *
+     * @var \Pants\Property\Properties
+     */
+    protected $properties;
 
     /**
      * Copy task
@@ -58,15 +65,15 @@ class CopyTest extends TestCase
      */
     public function setUp()
     {
-        $properties = $this->getMock('\Pants\Property\Properties');
-        
-        $this->task = new Copy($properties);
-
         vfsStream::setup('root', null, array(
             'test' => 'testing'
         ));
 
         $this->file = vfsStream::url('root/test');
+        
+        $this->properties = $this->getMock('\Pants\Property\Properties');
+        
+        $this->task = new Copy($this->properties);
     }
 
     /**
@@ -74,8 +81,9 @@ class CopyTest extends TestCase
      */
     public function tearDown()
     {
-        unset($this->task);
         unset($this->file);
+        unset($this->properties);
+        unset($this->task);
     }
 
     /**
@@ -103,6 +111,7 @@ class CopyTest extends TestCase
     }
 
     /**
+     * @covers Pants\Task\Copy::__construct
      * @covers Pants\Task\Copy::execute
      */
     public function testFileIsCopied()
@@ -110,15 +119,13 @@ class CopyTest extends TestCase
         $source = $this->file;
         $destination = $this->file . '_1';
         
-        $this->task
-            ->getProperties()
+        $this->properties
             ->expects($this->at(0))
             ->method('filter')
             ->with($source)
             ->will($this->returnArgument(0));
         
-        $this->task
-            ->getProperties()
+        $this->properties
             ->expects($this->at(1))
             ->method('filter')
             ->with($destination)

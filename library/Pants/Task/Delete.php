@@ -83,7 +83,7 @@ class Delete implements Task
         }
 
         foreach ($this->files as $file) {
-            $file = $this->getProperties()->filter($file);
+            $file = $this->properties->filter($file);
             Pale::run(function() use ($file) {
                 return unlink($file);
             });
@@ -112,16 +112,6 @@ class Delete implements Task
     {
         $this->files = array($file);
         return $this;
-    }
-    
-    /**
-     * Get the properties
-     *
-     * @return Properties
-     */
-    public function getProperties()
-    {
-        return $this->properties;
     }
 
     /**

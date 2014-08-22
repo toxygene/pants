@@ -52,6 +52,13 @@ class ChmodTest extends TestCase
      * @var string
      */
     protected $file;
+    
+    /**
+     * Properties mock object
+     *
+     * @var \Pants\Property\Properties
+     */
+    protected $properties;
 
     /**
      * Set up the test case
@@ -62,11 +69,11 @@ class ChmodTest extends TestCase
             'one' => 'test'
         ));
 
-        $properties = $this->getMock('\Pants\Property\Properties');
-
-        $this->chmod = new Chmod($properties);
-
         $this->file = vfsStream::url('root/one');
+
+        $this->properties = $this->getMock('\Pants\Property\Properties');
+
+        $this->chmod = new Chmod($this->properties);
     }
 
     /**
@@ -76,6 +83,7 @@ class ChmodTest extends TestCase
     {
         unset($this->chmod);
         unset($this->file);
+        unset($this->properties);
     }
 
     /**
@@ -103,19 +111,18 @@ class ChmodTest extends TestCase
     }
 
     /**
+     * @covers Pants\Task\Chmod::__construct
      * @covers Pants\Task\Chmod::execute
      */
     public function testPermissionsIsSet()
     {
-        $this->chmod
-            ->getProperties()
+        $this->properties
             ->expects($this->at(0))
             ->method('filter')
             ->with(0654)
             ->will($this->returnArgument(0));
 
-        $this->chmod
-            ->getProperties()
+        $this->properties
             ->expects($this->at(1))
             ->method('filter')
             ->with($this->file)
@@ -130,19 +137,18 @@ class ChmodTest extends TestCase
     }
 
     /**
+     * @covers Pants\Task\Chmod::__construct
      * @covers Pants\Task\Chmod::execute
      */
     public function testPermissionsAsAStringCanBeSet()
     {
-        $this->chmod
-            ->getProperties()
+        $this->properties
             ->expects($this->at(0))
             ->method('filter')
             ->with('654')
             ->will($this->returnArgument(0));
 
-        $this->chmod
-            ->getProperties()
+        $this->properties
             ->expects($this->at(1))
             ->method('filter')
             ->with($this->file)

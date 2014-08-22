@@ -41,6 +41,13 @@ class InputTest extends TestCase
 {
 
     /**
+     * Properties mock object
+     *
+     * @var \Pants\Property\Properties
+     */
+    protected $properties;
+
+    /**
      * Input task
      *
      * @var Input
@@ -52,7 +59,9 @@ class InputTest extends TestCase
      */
     public function setUp()
     {
-        $this->task = new Input($this->getMock('\Pants\Property\Properties'));
+        $this->properties = $this->getMock('\Pants\Property\Properties');
+
+        $this->task = new Input($this->properties);
     }
     
     /**
@@ -60,6 +69,7 @@ class InputTest extends TestCase
      */
     public function tearDown()
     {
+        unset($this->properties);
         unset($this->task);
     }
     
@@ -167,21 +177,20 @@ class InputTest extends TestCase
     }
     
     /**
+     * @covers Pants\Task\Input::__construct
      * @covers Pants\Task\Input::execute
      */
     public function testMessageIsOutput()
     {
         $message = 'message';
         
-        $this->task
-            ->getProperties()
+        $this->properties
             ->expects($this->at(0))
             ->method('filter')
             ->with($message)
             ->will($this->returnArgument(0));
 
-        $this->task
-            ->getProperties()
+        $this->properties
             ->expects($this->at(1))
             ->method('filter')
             ->with('?')
@@ -209,14 +218,14 @@ class InputTest extends TestCase
     }
     
     /**
+     * @covers Pants\Task\Input::__construct
      * @covers Pants\Task\Input::execute
      */
     public function testPromptCharacterIsOutput()
     {
         $promptCharacter = ':';
         
-        $this->task
-            ->getProperties()
+        $this->properties
             ->expects($this->at(0))
             ->method('filter')
             ->with(':')
@@ -241,28 +250,26 @@ class InputTest extends TestCase
     }
     
     /**
+     * @covers Pants\Task\Input::__construct
      * @covers Pants\Task\Input::execute
      */
     public function testDefaultValueIsUsedWhenThereInNoInput()
     {
         $defaultValue = 'test';
 
-        $this->task
-            ->getProperties()
+        $this->properties
             ->expects($this->at(0))
             ->method('filter')
             ->with('?')
             ->will($this->returnArgument(0));
 
-        $this->task
-            ->getProperties()
+        $this->properties
             ->expects($this->at(1))
             ->method('filter')
             ->with($defaultValue)
             ->will($this->returnArgument(0));
             
-        $this->task
-            ->getProperties()
+        $this->properties
             ->expects($this->once())
             ->method('__get')
             ->with('test')
@@ -283,10 +290,11 @@ class InputTest extends TestCase
         $this->task
             ->execute();
 
-        $this->assertEquals('test', $this->task->getProperties()->test);
+        $this->assertEquals('test', $this->properties->test);
     }
     
     /**
+     * @covers Pants\Task\Input::__construct
      * @covers Pants\Task\Input::execute
      */
     public function testValidArgsAreOutput()
@@ -297,15 +305,13 @@ class InputTest extends TestCase
         
         $output = fopen('php://memory', 'a+');
 
-        $this->task
-            ->getProperties()
+        $this->properties
             ->expects($this->at(0))
             ->method('filter')
             ->with('one')
             ->will($this->returnValue('one'));
             
-        $this->task
-            ->getProperties()
+        $this->properties
             ->expects($this->at(1))
             ->method('filter')
             ->with('two')

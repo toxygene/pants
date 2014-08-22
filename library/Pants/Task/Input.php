@@ -122,32 +122,32 @@ class Input implements Task
         }
 
         if ($this->getMessage()) {
-            fwrite($this->getOutputStream(), $this->getProperties()->filter($this->getMessage()));
+            fwrite($this->getOutputStream(), $this->properties->filter($this->getMessage()));
         }
 
         $validArgs = array();
 
         foreach ($this->getValidArgs() as $validArg) {
-            $validArgs[] = $this->getProperties()->filter($validArg);
+            $validArgs[] = $this->properties->filter($validArg);
         }
 
         if ($validArgs) {
             fwrite($this->getOutputStream(), ' [' . implode('/', $validArgs) . ']');
         }
 
-        fwrite($this->getOutputStream(), $this->getProperties()->filter($this->getPromptCharacter()) . ' ');
+        fwrite($this->getOutputStream(), $this->properties->filter($this->getPromptCharacter()) . ' ');
 
         $value = trim(fgets($this->getInputStream()));
 
         if (trim($value) == '') {
-            $value = $this->getProperties()->filter($this->getDefaultValue());
+            $value = $this->properties->filter($this->getDefaultValue());
         }
 
         if ($validArgs && !in_array($value, $validArgs)) {
             throw new BuildException('Invalid argument');
         }
 
-        $this->getProperties()
+        $this->properties
             ->{$this->getPropertyName()} = $value;
 
         return $this;
@@ -201,16 +201,6 @@ class Input implements Task
     public function getPromptCharacter()
     {
         return $this->promptCharacter;
-    }
-
-    /**
-     * Get the properties
-     *
-     * @return Properties
-     */
-    public function getProperties()
-    {
-        return $this->properties;
     }
 
     /**

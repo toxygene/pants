@@ -41,6 +41,13 @@ class ExecuteTest extends TestCase
 {
 
     /**
+     * Properties mock object
+     *
+     * @var \Pants\Property\Properties
+     */
+    protected $properties;
+
+    /**
      * Execute task
      * @var Delete
      */
@@ -51,7 +58,9 @@ class ExecuteTest extends TestCase
      */
     public function setUp()
     {
-        $this->task = new Execute($this->getMock('\Pants\Property\Properties'));
+        $this->properties = $this->getMock('\Pants\Property\Properties');
+        
+        $this->task = new Execute($this->properties);
     }
 
     /**
@@ -59,6 +68,7 @@ class ExecuteTest extends TestCase
      */
     public function tearDown()
     {
+        unset($this->properties);
         unset($this->task);
     }
 
@@ -96,6 +106,7 @@ class ExecuteTest extends TestCase
     }
     
     /**
+     * @covers Pants\Task\Execute::__construct
      * @covers Pants\Task\Execute::execute
      */
     public function testFailedCommandThrowsException()
@@ -105,15 +116,13 @@ class ExecuteTest extends TestCase
         $command   = 'php failure.php';
         $directory = __DIR__ . '/_files';
 
-        $this->task
-            ->getProperties()
+        $this->properties
             ->expects($this->at(0))
             ->method('filter')
             ->with($command)
             ->will($this->returnArgument(0));
 
-        $this->task
-            ->getProperties()
+        $this->properties
             ->expects($this->at(1))
             ->method('filter')
             ->with($directory)

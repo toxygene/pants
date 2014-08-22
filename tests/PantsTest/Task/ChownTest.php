@@ -54,6 +54,13 @@ class ChownTest extends TestCase
     protected $file;
 
     /**
+     * Properties mock object
+     *
+     * @var \Pats\Property\Properties
+     */
+    protected $properties;
+
+    /**
      * Setup the test case
      */
     public function setUp()
@@ -61,12 +68,12 @@ class ChownTest extends TestCase
         vfsStream::setup('root', null, array(
             'one' => 'test'
         ));
-        
-        $properties = $this->getMock('\Pants\Property\Properties');
-        
-        $this->chown = new Chown($properties);
 
         $this->file = vfsStream::url('root/one');
+        
+        $this->properties = $this->getMock('\Pants\Property\Properties');
+        
+        $this->chown = new Chown($this->properties);
     }
 
     /**
@@ -76,6 +83,7 @@ class ChownTest extends TestCase
     {
         unset($this->chown);
         unset($this->file);
+        unset($this->properties);
     }
 
     /**
@@ -103,19 +111,18 @@ class ChownTest extends TestCase
     }
 
     /**
+     * @covers Pants\Task\Chown::__construct
      * @covers Pants\Task\Chown::execute
      */
     public function testOwnerIsSet()
     {
-        $this->chown
-            ->getProperties()
+        $this->properties
             ->expects($this->at(0))
             ->method('filter')
             ->with(1000)
             ->will($this->returnArgument(0));
             
-        $this->chown
-            ->getProperties()
+        $this->properties
             ->expects($this->at(1))
             ->method('filter')
             ->with($this->file)

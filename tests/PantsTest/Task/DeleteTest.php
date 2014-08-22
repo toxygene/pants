@@ -46,6 +46,13 @@ class DeleteTest extends TestCase
      * @var string
      */
     protected $file;
+    
+    /**
+     * Properties mock object
+     *
+     * @var \Pants\Property\Properties
+     */
+    protected $properties;
 
     /**
      * Delete task
@@ -58,13 +65,15 @@ class DeleteTest extends TestCase
      */
     public function setUp()
     {
-        $this->task = new Delete($this->getMock('\Pants\Property\Properties'));
-        
         vfsStream::setup('root', null, array(
             'test' => 'test'
         ));
         
         $this->file = vfsStream::url('root/test');
+        
+        $this->properties = $this->getMock('\Pants\Property\Properties');
+        
+        $this->task = new Delete($this->properties);
     }
 
     /**
@@ -91,12 +100,12 @@ class DeleteTest extends TestCase
     }
 
     /**
+     * @covers Pants\Task\Delete::__construct
      * @covers Pants\Task\Delete::execute
      */
     public function testFileIsDeleted()
     {
-        $this->task
-            ->getProperties()
+        $this->properties
             ->expects($this->once())
             ->method('filter')
             ->with($this->file)
