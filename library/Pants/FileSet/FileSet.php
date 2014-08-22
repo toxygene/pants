@@ -33,6 +33,7 @@
 
 namespace Pants\FileSet;
 
+use FilesystemIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
@@ -53,7 +54,8 @@ class FileSet extends RecursiveIteratorIterator
     {
         parent::__construct(
             new RecursiveDirectoryIterator(
-                $baseDirectory
+                $baseDirectory,
+                FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO | FilesystemIterator::SKIP_DOTS
             ),
             RecursiveIteratorIterator::CHILD_FIRST
         );
