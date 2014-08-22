@@ -31,6 +31,7 @@
 
 namespace PantsTest\FileSet;
 
+use FilesystemIterator;
 use org\bovigo\vfs\vfsStream;
 use Pants\FileSet\DefaultBlacklistFilterIterator;
 use PHPUnit_Framework_TestCase as TestCase;
@@ -62,7 +63,8 @@ class DefaultBlacklistFilterIteratorTest extends TestCase
         ));
 
         $this->filter = new DefaultBlacklistFilterIterator(new RecursiveDirectoryIterator(
-            vfsStream::url('root')
+            vfsStream::url('root'),
+            FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO | FilesystemIterator::SKIP_DOTS
         ));
     }
 

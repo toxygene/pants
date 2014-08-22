@@ -88,8 +88,8 @@ class Touch implements Task
             throw new BuildException("File not set");
         }
 
-        $file = $this->getProperties()->filter($this->getFile());
-        $time = $this->getProperties()->filter($this->getTime());
+        $file = $this->properties->filter($this->getFile());
+        $time = $this->properties->filter($this->getTime());
 
         Pale::run(function() use ($file, $time) {
             return touch($file, $time);
@@ -106,16 +106,6 @@ class Touch implements Task
     public function getFile()
     {
         return $this->file;
-    }
-
-    /**
-     * Get the properties
-     *
-     * @return Properties
-     */
-    public function getProperties()
-    {
-        return $this->properties;
     }
     
     /**
