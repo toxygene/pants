@@ -89,8 +89,8 @@ class Execute implements Task
             throw new BuildException('Command is not set');
         }
 
-        $command   = $this->getProperties()->filter($this->getCommand());
-        $directory = $this->getProperties()->filter($this->getDirectory());
+        $command   = $this->properties->filter($this->getCommand());
+        $directory = $this->properties->filter($this->getDirectory());
 
         $result = Pale::run(function() use ($command, $directory) {
             $descriptorSpec = array(
@@ -158,16 +158,6 @@ class Execute implements Task
     public function getDirectory()
     {
         return $this->directory;
-    }
-
-    /**
-     * Get the properties
-     *
-     * @return Properties
-     */
-    public function getProperties()
-    {
-        return $this->properties;
     }
 
     /**

@@ -92,8 +92,8 @@ class Copy implements Task
             throw new BuildException('Destination is not set');
         }
 
-        $file        = $this->getProperties()->filter($this->getFile());
-        $destination = $this->getProperties()->filter($this->getDestination());
+        $file        = $this->properties->filter($this->getFile());
+        $destination = $this->properties->filter($this->getDestination());
 
         Pale::run(function() use($file, $destination) {
             return copy($file, $destination);
@@ -120,16 +120,6 @@ class Copy implements Task
     public function getFile()
     {
         return $this->file;
-    }
-
-    /**
-     * Get the properties
-     *
-     * @return Properties
-     */
-    public function getProperties()
-    {
-        return $this->properties;
     }
 
     /**

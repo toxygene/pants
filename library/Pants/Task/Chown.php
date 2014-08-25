@@ -93,10 +93,10 @@ class Chown implements Task
             throw new BuildException("Owner is not set");
         }
 
-        $owner = $this->getProperties()->filter($this->getOwner());
+        $owner = $this->properties->filter($this->getOwner());
 
         foreach ($this->getFiles() as $file) {
-            $file = $this->getProperties()->filter($file);
+            $file = $this->properties->filter($file);
             Pale::run(function() use ($file, $owner) {
                 return chown($file, $owner);
             });
@@ -123,16 +123,6 @@ class Chown implements Task
     public function getOwner()
     {
         return $this->owner;
-    }
-    
-    /**
-     * Get the properties
-     *
-     * @return Properties
-     */
-    public function getProperties()
-    {
-        return $this->properties;
     }
 
     /**

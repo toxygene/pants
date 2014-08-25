@@ -36,7 +36,7 @@ use Pants\Task\Chgrp;
 use PHPUnit_Framework_TestCase as TestCase;
 
 /**
- *
+ * Unit tests for the Chgrp task
  */
 class ChgrpTest extends TestCase
 {
@@ -52,6 +52,13 @@ class ChgrpTest extends TestCase
      * @var string
      */
     protected $file;
+    
+    /**
+     * Properties mock object
+     *
+     * @var \Pants\Property\Properties
+     */
+    protected $properties;
 
     /**
      * Setup the test case
@@ -62,11 +69,11 @@ class ChgrpTest extends TestCase
             'test' => 'test'
         ));
 
-        $properties = $this->getMock('\Pants\Property\Properties');
-
-        $this->chgrp = new Chgrp($properties);
-        
         $this->file = vfsStream::url('root/test');
+
+        $this->properties = $this->getMock('\Pants\Property\Properties');
+
+        $this->chgrp = new Chgrp($this->properties);
     }
 
     /**
@@ -76,6 +83,7 @@ class ChgrpTest extends TestCase
     {
         unset($this->chgrp);
         unset($this->file);
+        unset($this->properties);
     }
 
     /**
@@ -104,19 +112,18 @@ class ChgrpTest extends TestCase
 
 
     /**
+     * @covers Pants\Task\Chgrp::__construct
      * @covers Pants\Task\Chgrp::execute
      */
     public function testGroupIsSet()
     {
-        $this->chgrp
-            ->getProperties()
+        $this->properties
             ->expects($this->at(0))
             ->method('filter')
             ->with(1000)
             ->will($this->returnArgument(0));
 
-        $this->chgrp
-            ->getProperties()
+        $this->properties
             ->expects($this->at(1))
             ->method('filter')
             ->with($this->file)

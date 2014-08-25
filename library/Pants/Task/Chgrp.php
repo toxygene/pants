@@ -93,11 +93,11 @@ class Chgrp implements Task
             throw new BuildException("Group is not set");
         }
 
-        $group = $this->getProperties()
+        $group = $this->properties
             ->filter($this->getGroup());
 
         foreach ($this->getFiles() as $file) {
-            $file = $this->getProperties()->filter($file);
+            $file = $this->properties->filter($file);
             Pale::run(function() use ($file, $group) {
                 return chgrp($file, $group);
             });
@@ -124,16 +124,6 @@ class Chgrp implements Task
     public function getGroup()
     {
         return $this->group;
-    }
-
-    /**
-     * Get the properties
-     *
-     * @return Properties
-     */
-    public function getProperties()
-    {
-        return $this->properties;
     }
 
     /**

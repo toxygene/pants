@@ -93,14 +93,14 @@ class Chmod implements Task
             throw new BuildException("Mode is not set");
         }
 
-        $mode = $this->getProperties()->filter($this->getMode());
+        $mode = $this->properties->filter($this->getMode());
 
         if (is_string($mode)) {
             $mode = octdec($mode);
         }
 
         foreach ($this->getFiles() as $file) {
-            $file = $this->getProperties()->filter($file);
+            $file = $this->properties->filter($file);
             Pale::run(function() use ($file, $mode) {
                 return chmod($file, $mode);
             });
@@ -127,16 +127,6 @@ class Chmod implements Task
     public function getMode()
     {
         return $this->mode;
-    }
-
-    /**
-     * Get the properties
-     *
-     * @return Properties
-     */
-    public function getProperties()
-    {
-        return $this->properties;
     }
 
     /**
