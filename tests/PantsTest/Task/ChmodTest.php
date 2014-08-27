@@ -111,6 +111,18 @@ class ChmodTest extends TestCase
     }
 
     /**
+     * @covers Pants\Task\Chmod::getMode
+     * @covers Pants\Task\Chmod::setMode
+     */
+    public function testModeCanBeSet()
+    {
+        $this->chmod
+            ->setMode('0666');
+
+        $this->assertEquals('0666', $this->chmod->getMode());
+    }
+
+    /**
      * @covers Pants\Task\Chmod::__construct
      * @covers Pants\Task\Chmod::execute
      */
