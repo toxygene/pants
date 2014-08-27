@@ -80,7 +80,7 @@ class OutputTest extends TestCase
         $this->setExpectedException('\Pants\BuildException');
 
         $this->task
-             ->execute();
+            ->execute();
     }
 
     /**
