@@ -132,7 +132,7 @@ class Symlink implements Task
     }
 
     /**
-     * Set the target 
+     * Set the target
      *
      * @param string $target
      * @return self
@@ -142,5 +142,4 @@ class Symlink implements Task
         $this->target = $target;
         return $this;
     }
-    
 }

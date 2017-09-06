@@ -48,5 +48,4 @@ interface Matcher
      * @return boolean
      */
     public function match(SplFileInfo $file);
-    
 }

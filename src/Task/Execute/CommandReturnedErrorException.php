@@ -60,5 +60,4 @@ class CommandReturnedErrorException extends RuntimeException
         
         parent::__construct("'{$command}' failed: '{$stderr}'");
     }
-
 }

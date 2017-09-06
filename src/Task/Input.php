@@ -369,5 +369,4 @@ class Input implements Task
                 throw new BuildException('');
         }
     }
-
 }

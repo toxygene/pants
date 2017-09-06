@@ -60,5 +60,4 @@ class CommandFailedException extends RuntimeException
         
         parent::__construct("'{$command}' failed");
     }
-
 }

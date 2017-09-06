@@ -100,5 +100,4 @@ class Chdir implements Task
         $this->directory = $directory;
         return $this;
     }
-
 }

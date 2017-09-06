@@ -310,5 +310,4 @@ class Target implements Task
         $this->unless = $unless;
         return $this;
     }
-
 }

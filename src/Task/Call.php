@@ -100,5 +100,4 @@ class Call implements Task
         $this->target = $target;
         return $this;
     }
-
 }

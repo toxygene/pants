@@ -33,6 +33,36 @@
 
 namespace Pants\Cli;
 
+use Doctrine\Common\Annotations\AnnotationRegistry;
+use GetOpt\ArgumentException;
+use GetOpt\GetOpt;
+use GetOpt\Operand;
+use GetOpt\Option;
+use JMS\Serializer\Handler\HandlerRegistry;
+use JMS\Serializer\Metadata\ClassMetadata;
+use JMS\Serializer\SerializerBuilder;
+use Pants\Jms\CollectionsHandler;
+use Pants\Project;
+use Pants\Task\AbstractTask;
+use Pants\Task\Call;
+use Pants\Task\Chdir;
+use Pants\Task\Chgrp;
+use Pants\Task\Chmod;
+use Pants\Task\Chown;
+use Pants\Task\Copy;
+use Pants\Task\Delete;
+use Pants\Task\Execute;
+use Pants\Task\FileSet;
+use Pants\Task\Input;
+use Pants\Task\Move;
+use Pants\Task\Output;
+use Pants\Task\PhpScript;
+use Pants\Task\Property;
+use Pants\Task\PropertyFile;
+use Pants\Task\Symlink;
+use Pants\Task\TokenFilter;
+use Pants\Task\Touch;
+
 /**
  * Runner
  *
@@ -48,54 +78,114 @@ class Runner
      */
     public function run($argv)
     {
-        $opts = new Getopt(
-            array(
-                "file|f=s"  => "Set the build file (defaults to build.xml)",
-                "help|h"    => "Print help message",
-                "list|l"    => "Print a list of targets",
-                "verbose"   => "Make temp more verbose",
-                "version|v" => "Print the version"
-            ),
-            $argv
+        $opt = new GetOpt(
+            [
+                Option::create('h', 'help', GetOpt::NO_ARGUMENT)
+                    ->setDescription('Show the help text'),
+                Option::create('f', 'file', GetOpt::REQUIRED_ARGUMENT)
+                    ->setDescription('Set the build file')
+                    ->setDefaultValue('build.xml'),
+                Option::create('l', 'list', GetOpt::NO_ARGUMENT)
+                    ->setDescription('Print a list of targets from the build file'),
+                Option::create('v', 'version', GetOpt::NO_ARGUMENT)
+                    ->setDescription('Print the version number')
+            ]
         );
 
+        $opt->addOperand(new Operand('targets', GetOpt::MULTIPLE_ARGUMENT));
+
         try {
-            $opts->parse();
-        } catch (ConsoleException $e) {
-            echo $opts->getUsageMessage();
-            exit(255);
-        }
-
-        if ($opts->getOption("h")) {
-            echo $opts->getUsageMessage();
+            $opt->process();
+        } catch (ArgumentException $exception) {
+            file_put_contents('php://stderr', $exception->getMessage() . PHP_EOL);
+            echo PHP_EOL . $opt->getHelpText();
             exit;
         }
 
-        if ($opts->getOption("v")) {
-            echo "Pants v@version@\n";
+        if ($opt->getOption('help')) {
+            echo $opt->getHelpText();
             exit;
         }
 
-        $file = $opts->getOption("f");
-        if (!$file) {
-            $file = "build.xml";
+        $buildFile = $opt->getOption('file');
+        if (!file_exists($buildFile)) {
+            echo "Build file \"{$buildFile}\" does not exist" . PHP_EOL;
+            exit(1);
         }
 
-        $builder = new Builder();
-        $project = $builder->build($file);
+        if (!preg_match('#.*\.(.*?)$#', $buildFile, $matches)) {
+            exit(2);
+        }
 
-        if ($opts->getOption("l")) {
+        AnnotationRegistry::registerLoader('class_exists');
+
+        $builder = SerializerBuilder::create();
+        $builder->configureHandlers(function(HandlerRegistry $handlerRegistry) {
+            $handlerRegistry->registerSubscribingHandler(new CollectionsHandler());
+        });
+
+        $serializer = $builder->build();
+
+        $taskClasses = [
+            'call' => Call::class,
+            'chdir' => Chdir::class,
+            'chgrp' => Chgrp::class,
+            'chmod' => Chmod::class,
+            'chown' => Chown::class,
+            'copy' => Copy::class,
+            'delete' => Delete::class,
+            'execute' => Execute::class,
+            'fileset' => FileSet::class,
+            'input' => Input::class,
+            'move' => Move::class,
+            'output' => Output::class,
+            'php-script' => PhpScript::class,
+            'property' => Property::class,
+            'property-file' => PropertyFile::class,
+            'symlink' => Symlink::class,
+            'token-filter' => TokenFilter::class,
+            'touch' => Touch::class
+        ];
+
+        foreach ($taskClasses as $name => $class) {
+            $classMetadata = new ClassMetadata($class);
+            $classMetadata->setDiscriminator('type', [$name => $class]);
+            $classMetadata->discriminatorDisabled = false;
+
+            $serializer->getMetadataFactory()
+                ->getMetadataForClass($class)
+                ->merge($classMetadata);
+        }
+
+        $classMetadata = new ClassMetadata(AbstractTask::class);
+        $classMetadata->setDiscriminator('type', $taskClasses);
+        $classMetadata->discriminatorDisabled = false;
+
+        $serializer->getMetadataFactory()
+            ->getMetadataForClass(AbstractTask::class)
+            ->merge($classMetadata);
+
+        /** @var Project $project */
+        $project = $serializer->deserialize(
+            file_get_contents($buildFile),
+            Project::class,
+            $matches[1]
+        );
+
+        if ($opt->getOption('list')) {
+            $maxWidth = 0;
             foreach ($project->getTargets()->getDescriptions() as $name => $description) {
-                printf(
-                    "%s %s\n",
-                    $name,
-                    $description
-                );
+                $maxWidth = max($maxWidth, strlen($name));
             }
+
+            foreach ($project->getTargets()->getDescriptions() as $name => $description) {
+                printf("%{$maxWidth}s\t%s", $name, $description);
+            }
+
+            echo PHP_EOL;
             exit;
         }
 
-        $project->execute($opts->getRemainingArgs());
+        $project->execute($opt->getOperands());
     }
-
 }

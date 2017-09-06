@@ -96,5 +96,4 @@ class Output extends AbstractTask
         $this->message = $message;
         return $this;
     }
-
 }

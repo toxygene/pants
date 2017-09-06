@@ -136,5 +136,4 @@ class Property extends AbstractTask
         $this->value = $value;
         return $this;
     }
-
 }

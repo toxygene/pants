@@ -151,5 +151,4 @@ class Chgrp implements Task
         $this->group = $group;
         return $this;
     }
-
 }

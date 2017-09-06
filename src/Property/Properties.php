@@ -150,5 +150,4 @@ class Properties
         }
         return $string;
     }
-
 }

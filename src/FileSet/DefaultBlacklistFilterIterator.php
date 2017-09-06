@@ -129,5 +129,4 @@ class DefaultBlacklistFilterIterator extends RecursiveFilterIterator
         $this->patterns = $patterns;
         return $this;
     }
-
 }

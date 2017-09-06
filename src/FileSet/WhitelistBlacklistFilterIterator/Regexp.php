@@ -122,5 +122,4 @@ class Regexp implements Matcher
         $this->pattern = $pattern;
         return $this;
     }
-
 }

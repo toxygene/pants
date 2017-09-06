@@ -111,7 +111,7 @@ class Parser
      */
     public function handleXml()
     {
-        while($this->xmlReader->read()) {
+        while ($this->xmlReader->read()) {
             if ($this->xmlReader->name == "project" && $this->xmlReader->nodeType == XMLReader::ELEMENT) {
                 // TODO register namespaces with autoloaders and task locators
                 return $this->handleProject();
@@ -129,7 +129,7 @@ class Parser
         $project = new Project();
         $project->setDefault($this->xmlReader->getAttribute("default"));
 
-        while($this->xmlReader->read()) {
+        while ($this->xmlReader->read()) {
             if ($this->xmlReader->name == "project" && $this->xmlReader->nodeType == XMLReader::END_ELEMENT) {
                 return $project;
             } elseif ($this->xmlReader->name == "target" && $this->xmlReader->nodeType == XMLReader::ELEMENT) {
@@ -201,5 +201,4 @@ class Parser
             }
         }
     }
-
 }

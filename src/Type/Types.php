@@ -102,5 +102,4 @@ class Types
 
         unset($this->types[$name]);
     }
-
 }

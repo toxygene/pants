@@ -106,5 +106,4 @@ class PropertyFile implements Task
         $this->file = $file;
         return $this;
     }
-
 }

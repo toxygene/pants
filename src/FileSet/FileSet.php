@@ -71,5 +71,4 @@ class FileSet extends RecursiveIteratorIterator
         return parent::current()
             ->getPathname();
     }
-
 }

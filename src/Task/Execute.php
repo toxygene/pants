@@ -170,5 +170,4 @@ class Execute implements Task
         $this->directory = $directory;
         return $this;
     }
-
 }

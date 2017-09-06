@@ -50,5 +50,4 @@ interface Task
      * @return Task
      */
     public function execute(Project $project): self;
-
 }

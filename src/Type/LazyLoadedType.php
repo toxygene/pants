@@ -120,5 +120,4 @@ class LazyLoadedType
         $this->types = $types;
         return $this;
     }
-
 }

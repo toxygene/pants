@@ -138,5 +138,4 @@ class Touch implements Task
         $this->time = $time;
         return $this;
     }
-
 }

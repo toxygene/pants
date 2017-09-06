@@ -221,5 +221,4 @@ class TokenFilter implements Task
         $this->startingCharacter = $startingCharacter;
         return $this;
     }
-
 }

@@ -155,5 +155,4 @@ class Chmod implements Task
         $this->mode = $mode;
         return $this;
     }
-
 }

@@ -84,5 +84,4 @@ class Tasks implements IteratorAggregate
     {
         return $this->tasks;
     }
-
 }

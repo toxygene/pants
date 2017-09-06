@@ -82,7 +82,7 @@ class FileSet implements Task
             throw new BuildException("No id set");
         }
 
-//        $fileSet = new FileSetType();
+        //        $fileSet = new FileSetType();
 //
 //        $fileSet->setBaseDirectory($this->getBaseDirectory());
 //
@@ -136,5 +136,4 @@ class FileSet implements Task
         $this->id = $id;
         return $this;
     }
-
 }

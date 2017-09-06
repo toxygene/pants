@@ -137,5 +137,4 @@ class Targets
     {
         return $this->targets;
     }
-
 }

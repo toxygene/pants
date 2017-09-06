@@ -96,5 +96,4 @@ class PhpScript implements Task
         $this->file = $file;
         return $this;
     }
-
 }

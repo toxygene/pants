@@ -136,5 +136,4 @@ class Copy implements Task
         $this->source = $source;
         return $this;
     }
-
 }

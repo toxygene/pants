@@ -142,5 +142,4 @@ class Move implements Task
         $this->source = $source;
         return $this;
     }
-
 }

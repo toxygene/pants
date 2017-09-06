@@ -109,5 +109,4 @@ class Delete implements Task
         $this->files = $files;
         return $this;
     }
-
 }

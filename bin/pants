@@ -1,9 +1,8 @@
-#!@php_bin@
 <?php
 
 use Pants\Cli\Runner;
 
-require_once './vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 $cli = new Runner();
 

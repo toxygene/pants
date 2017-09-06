@@ -54,5 +54,4 @@ class CommandFailedToRunException extends RuntimeException
         
         parent::__construct("'{$command}' failed to run");
     }
-
 }
