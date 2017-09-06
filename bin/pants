@@ -1,13 +1,9 @@
 #!@php_bin@
 <?php
-use Pants\Runner;
-use Zend\Loader\StandardAutoloader;
+
+use Pants\Cli\Runner;
 
 require_once './vendor/autoload.php';
-
-$autoloader = new StandardAutoloader();
-$autoloader->registerNamespace('Pants', './library/Pants')
-    ->register();
 
 $cli = new Runner();
 

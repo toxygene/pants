@@ -1,4 +1,4 @@
-<phpunit bootstrap="./tests/bootstrap.php">
+<phpunit>
     <testsuites>
         <testsuite name="Pants Tests">
             <directory>./tests</directory>
@@ -6,10 +6,7 @@
     </testsuites>
     <filter>
         <whitelist addUncoveredFilesFromWhitelist="true">
-            <directory>./library</directory>
-            <exclude>
-                <directory>./library/Zend</directory>
-            </exclude>
+            <directory>./src</directory>
         </whitelist>
     </filter>
 </phpunit>

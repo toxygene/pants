@@ -3,28 +3,31 @@
         "bin/pants"
     ],
     "description": "asdf",
-    "license": "BSD-3-Clause",
+    "license": "MIT",
     "name": "toxygene/pants",
-    "repositories": [
-        {
-            "type": "composer",
-            "url": "http://packages.zendframework.com/"
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/toxygene/pale"
-        }
-    ],
     "require": {
-        "php": ">=5.3.0",
-        "pimple/pimple": "~2.0",
-        "toxygene/pale": "dev-master",
-        "zendframework/zend-loader": "~2.3"
+        "php": "^7",
+        "jms/serializer": "^1.8",
+        "mikey179/vfsStream": "^1.6"
     },
     "require-dev": {
-        "mikey179/vfsStream": "~1.2",
-        "pdepend/pdepend" : "~1.1",
-        "phpmd/phpmd": "~1.5",
-        "phpunit/phpunit": "~4.0"
+        "phpunit/phpunit": "^6.2",
+        "mockery/mockery": "^0.9.9"
+    },
+    "authors": [
+        {
+            "name": "Justin Hendrickson",
+            "email": "justin.hendrickson@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Pants\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Pants\\Test\\": "tests/"
+        }
     }
 }
