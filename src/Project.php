@@ -42,10 +42,11 @@ use Pants\Task\Tasks;
 /**
  * Project
  *
- * @package Pants
  * @JMS\ExclusionPolicy("all")
  * @JMS\XmlNamespace(uri="http://www.github.com/toxygene/pants")
  * @JMS\XmlRoot(name="project")
+ *
+ * @package Pants
  */
 class Project
 {
@@ -136,14 +137,12 @@ class Project
             $task->execute($this);
         }
 
-        if (!$targets) {
+        if (empty($targets)) {
             if (!$this->getDefault()) {
                 return $this;
             }
 
-            $targets = array($this->getDefault());
-        } else {
-            $targets = (array) $targets;
+            $targets = [$this->getDefault()];
         }
 
         foreach ($targets as $target) {
