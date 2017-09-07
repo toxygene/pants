@@ -33,8 +33,8 @@ namespace PantsTest\FileSet;
 
 use FilesystemIterator;
 use org\bovigo\vfs\vfsStream;
-use Pants\FileSet\WhitelistBlacklistFilterIterator;
-use Pants\FileSet\WhitelistBlacklistFilterIterator\Matcher;
+use Pants\FileSet\Fileset;
+use Pants\FileSet\Fileset\MatcherInterface;
 use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
 

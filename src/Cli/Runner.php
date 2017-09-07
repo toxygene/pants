@@ -41,6 +41,10 @@ use GetOpt\Option;
 use JMS\Serializer\Handler\HandlerRegistry;
 use JMS\Serializer\Metadata\ClassMetadata;
 use JMS\Serializer\SerializerBuilder;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
+use Pants\Fileset\Fileset\AbstractMatcher;
+use Pants\Fileset\Fileset\Regexp;
 use Pants\Jms\CollectionsHandler;
 use Pants\Project;
 use Pants\Task\AbstractTask;
@@ -52,8 +56,9 @@ use Pants\Task\Chown;
 use Pants\Task\Copy;
 use Pants\Task\Delete;
 use Pants\Task\Execute;
-use Pants\Task\FileSet;
+use Pants\Task\Fileset;
 use Pants\Task\Input;
+use Pants\Task\Mkdir;
 use Pants\Task\Move;
 use Pants\Task\Output;
 use Pants\Task\PhpScript;
@@ -84,10 +89,14 @@ class Runner
                     ->setDescription('Show the help text'),
                 Option::create('f', 'file', GetOpt::REQUIRED_ARGUMENT)
                     ->setDescription('Set the build file')
-                    ->setDefaultValue('build.xml'),
+                    ->setDefaultValue('build.xml')
+                    ->setValidation(function($file) { // todo doesn't appear to be working, possible due default value?
+                        return file_exists($file);
+                    }),
                 Option::create('l', 'list', GetOpt::NO_ARGUMENT)
                     ->setDescription('Print a list of targets from the build file'),
-                Option::create('v', 'version', GetOpt::NO_ARGUMENT)
+                Option::create('v', 'verbose', GetOpt::NO_ARGUMENT),
+                Option::create('V', 'version', GetOpt::NO_ARGUMENT)
                     ->setDescription('Print the version number')
             ]
         );
@@ -95,11 +104,11 @@ class Runner
         $opt->addOperand(new Operand('targets', GetOpt::MULTIPLE_ARGUMENT));
 
         try {
-            $opt->process();
+            $opt->process(array_slice($argv, 1));
         } catch (ArgumentException $exception) {
             file_put_contents('php://stderr', $exception->getMessage() . PHP_EOL);
             echo PHP_EOL . $opt->getHelpText();
-            exit;
+            exit(255);
         }
 
         if ($opt->getOption('help')) {
@@ -108,19 +117,58 @@ class Runner
         }
 
         $buildFile = $opt->getOption('file');
-        if (!file_exists($buildFile)) {
-            echo "Build file \"{$buildFile}\" does not exist" . PHP_EOL;
+
+        if (!preg_match('#.*\.(.*?)$#', $buildFile, $matches)) {
             exit(1);
         }
 
-        if (!preg_match('#.*\.(.*?)$#', $buildFile, $matches)) {
-            exit(2);
+        /** @var Project $project */
+        $project = $this->buildSerializer()->deserialize(
+            file_get_contents($buildFile),
+            Project::class,
+            $matches[1]
+        );
+
+        if ($opt->getOption('verbose')) {
+            $logger = new Logger('pants');
+
+            if (2 === $opt->getOption('verbose')) {
+                $level = Logger::DEBUG;
+            } else {
+                $level = Logger::INFO;
+            }
+
+            $logger->pushHandler(new StreamHandler('php://stdout', $level));
+
+            $project->setLogger($logger);
         }
 
+        if ($opt->getOption('list')) {
+            $maxWidth = 0;
+            foreach ($project->getTargets()->getDescriptions() as $name => $description) {
+                $maxWidth = max($maxWidth, strlen($name));
+            }
+
+            foreach ($project->getTargets()->getDescriptions() as $name => $description) {
+                printf("%{$maxWidth}s\t%s", $name, $description);
+                echo PHP_EOL;
+            }
+
+            exit;
+        }
+
+        $project->execute($opt->getOperands());
+    }
+
+    /**
+     * @return \JMS\Serializer\Serializer
+     */
+    protected function buildSerializer(): \JMS\Serializer\Serializer
+    {
         AnnotationRegistry::registerLoader('class_exists');
 
         $builder = SerializerBuilder::create();
-        $builder->configureHandlers(function(HandlerRegistry $handlerRegistry) {
+        $builder->configureHandlers(function (HandlerRegistry $handlerRegistry) {
             $handlerRegistry->registerSubscribingHandler(new CollectionsHandler());
         });
 
@@ -135,8 +183,9 @@ class Runner
             'copy' => Copy::class,
             'delete' => Delete::class,
             'execute' => Execute::class,
-            'fileset' => FileSet::class,
+            'fileset' => Fileset::class,
             'input' => Input::class,
+            'mkdir' => Mkdir::class,
             'move' => Move::class,
             'output' => Output::class,
             'php-script' => PhpScript::class,
@@ -147,45 +196,26 @@ class Runner
             'touch' => Touch::class
         ];
 
-        foreach ($taskClasses as $name => $class) {
-            $classMetadata = new ClassMetadata($class);
-            $classMetadata->setDiscriminator('type', [$name => $class]);
-            $classMetadata->discriminatorDisabled = false;
-
-            $serializer->getMetadataFactory()
-                ->getMetadataForClass($class)
-                ->merge($classMetadata);
-        }
-
-        $classMetadata = new ClassMetadata(AbstractTask::class);
-        $classMetadata->setDiscriminator('type', $taskClasses);
-        $classMetadata->discriminatorDisabled = false;
+        $abstractTaskMetadata = new ClassMetadata(AbstractTask::class);
+        $abstractTaskMetadata->setDiscriminator('type', $taskClasses);
+        $abstractTaskMetadata->discriminatorDisabled = false;
 
         $serializer->getMetadataFactory()
             ->getMetadataForClass(AbstractTask::class)
-            ->merge($classMetadata);
+            ->merge($abstractTaskMetadata);
 
-        /** @var Project $project */
-        $project = $serializer->deserialize(
-            file_get_contents($buildFile),
-            Project::class,
-            $matches[1]
-        );
+        $filesetClasses = [
+            'regexp' => Regexp::class
+        ];
 
-        if ($opt->getOption('list')) {
-            $maxWidth = 0;
-            foreach ($project->getTargets()->getDescriptions() as $name => $description) {
-                $maxWidth = max($maxWidth, strlen($name));
-            }
+        $abstractMatcherMetadata = new ClassMetadata(AbstractMatcher::class);
+        $abstractMatcherMetadata->setDiscriminator('type', $filesetClasses);
+        $abstractMatcherMetadata->discriminatorDisabled = false;
 
-            foreach ($project->getTargets()->getDescriptions() as $name => $description) {
-                printf("%{$maxWidth}s\t%s", $name, $description);
-            }
+        $serializer->getMetadataFactory()
+            ->getMetadataForClass(AbstractMatcher::class)
+            ->merge($abstractMatcherMetadata);
 
-            echo PHP_EOL;
-            exit;
-        }
-
-        $project->execute($opt->getOperands());
+        return $serializer;
     }
 }

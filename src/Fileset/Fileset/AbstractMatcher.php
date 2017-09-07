@@ -2,7 +2,7 @@
 /**
  * Pants
  *
- * Copyright (c) 2011, Justin Hendrickson
+ * Copyright (c) 2017, Justin Hendrickson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,23 +29,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Pants\FileSet\WhitelistBlacklistFilterIterator;
+namespace Pants\Fileset\Fileset;
 
-use SplFileInfo;
+use JMS\Serializer\Annotation as JMS;
 
 /**
- * Matcher interface for the include/exclude filter iterator
- *
- * @package Pants\FileSet\WhitelistBlacklistFilterIterator
+ * @JMS\Discriminator(disabled=true)
+ * @JMS\XmlDiscriminator(attribute=true)
  */
-interface Matcher
+abstract class AbstractMatcher implements MatcherInterface
 {
-
-    /**
-     * Check if a pathname is a match
-     *
-     * @param SplFileInfo $file
-     * @return boolean
-     */
-    public function match(SplFileInfo $file);
 }

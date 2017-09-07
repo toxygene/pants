@@ -29,51 +29,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Pants\FileSet\WhitelistBlacklistFilterIterator;
+namespace Pants\Fileset\Fileset;
 
+use JMS\Serializer\Annotation as JMS;
 use SplFileInfo;
 
 /**
  * Matcher that does a regular expression match on the path
  *
- * @package Pants\FileSet\WhitelistBlacklistFilterIterator
+ * @package Pants\Fileset\Fileset
  */
-class Regexp implements Matcher
+class Regexp implements MatcherInterface
 {
-
-    /**
-     * Base directory
-     *
-     * @var string
-     */
-    protected $baseDirectory;
 
     /**
      * Regular expression pattern to match against
      *
+     * @JMS\Expose()
+     * @JMS\SerializedName("pattern")
+     * @JMS\SkipWhenEmpty()
+     * @JMS\Type("string")
+     * @JMS\XmlElement(cdata=false)
+     *
      * @var string
      */
     protected $pattern;
-    
-    /**
-     * Constructor
-     *
-     * @param string $pattern
-     */
-    public function __construct($pattern = null)
-    {
-        $this->setPattern($pattern);
-    }
-    
-    /**
-     * Get the base directory
-     *
-     * @return string
-     */
-    public function getBaseDirectory()
-    {
-        return $this->baseDirectory;
-    }
     
     /**
      * Get the regular expression pattern to match against
@@ -88,27 +68,15 @@ class Regexp implements Matcher
     /**
      * {@inheritDoc}
      */
-    public function match(SplFileInfo $file)
+    public function match(SplFileInfo $file, string $baseDirectory = null)
     {
         $path = preg_replace(
-            '#^' . preg_quote($this->getBaseDirectory(), '#') . '/#',
+            '#^' . preg_quote($baseDirectory, '#') . '/#',
             '',
             $file->getPathname()
         );
 
         return preg_match($this->getPattern(), $path) > 0;
-    }
-    
-    /**
-     * Set the base directory
-     *
-     * @param string $baseDirectory
-     * @return self
-     */
-    public function setBaseDirectory($baseDirectory)
-    {
-        $this->baseDirectory = $baseDirectory;
-        return $this;
     }
     
     /**
@@ -122,4 +90,5 @@ class Regexp implements Matcher
         $this->pattern = $pattern;
         return $this;
     }
+
 }

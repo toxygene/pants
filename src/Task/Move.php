@@ -48,6 +48,19 @@ class Move implements Task
 {
 
     /**
+     * Fileset to move
+     *
+     * @JMS\Expose()
+     * @JMS\SerializedName("fileset")
+     * @JMS\SkipWhenEmpty()
+     * @JMS\Type("Pants\Fileset\Fileset")
+     * @JMS\XmlElement(cdata=false)
+     *
+     * @var Fileset|null
+     */
+    protected $fileSet;
+
+    /**
      * Target file
      *
      * @JMS\Expose()
@@ -56,7 +69,7 @@ class Move implements Task
      * @JMS\Type("string")
      * @JMS\XmlElement(cdata=false)
      *
-     * @var string
+     * @var string|null
      */
     protected $source;
 
@@ -69,7 +82,7 @@ class Move implements Task
      * @JMS\Type("string")
      * @JMS\XmlElement(cdata=false)
      *
-     * @var string
+     * @var string|null
      */
     protected $destination;
 
@@ -78,7 +91,7 @@ class Move implements Task
      */
     public function execute(Project $project): Task
     {
-        if (null === $this->getSource()) {
+        if (null === $this->getSource() && null === $this->getFileset()) {
             throw new BuildException('Source not set');
         }
 
@@ -86,14 +99,36 @@ class Move implements Task
             throw new BuildException('Destination not set');
         }
 
-        $source = $project->getProperties()
-            ->filter($this->getSource());
-
         $destination = $project->getProperties()
             ->filter($this->getDestination());
 
-        if (!rename($source, $destination)) {
-            throw new BuildException('');
+        $source = $project->getProperties()
+            ->filter($this->getSource());
+
+        if (null !== $this->getSource()) {
+            if (!is_dir($source) && is_dir($destination)) {
+                $dest = $destination . DIRECTORY_SEPARATOR . basename($source);
+            } else {
+                $dest = $destination;
+            }
+
+            if (!$this->rename($source, $dest)) {
+                throw new BuildException();
+            }
+        }
+
+        if (null !== $this->getFileset()) {
+            if (is_file($destination)) {
+                throw new BuildException();
+            }
+
+            foreach ($this->getFileset() as $source) {
+                $dest = $destination . DIRECTORY_SEPARATOR . basename($source);
+
+                if (!$this->rename($source, $dest)) {
+                    throw new BuildException();
+                }
+            }
         }
 
         return $this;
@@ -107,6 +142,16 @@ class Move implements Task
     public function getDestination()
     {
         return $this->destination;
+    }
+
+    /**
+     * Get the fileset
+     *
+     * @return Fileset|null
+     */
+    public function getFileset()
+    {
+        return $this->fileSet;
     }
 
     /**
@@ -132,6 +177,18 @@ class Move implements Task
     }
 
     /**
+     * Set the fileset
+     *
+     * @param Fileset $fileSet
+     * @return self
+     */
+    public function setFileSet(Fileset $fileSet)
+    {
+        $this->fileSet = $fileSet;
+        return $this;
+    }
+
+    /**
      * Set the target file
      *
      * @param string $source
@@ -141,5 +198,17 @@ class Move implements Task
     {
         $this->source = $source;
         return $this;
+    }
+
+    /**
+     * Rename a source
+     *
+     * @param string $source
+     * @param string $destination
+     * @return bool
+     */
+    protected function rename($source, $destination): bool
+    {
+        return rename($source, $destination);
     }
 }

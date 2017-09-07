@@ -66,13 +66,34 @@ class Chdir implements Task
     public function execute(Project $project): Task
     {
         if (null === $this->getDirectory()) {
-            throw new BuildException('Directory is not set');
+            $project->getLogger()->error(
+                'directory not set',
+                [
+                    'task' => __CLASS__
+                ]
+            );
+
+            throw new BuildException('Directory not set');
         }
 
         $directory = $project->getProperties()
             ->filter($this->getDirectory());
 
+        $project->getLogger()->debug(
+            'filtered directory',
+            [
+                'directory' => $directory
+            ]
+        );
+
         if (!chdir($directory)) {
+            $project->getLogger()->error(
+                'could not set the current directory',
+                [
+                    'directory' => $directory
+                ]
+            );
+
             throw new BuildException('Could not set the current directory to "{$this->getDirectory()}"');
         }
 

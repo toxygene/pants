@@ -74,21 +74,57 @@ class Chgrp implements Task
     public function execute(Project $project): Task
     {
         if (null === $this->getFiles()) {
+            $project->getLogger()->error(
+                'files not set',
+                [
+                    'task' => self::class
+                ]
+            );
+
             throw new BuildException('Files are not set');
         }
 
         if (null === $this->getGroup()) {
+            $project->getLogger()->error(
+                'group not set',
+                [
+                    'task' => self::class
+                ]
+            );
+
             throw new BuildException('Group is not set');
         }
 
         $group = $project->getProperties()
             ->filter($this->getGroup());
 
+        $project->getLogger()->debug(
+            'filtered group',
+            [
+                'group' => $group
+            ]
+        );
+
         foreach ($this->getFiles() as $file) {
             $file = $project->getProperties()
                 ->filter($file);
 
+            $project->getLogger()->debug(
+                'filtered file',
+                [
+                    'file' => $file
+                ]
+            );
+
             if (!chgrp($file, (int) $group)) {
+                $project->getLogger()->error(
+                    'could not set group on file',
+                    [
+                        'group' => $group,
+                        'files' => $file
+                    ]
+                );
+
                 throw new BuildException("Could not set group \"{$group}\" on file \"{$file}\"");
             }
         }

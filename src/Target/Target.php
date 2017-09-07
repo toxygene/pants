@@ -157,22 +157,68 @@ class Target implements Task
     public function execute(Project $project): Task
     {
         foreach ($this->getDepends() as $depends) {
+            $project->getLogger()->info(
+                'executing dependent target',
+                [
+                    'target' => $this->getName(),
+                    'depends' => $depends
+                ]
+            );
+
             $project->getTargets()
-                ->$depends
-                ->execute($project);
+                ->execute($depends, $project);
         }
 
         foreach ($this->getIf() as $if) {
+            $project->getLogger()->debug(
+                'checking if property',
+                [
+                    'target' => $this->getName(),
+                    'if' => $if
+                ]
+            );
+
             if (!isset($project->getProperties()->$if) || !$project->getProperties()->$if) {
+                $project->getLogger()->info(
+                    'if property not set or false',
+                    [
+                        'target' => $this->getName(),
+                        'if' => $if
+                    ]
+                );
+
                 return $this;
             }
         }
 
         foreach ($this->getUnless() as $unless) {
-            if (isset($project->getProperties()->$unless) || $project->getProperties()->$unless) {
+            $project->getLogger()->debug(
+                'checking unless property',
+                [
+                    'target' => $this->getName(),
+                    'unless' => $unless
+                ]
+            );
+
+            if (isset($project->getProperties()->$unless) && $project->getProperties()->$unless) {
+                $project->getLogger()->info(
+                    'unless property set and true',
+                    [
+                        'target' => $this->getName(),
+                        'unless' => $unless
+                    ]
+                );
+
                 return $this;
             }
         }
+
+        $project->getLogger()->info(
+            'executing target tasks',
+            [
+                'target' => $this->getName()
+            ]
+        );
 
         foreach ($this->tasks as $task) {
             $task->execute($project);
@@ -310,4 +356,5 @@ class Target implements Task
         $this->unless = $unless;
         return $this;
     }
+
 }

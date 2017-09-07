@@ -48,17 +48,17 @@ class Touch implements Task
 {
 
     /**
-     * Target file
+     * Target path
      *
      * @JMS\Expose()
-     * @JMS\SerializedName("file")
+     * @JMS\SerializedName("path")
      * @JMS\SkipWhenEmpty()
      * @JMS\Type("string")
      * @JMS\XmlElement(cdata=false)
      *
      * @var string|null
      */
-    protected $file;
+    protected $path;
     
     /**
      * Time to touch the file with
@@ -78,17 +78,21 @@ class Touch implements Task
      */
     public function execute(Project $project): Task
     {
-        if (null === $this->getFile()) {
-            throw new BuildException("File not set");
+        if (null === $this->getPath()) {
+            throw new BuildException('Path not set');
         }
 
-        $file = $project->getProperties()
-            ->filter($this->getFile());
+        $path = $project->getProperties()
+            ->filter($this->getPath());
 
-        $time = $project->getProperties()
-            ->filter($this->getTime());
+        if (null !== $this->getTime()) {
+            $time = $project->getProperties()
+                ->filter($this->getTime());
+        } else {
+            $time = time(); // todo this is kind of ugly
+        }
 
-        if (!touch($file, $time)) {
+        if (!touch($path, $time)) {
             throw new BuildException('');
         }
 
@@ -96,13 +100,13 @@ class Touch implements Task
     }
 
     /**
-     * Get the target file
+     * Get the target path
      *
      * @return string|null
      */
-    public function getFile()
+    public function getPath()
     {
-        return $this->file;
+        return $this->path;
     }
     
     /**
@@ -116,14 +120,14 @@ class Touch implements Task
     }
 
     /**
-     * Set the target file
+     * Set the target path
      *
-     * @param string $file
+     * @param string $path
      * @return self
      */
-    public function setFile(string $file): self
+    public function setPath(string $path): self
     {
-        $this->file = $file;
+        $this->path = $path;
         return $this;
     }
     

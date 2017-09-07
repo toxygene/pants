@@ -38,13 +38,13 @@ use Pants\BuildException;
 use Pants\Project;
 
 /**
- * FileSet task
+ * Fileset task
  *
  * @JMS\ExclusionPolicy("all")
  *
  * @package Pants\Task
  */
-class FileSet implements Task
+class Fileset implements Task
 {
 
     /**

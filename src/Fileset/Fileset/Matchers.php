@@ -2,7 +2,7 @@
 /**
  * Pants
  *
- * Copyright (c) 2011-2017, Justin Hendrickson
+ * Copyright (c) 2017, Justin Hendrickson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,44 +31,51 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
-namespace Pants\FileSet;
+namespace Pants\Fileset\Fileset;
 
-use FilesystemIterator;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
+use ArrayIterator;
+use Iterator;
+use IteratorAggregate;
 
 /**
- * Abstraction of a set of files
- *
- * @package Pants\FileSet
+ * Container of matchers
  */
-class FileSet extends RecursiveIteratorIterator
+class Matchers implements IteratorAggregate
 {
 
     /**
-     * Constructor
-     *
-     * @param string $baseDirectory
+     * @var MatcherInterface[]|null
      */
-    public function __construct($baseDirectory)
+    private $matchers;
+
+    /**
+     * Add a matcher
+     *
+     * @param MatcherInterface $matcher
+     * @return self
+     */
+    public function add(MatcherInterface $matcher): self
     {
-        parent::__construct(
-            new RecursiveDirectoryIterator(
-                $baseDirectory,
-                FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO | FilesystemIterator::SKIP_DOTS
-            ),
-            RecursiveIteratorIterator::CHILD_FIRST
-        );
+        $this->matchers[] = $matcher;
+        return $this;
     }
 
     /**
-     * Return each file in the fileset as the pathname of the file
-     *
-     * @return string
+     * {@inheritdoc}
      */
-    public function current(): string
+    public function getIterator(): Iterator
     {
-        return parent::current()
-            ->getPathname();
+        return new ArrayIterator($this->matchers);
     }
+
+    /**
+     * Get the matchers
+     *
+     * @return MatcherInterface[]
+     */
+    public function toArray(): array
+    {
+        return $this->matchers;
+    }
+
 }

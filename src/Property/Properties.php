@@ -131,14 +131,29 @@ class Properties
     }
 
     /**
+     * Add multiple properties from an array
+     *
+     * @param array $properties
+     * @return self
+     */
+    public function add(array $properties): self
+    {
+        foreach ($properties as $name => $value) {
+            $this->$name = $value;
+        }
+
+        return $this;
+    }
+
+    /**
      * Filter a string by converting properties to their values
      *
-     * @param string $string
+     * @param string|int $string
      * @param string[] $encountered
-     * @return string
+     * @return string|int
      * @throws PropertyNameCycleException
      */
-    public function filter(string $string, array $encountered = array())
+    public function filter($string, array $encountered = array())
     {
         while (preg_match('#^(.*)\${(.*?)}(.*)$#', $string, $matches)) {
             if (in_array($matches[2], $encountered)) {

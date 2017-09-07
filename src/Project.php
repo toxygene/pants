@@ -38,6 +38,10 @@ use Pants\Property\Properties;
 use Pants\Target\Targets;
 use Pants\Task\Task;
 use Pants\Task\Tasks;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
 /**
  * Project
@@ -48,8 +52,9 @@ use Pants\Task\Tasks;
  *
  * @package Pants
  */
-class Project
+class Project implements LoggerAwareInterface
 {
+    use LoggerAwareTrait;
 
     /**
      * Base directory
@@ -130,25 +135,42 @@ class Project
      */
     public function execute($targets = array()): self
     {
-        $this->setupBaseDirectory()
+        $this->resetExecutedTasks()
+            ->setupBaseDirectory()
             ->setupBuiltinProperties();
+
+        $this->getLogger()->info(
+            'executing tasks'
+        );
 
         foreach ($this->getTasks() as $task) {
             $task->execute($this);
         }
 
         if (empty($targets)) {
+            $this->getLogger()->info(
+                'no targets specified'
+            );
+
             if (!$this->getDefault()) {
+                $this->getLogger()->warning(
+                    'no default target set, bailing out'
+                );
+
                 return $this;
             }
 
             $targets = [$this->getDefault()];
         }
 
+        $this->getLogger()->info(
+            'executing targets',
+            $targets
+        );
+
         foreach ($targets as $target) {
             $this->getTargets()
-                ->$target
-                ->execute($this);
+                ->execute($target, $this);
         }
 
         return $this;
@@ -172,6 +194,20 @@ class Project
     public function getDefault()
     {
         return $this->default;
+    }
+
+    /**
+     * Get the logger
+     *
+     * @return LoggerInterface
+     */
+    public function getLogger()
+    {
+        if (null === $this->logger) {
+            $this->logger = new NullLogger();
+        }
+
+        return $this->logger;
     }
 
     /**
@@ -235,8 +271,24 @@ class Project
      */
     protected function setupBaseDirectory(): self
     {
-        if ($this->getBaseDirectory()) {
-            chdir($this->getBaseDirectory());
+        if (null !== $this->getBaseDirectory()) {
+            $this->getLogger()->info(
+                'changing working directory',
+                [
+                    'directory' => $this->getBaseDirectory()
+                ]
+            );
+
+            if (!chdir($this->getBaseDirectory())) {
+                $this->getLogger()->error(
+                    'Could not set the working directory',
+                    [
+                        'directory' => $this->getBaseDirectory()
+                    ]
+                );
+
+                throw new BuildException('');
+            }
         }
 
         return $this;
@@ -249,16 +301,41 @@ class Project
      */
     protected function setupBuiltinProperties(): self
     {
-        $properties = $this->getProperties();
-
-        $properties->basedir           = getcwd();
-        $properties->{"host.os"}       = PHP_OS;
-        $properties->{"pants.version"} = "@version@";
-        $properties->{"php.version"}   = PHP_VERSION;
+        $builtinProperties = [
+            'basedir' => getcwd(),
+            'host.os' => PHP_OS,
+            'pants.version' => '@version@',
+            'php.version' => PHP_VERSION
+        ];
 
         foreach ($_SERVER as $key => $value) {
-            $properties->{"env.{$key}"} = $value;
+            $builtinProperties["env.{$key}"] = $value;
         }
+
+        $this->getLogger()->info(
+            'setting builtin properties'
+        );
+
+        $this->getLogger()->debug(
+            'builtin properties',
+            $builtinProperties
+        );
+
+        $this->getProperties()
+            ->add($builtinProperties);
+
+        return $this;
+    }
+
+    /**
+     * Reset the list of executed tasks
+     *
+     * @return Project
+     */
+    protected function resetExecutedTasks(): self
+    {
+        $this->getTargets()
+            ->resetExecutedTargets();
 
         return $this;
     }

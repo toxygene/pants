@@ -34,7 +34,7 @@ namespace PantsTest\FileSet\WhitelistBlacklistFilterIterator;
 use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\TestCase;
 use SplFileInfo;
-use Pants\FileSet\WhitelistBlacklistFilterIterator\Regexp;
+use Pants\FileSet\Fileset\Regexp;
 
 /**
  * Unit tests for the regex matcher

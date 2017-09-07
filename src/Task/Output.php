@@ -66,11 +66,24 @@ class Output extends AbstractTask
     public function execute(Project $project): Task
     {
         if (null === $this->getMessage()) {
+            $project->getLogger()->error(
+                'message not set'
+            );
+
             throw new BuildException('Message not set');
         }
 
-        echo $project->getProperties()
+        $filteredMessage = $project->getProperties()
             ->filter($this->getMessage());
+
+        $project->getLogger()->debug(
+            'filtered message',
+            [
+                'message' => $filteredMessage
+            ]
+        );
+
+        echo $filteredMessage;
 
         return $this;
     }

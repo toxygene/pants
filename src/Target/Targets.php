@@ -34,6 +34,7 @@
 namespace Pants\Target;
 
 use InvalidArgumentException;
+use Pants\Project;
 
 /**
  * Targets container
@@ -49,6 +50,11 @@ class Targets
      * @var Target[]
      */
     protected $targets = array();
+
+    /**
+     * @var string[]
+     */
+    private $executedTargets = [];
 
     /**
      * Get a target
@@ -113,6 +119,27 @@ class Targets
     }
 
     /**
+     * Execute a task
+     *
+     * Tracks and only executes a target one time.
+     *
+     * @param string $target
+     * @param Project $project
+     * @return self
+     */
+    public function execute(string $target, Project $project): self
+    {
+        if (false === in_array($target, $this->executedTargets)) {
+            $this->executedTargets[] = $target;
+
+            $this->$target
+                ->execute($project);
+        }
+
+        return $this;
+    }
+
+    /**
      * Get the names and descriptions of the targets
      *
      * @return string[]
@@ -137,4 +164,17 @@ class Targets
     {
         return $this->targets;
     }
+
+    /**
+     * Reset the list of executed tasks
+     *
+     * @return self
+     */
+    public function resetExecutedTargets(): self
+    {
+        $this->executedTargets = [];
+
+        return $this;
+    }
+
 }

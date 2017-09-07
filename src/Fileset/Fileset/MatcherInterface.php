@@ -29,73 +29,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace PantsTest\FileSet;
+namespace Pants\Fileset\Fileset;
 
-use org\bovigo\vfs\vfsStream;
-use Pants\FileSet\Fileset;
-use PHPUnit\Framework\TestCase;
+use SplFileInfo;
 
 /**
- * @coversDefaultClass \Pants\FileSet\FileSet
+ * Matcher interface for the include/exclude filter iterator
+ *
+ * @package Pants\Fileset\Matcher
  */
-class FileSetTest extends TestCase
+interface MatcherInterface
 {
-    
+
     /**
-     * File set
+     * Check if a pathname is a match
      *
-     * @var Fileset
+     * @param SplFileInfo $file
+     * @param string|null $baseDirectory
+     * @return boolean
      */
-    protected $fileSet;
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setUp()
-    {
-        parent::setUp();
-
-        vfsStream::setup(
-            'root',
-            null,
-            array(
-                '.git' => array(),
-                '.gitignore' => 'test',
-                'README' => 'test',
-                'src' => array(
-                    'test' => 'test',
-                    '.test.swp' => 'test'
-                )
-            )
-        );
-
-        $this->fileSet = new Fileset(vfsStream::url('root'));
-    }
-    
-    /**
-     * {@inheritdoc}
-     */
-    public function tearDown()
-    {
-        parent::tearDown();
-
-        unset($this->fileSet);
-    }
-    
-    /**
-     * @covers ::getIterator
-     */
-    public function testIteratesOverAllFilesAndDirectories()
-    {
-        $paths = iterator_to_array($this->fileSet);
-        
-        $this->assertCount(6, $paths);
-        $this->assertContains(vfsStream::url('root/.git'), $paths);
-        $this->assertContains(vfsStream::url('root/.gitignore'), $paths);
-        $this->assertContains(vfsStream::url('root/README'), $paths);
-        $this->assertContains(vfsStream::url('root/src'), $paths);
-        $this->assertContains(vfsStream::url('root/src/test'), $paths);
-        $this->assertContains(vfsStream::url('root/src/.test.swp'), $paths);
-    }
-
+    public function match(SplFileInfo $file, string $baseDirectory = null);
 }

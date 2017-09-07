@@ -2,7 +2,7 @@
 /**
  * Pants
  *
- * Copyright (c) 2011-2017, Justin Hendrickson
+ * Copyright (c) 2017, Justin Hendrickson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -38,31 +38,11 @@ use Pants\BuildException;
 use Pants\Project;
 
 /**
- * Delete file(s) task
- *
  * @JMS\ExclusionPolicy("all")
- *
- * @package Pants\Task
  */
-class Delete implements Task
+class Mkdir extends AbstractTask
 {
-
     /**
-     * Fileset to delete
-     *
-     * @JMS\Expose()
-     * @JMS\SerializedName("fileset")
-     * @JMS\SkipWhenEmpty()
-     * @JMS\Type("Pants\Fileset\Fileset")
-     * @JMS\XmlElement(cdata=false)
-     *
-     * @var Fileset|null
-     */
-    protected $fileset;
-
-    /**
-     * Path to delete
-     *
      * @JMS\Expose()
      * @JMS\SerializedName("path")
      * @JMS\SkipWhenEmpty()
@@ -71,62 +51,87 @@ class Delete implements Task
      *
      * @var string|null
      */
-    protected $path;
+    private $path;
 
     /**
-     * Recursive flag
-     *
      * @JMS\Expose()
-     * @JMS\SerializedName("boolean")
+     * @JMS\SerializedName("mode")
      * @JMS\SkipWhenEmpty()
      * @JMS\Type("string")
      * @JMS\XmlElement(cdata=false)
      *
-     * @var bool|null
+     * @var string|int|null
+     */
+    private $mode;
+
+    /**
+     * @JMS\Expose()
+     * @JMS\SerializedName("recursive")
+     * @JMS\SkipWhenEmpty()
+     * @JMS\Type("boolean")
+     * @JMS\XmlElement(cdata=false)
+     *
+     * @var boolean|null
      */
     private $recursive;
+
+    /**
+     * @JMS\Expose()
+     * @JMS\SerializedName("skip-if-path-exists")
+     * @JMS\SkipWhenEmpty()
+     * @JMS\Type("boolean")
+     * @JMS\XmlElement(cdata=false)
+     *
+     * @var boolean|null
+     */
+    private $skipIfPathExists;
 
     /**
      * {@inheritdoc}
      */
     public function execute(Project $project): Task
     {
-        if (null === $this->getPath() && null === $this->getFileset()) {
-            throw new BuildException('Path not set');
+        if (null === $this->getPath()) {
+            throw new BuildException();
         }
 
-        if (null !== $this->getPath()) {
-            $path = $project->getProperties()
-                ->filter($this->getPath());
+        $path = $project->getProperties()
+            ->filter($this->getPath());
 
-            if (!$this->delete($path)) {
-                throw new BuildException();
-            }
+        if ($this->getSkipIfPathExists() && file_exists($path)) {
+            return $this;
         }
 
-        if (null !== $this->getFileset()) {
-            foreach ($this->getFileset() as $path) {
-                if (!$this->delete($path)) {
-                    throw new BuildException();
-                }
-            }
+        $mode = $project->getProperties()
+            ->filter($this->getMode());
+
+        if (is_string($mode)) {
+            $mode = octdec($mode);
+        }
+
+        if (!mkdir($path, $mode, $this->getRecursive())) {
+            throw new BuildException();
         }
 
         return $this;
     }
 
     /**
-     * Get the fileset to apply the delete to
+     * Get the mode
      *
-     * @return Fileset|null
+     * @return string|int|null
      */
-    public function getFileset()
+    public function getMode()
     {
-        return $this->fileset;
+        if (null === $this->mode) {
+            $this->mode = 0777;
+        }
+
+        return $this->mode;
     }
 
     /**
-     * Get the path to apply the delete to
+     * Get the path
      *
      * @return string|null
      */
@@ -138,9 +143,7 @@ class Delete implements Task
     /**
      * Get the recursive flag
      *
-     * If the path is a directory, this determines if the unlink should be recursive.
-     *
-     * @return bool
+     * @return boolean
      */
     public function getRecursive()
     {
@@ -148,19 +151,29 @@ class Delete implements Task
     }
 
     /**
-     * Set the fileset to apply the delete to
+     * Get the skip if path exists flag
      *
-     * @param Fileset $fileset
+     * @return boolean
+     */
+    public function getSkipIfPathExists()
+    {
+        return true === $this->skipIfPathExists;
+    }
+
+    /**
+     * Set the mode
+     *
+     * @param string|int $mode
      * @return self
      */
-    public function setFileset(Fileset $fileset): self
+    public function setMode($mode): self
     {
-        $this->fileset = $fileset;
+        $this->mode = $mode;
         return $this;
     }
 
     /**
-     * Set the path to apply the delete to
+     * Set the path
      *
      * @param string $path
      * @return self
@@ -174,9 +187,7 @@ class Delete implements Task
     /**
      * Set the recursive flag
      *
-     * @see getRecursive
-     *
-     * @param bool $recursive
+     * @param boolean $recursive
      * @return self
      */
     public function setRecursive(bool $recursive): self
@@ -186,18 +197,14 @@ class Delete implements Task
     }
 
     /**
-     * Unlink a path
+     * Set the skip if path exists flag
      *
-     * @param string $path
-     * @return bool
+     * @param boolean $skipIfPathExists
+     * @return self
      */
-    protected function delete($path)
+    public function setSkipIfPathExists(bool $skipIfPathExists): self
     {
-        if (is_dir($path)) {
-            return rmdir($path);
-        } else {
-            return unlink($path);
-        }
+        $this->skipIfPathExists = $skipIfPathExists;
+        return $this;
     }
-
 }

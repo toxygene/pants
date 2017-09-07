@@ -90,9 +90,9 @@ class TouchTest extends TestCase
     public function testFileCanBeSet()
     {
         $this->touch
-            ->setFile('test');
+            ->setPath('test');
 
-        $this->assertEquals('test', $this->touch->getFile());
+        $this->assertEquals('test', $this->touch->getPath());
     }
     
     /**
@@ -145,7 +145,7 @@ class TouchTest extends TestCase
             ->will($this->returnArgument(0));
 
         $this->touch
-            ->setFile($file)
+            ->setPath($file)
             ->setTime($time)
             ->execute($mockProject);
 

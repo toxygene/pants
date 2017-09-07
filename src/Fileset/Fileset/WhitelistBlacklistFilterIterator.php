@@ -29,31 +29,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Pants\FileSet;
+namespace Pants\Fileset\Fileset;
 
 use FilterIterator;
 
 /**
  * Whitelist/blacklist pattern filter iterator
  *
- * @package Pants\FileSet
+ * @package Pants\Fileset\Fileset
  */
 class WhitelistBlacklistFilterIterator extends FilterIterator
 {
 
     /**
-     * Blacklist matchers
+     * Base directory
      *
-     * @var WhitelistBlacklistFilterIterator\Matcher[]
+     * @var string|null
      */
-    protected $blacklistMatchers = array();
+    protected $baseDirectory;
 
     /**
-     * Whitelist matchers
+     * Blacklist
      *
-     * @var WhitelistBlacklistFilterIterator\Matcher[]
+     * @var Matchers|MatcherInterface[]|null
      */
-    protected $whitelistMatchers = array();
+    protected $blacklist = array();
+
+    /**
+     * Whitelist
+     *
+     * @var Matchers|MatcherInterface[]|null
+     */
+    protected $whitelist = array();
 
     /**
      * Check whether the current element of the iterator is acceptable
@@ -62,11 +69,11 @@ class WhitelistBlacklistFilterIterator extends FilterIterator
      */
     public function accept()
     {
-        if ($this->getWhitelistMatchers()) {
-            foreach ($this->getWhitelistMatchers() as $whitelist) {
-                if ($whitelist->match($this->getInnerIterator()->current())) {
-                    foreach ($this->getBlacklistMatchers() as $blacklist) {
-                        if ($blacklist->match($this->getInnerIterator()->current())) {
+        if ($this->getWhitelist()) {
+            foreach ($this->getWhitelist() as $whitelist) {
+                if ($whitelist->match($this->getInnerIterator()->current(), $this->getBaseDirectory())) {
+                    foreach ($this->getBlacklist() as $blacklist) {
+                        if ($blacklist->match($this->getInnerIterator()->current(), $this->getBaseDirectory())) {
                             return false;
                         }
                     }
@@ -76,8 +83,8 @@ class WhitelistBlacklistFilterIterator extends FilterIterator
             
             return false;
         } else {
-            foreach ($this->getBlacklistMatchers() as $blacklist) {
-                if ($blacklist->match($this->getInnerIterator()->current())) {
+            foreach ($this->getBlacklist() as $blacklist) {
+                if ($blacklist->match($this->getInnerIterator()->current(), $this->getBaseDirectory())) {
                     return false;
                 }
             }
@@ -87,46 +94,69 @@ class WhitelistBlacklistFilterIterator extends FilterIterator
     }
 
     /**
-     * Get the blacklist matchers
+     * Get the base directory
      *
-     * @return WhitelistBlacklistFilterIterator\Matcher[]
+     * @return string|null
      */
-    public function getBlacklistMatchers()
+    public function getBaseDirectory()
     {
-        return $this->blacklistMatchers;
+        return $this->baseDirectory;
     }
 
     /**
-     * Get the whitelist matchers
+     * Get the blacklist
      *
-     * @return WhitelistBlacklistFilterIterator\Matcher[]
+     * @return Matchers|MatcherInterface[]|null
      */
-    public function getWhitelistMatchers()
+    public function getBlacklist()
     {
-        return $this->whitelistMatchers;
+        return $this->blacklist;
+    }
+
+    /**
+     * Get the whitelist
+     *
+     * @return Matchers|MatcherInterface[]|null
+     */
+    public function getWhitelist()
+    {
+        return $this->whitelist;
+    }
+
+    /**
+     * Set the base directory
+     *
+     * @param string $baseDirectory
+     * @return self
+     */
+    public function setBaseDirectory(string $baseDirectory): self
+    {
+        $this->baseDirectory = $baseDirectory;
+        return $this;
     }
 
     /**
      * Set the exclude patterns
      *
-     * @param WhitelistBlacklistFilterIterator\Matcher[] $blacklistMatchers
+     * @param Matchers|MatcherInterface[] $blacklist
      * @return self
      */
-    public function setBlacklistMatchers(array $blacklistMatchers)
+    public function setBlacklist(Matchers $blacklist)
     {
-        $this->blacklistMatchers = $blacklistMatchers;
+        $this->blacklist = $blacklist;
         return $this;
     }
 
     /**
      * Set the include patterns
      *
-     * @param WhitelistBlacklistFilterIterator\Matcher[] $whitelistMatchers
+     * @param Matchers|MatcherInterface[] $whitelist
      * @return self
      */
-    public function setWhitelistMatchers(array $whitelistMatchers)
+    public function setWhitelist(Matchers $whitelist)
     {
-        $this->whitelistMatchers = $whitelistMatchers;
+        $this->whitelist = $whitelist;
         return $this;
     }
+
 }
