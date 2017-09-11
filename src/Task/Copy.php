@@ -33,9 +33,10 @@
 
 namespace Pants\Task;
 
+use ErrorException;
 use JMS\Serializer\Annotation as JMS;
-use Pants\BuildException;
-use Pants\Project;
+use function Pale\run;
+use Pants\ContextInterface;
 
 /**
  * Copy file(s) task
@@ -44,7 +45,7 @@ use Pants\Project;
  *
  * @package Pants\Task
  */
-class Copy implements Task
+class Copy implements TaskInterface
 {
 
     /**
@@ -70,24 +71,87 @@ class Copy implements Task
     /**
      * {@inheritdoc}
      */
-    public function execute(Project $project): Task
+    public function execute(ContextInterface $context): TaskInterface
     {
         if (null === $this->getSource()) {
-            throw new BuildException('Source is not set');
+            $message = 'Source not set';
+
+            $context->getLogger()->error(
+                $message,
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this
+            );
         }
 
         if (null === $this->getDestination()) {
-            throw new BuildException('Destination is not set');
+            $message = 'Destination not set';
+
+            $context->getLogger()->error(
+                $message,
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this
+            );
         }
 
-        $source = $project->getProperties()
+        $source = $context->getProperties()
             ->filter($this->getSource());
 
-        $destination = $project->getProperties()
+        $destination = $context->getProperties()
             ->filter($this->getDestination());
 
-        if (!copy($source, $destination)) {
-            throw new BuildException('');
+        $context->getLogger()->debug(
+            sprintf(
+                'Copying source "%s" to destination "%s"',
+                $source,
+                $destination
+            ),
+            [
+                'target' => $context->getCurrentTarget()
+                    ->getName()
+            ]
+        );
+
+        try {
+            run(function() use ($source, $destination) {
+                copy($source, $destination);
+            });
+        } catch (ErrorException $e) {
+            $message = sprintf(
+                'Could not copy source "%s" to destination "%s" because "%s"',
+                $source,
+                $destination,
+                $e->getMessage()
+            );
+
+            $context->getLogger()->error(
+                $message,
+                [
+                    'target' => $context->getCurrentTarget()
+                ]
+            );
+
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this,
+                $e
+            );
         }
 
         return $this;

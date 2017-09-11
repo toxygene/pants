@@ -34,8 +34,7 @@
 namespace Pants\Task;
 
 use JMS\Serializer\Annotation as JMS;
-use Pants\BuildException;
-use Pants\Project;
+use Pants\ContextInterface;
 
 /**
  * Output task
@@ -44,7 +43,7 @@ use Pants\Project;
  *
  * @package Pants\Task
  */
-class Output extends AbstractTask
+class Output extends AbstractTaskInterface
 {
 
     /**
@@ -63,23 +62,36 @@ class Output extends AbstractTask
     /**
      * {@inheritdoc}
      */
-    public function execute(Project $project): Task
+    public function execute(ContextInterface $context): TaskInterface
     {
         if (null === $this->getMessage()) {
-            $project->getLogger()->error(
-                'message not set'
+            $message = 'Message not set';
+
+            $context->getLogger()->error(
+                $message,
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
             );
 
-            throw new BuildException('Message not set');
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this
+            );
         }
 
-        $filteredMessage = $project->getProperties()
+        $filteredMessage = $context->getProperties()
             ->filter($this->getMessage());
 
-        $project->getLogger()->debug(
-            'filtered message',
+        $context->getLogger()->debug(
+            sprintf(
+                'Outputting message "%s"',
+                $filteredMessage
+            ),
             [
-                'message' => $filteredMessage
+                'target' => $context->getCurrentTarget()
             ]
         );
 

@@ -36,8 +36,6 @@ use SplFileInfo;
 
 /**
  * Matcher that does a regular expression match on the path
- *
- * @package Pants\Fileset\Fileset
  */
 class Regexp implements MatcherInterface
 {

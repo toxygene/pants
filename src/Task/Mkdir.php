@@ -33,14 +33,15 @@
 
 namespace Pants\Task;
 
+use ErrorException;
 use JMS\Serializer\Annotation as JMS;
-use Pants\BuildException;
-use Pants\Project;
+use function Pale\run;
+use Pants\ContextInterface;
 
 /**
  * @JMS\ExclusionPolicy("all")
  */
-class Mkdir extends AbstractTask
+class Mkdir extends AbstractTaskInterface
 {
     /**
      * @JMS\Expose()
@@ -89,28 +90,92 @@ class Mkdir extends AbstractTask
     /**
      * {@inheritdoc}
      */
-    public function execute(Project $project): Task
+    public function execute(ContextInterface $context): TaskInterface
     {
         if (null === $this->getPath()) {
-            throw new BuildException();
+            $message = 'Path not set';
+
+            $context->getLogger()->error(
+                $message,
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this
+            );
         }
 
-        $path = $project->getProperties()
+        $path = $context->getProperties()
             ->filter($this->getPath());
 
         if ($this->getSkipIfPathExists() && file_exists($path)) {
+            $message = sprintf(
+                'Directory "%s" already exists, skipping creation',
+                $path
+            );
+
+            $context->getLogger()->info(
+                $message,
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
             return $this;
         }
 
-        $mode = $project->getProperties()
+        $mode = $context->getProperties()
             ->filter($this->getMode());
 
         if (is_string($mode)) {
             $mode = octdec($mode);
         }
 
-        if (!mkdir($path, $mode, $this->getRecursive())) {
-            throw new BuildException();
+        $context->getLogger()->debug(
+            sprintf(
+                'Creating directory "%s" with mode "%s" and recursive "%s"',
+                $path,
+                $mode,
+                $this->getRecursive()
+            ),
+            [
+                'target' => $context->getCurrentTarget()
+                    ->getName()
+            ]
+        );
+
+        try {
+            run(function() use ($path, $mode) {
+                mkdir($path, $mode, $this->getRecursive());
+            });
+        } catch (ErrorException $e) {
+            $message = sprintf(
+                'Could not create directory "%s" with mode "%s" and recursive "%s" because "%s"',
+                $path,
+                $mode,
+                $this->getRecursive(),
+                $e->getMessage()
+            );
+
+            $context->getLogger()->error(
+                $message,
+                [
+                    'target' => $context->getCurrentTarget()
+                ]
+            );
+
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this,
+                $e
+            );
         }
 
         return $this;
@@ -124,7 +189,7 @@ class Mkdir extends AbstractTask
     public function getMode()
     {
         if (null === $this->mode) {
-            $this->mode = 0777;
+            $this->mode = 0775;
         }
 
         return $this->mode;

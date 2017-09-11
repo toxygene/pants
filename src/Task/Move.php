@@ -33,9 +33,11 @@
 
 namespace Pants\Task;
 
+use ErrorException;
 use JMS\Serializer\Annotation as JMS;
-use Pants\BuildException;
-use Pants\Project;
+use function Pale\run;
+use Pants\ContextInterface;
+use Pants\Fileset\Fileset;
 
 /**
  * Move file task
@@ -44,7 +46,7 @@ use Pants\Project;
  *
  * @package Pants\Task
  */
-class Move implements Task
+class Move implements TaskInterface
 {
 
     /**
@@ -89,20 +91,48 @@ class Move implements Task
     /**
      * {@inheritdoc}
      */
-    public function execute(Project $project): Task
+    public function execute(ContextInterface $context): TaskInterface
     {
         if (null === $this->getSource() && null === $this->getFileset()) {
-            throw new BuildException('Source not set');
+            $message = 'Source not set';
+
+            $context->getLogger()->error(
+                $message,
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this
+            );
         }
 
         if (null === $this->getDestination()) {
-            throw new BuildException('Destination not set');
+            $message = 'Directory not set';
+
+            $context->getLogger()->error(
+                $message,
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this
+            );
         }
 
-        $destination = $project->getProperties()
+        $destination = $context->getProperties()
             ->filter($this->getDestination());
 
-        $source = $project->getProperties()
+        $source = $context->getProperties()
             ->filter($this->getSource());
 
         if (null !== $this->getSource()) {
@@ -112,22 +142,59 @@ class Move implements Task
                 $dest = $destination;
             }
 
-            if (!$this->rename($source, $dest)) {
-                throw new BuildException();
-            }
+            $context->getLogger()->debug(
+                sprintf(
+                    'Renaming source "%s" to destination "%s"',
+                    $source,
+                    $dest
+                ),
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            $this->rename($source, $dest, $context);
         }
 
         if (null !== $this->getFileset()) {
             if (is_file($destination)) {
-                throw new BuildException();
+                $message = sprintf(
+                    'Cannot move a fileset to file "%s"',
+                    $destination
+                );
+
+                $context->getLogger()->error(
+                    $message,
+                    [
+                        'target' => $context->getCurrentTarget()
+                            ->getName()
+                    ]
+                );
+
+                throw new BuildException(
+                    $message,
+                    $context->getCurrentTarget(),
+                    $this
+                );
             }
 
-            foreach ($this->getFileset() as $source) {
+            foreach ($this->getFileset()->getIterator($context) as $source) {
                 $dest = $destination . DIRECTORY_SEPARATOR . basename($source);
 
-                if (!$this->rename($source, $dest)) {
-                    throw new BuildException();
-                }
+                $context->getLogger()->debug(
+                    sprintf(
+                        'Renaming source "%s" to destination "%s"',
+                        $source,
+                        $dest
+                    ),
+                    [
+                        'target' => $context->getCurrentTarget()
+                            ->getName()
+                    ]
+                );
+
+                $this->rename($source, $dest, $context);
             }
         }
 
@@ -205,10 +272,37 @@ class Move implements Task
      *
      * @param string $source
      * @param string $destination
-     * @return bool
+     * @param ContextInterface $context
+     * @throws BuildException
      */
-    protected function rename($source, $destination): bool
+    protected function rename($source, $destination, ContextInterface $context)
     {
-        return rename($source, $destination);
+        try {
+            run(function() use ($source, $destination) {
+                rename($source, $destination);
+            });
+        } catch (ErrorException $e) {
+            $message = sprintf(
+                'Could not rename source "%s" to destination "%s" because "%s"',
+                $source,
+                $destination,
+                $e->getMessage()
+            );
+
+            $context->getLogger()->error(
+                $message,
+                [
+                    'target' => $context->getCurrentTarget()
+                ]
+            );
+
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this,
+                $e
+            );
+        }
+
     }
 }

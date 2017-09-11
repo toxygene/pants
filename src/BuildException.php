@@ -37,9 +37,6 @@ use RuntimeException;
 
 /**
  * Build exception
- *
- * @package Pants
- * @subpackage Task
  */
 class BuildException extends RuntimeException
 {

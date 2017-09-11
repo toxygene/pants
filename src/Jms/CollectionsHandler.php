@@ -39,11 +39,15 @@ use JMS\Serializer\Handler\SubscribingHandlerInterface;
 use JMS\Serializer\VisitorInterface;
 use Pants\Fileset\Fileset\AbstractMatcher;
 use Pants\Fileset\Fileset\Matchers;
+use Pants\Property\Properties;
 use Pants\Target\Target;
 use Pants\Target\Targets;
-use Pants\Task\AbstractTask;
+use Pants\Task\AbstractTaskInterface;
 use Pants\Task\Tasks;
 
+/**
+ * JMS subscribing handler for Targets, Tasks, Matchers, and Properties collections.
+ */
 class CollectionsHandler implements SubscribingHandlerInterface
 {
 
@@ -96,6 +100,20 @@ class CollectionsHandler implements SubscribingHandlerInterface
                 'type' => Matchers::class,
                 'format' => $format,
                 'method' => 'deserializeMatchers'
+            ];
+
+            $methods[] = [
+                'direction' => GraphNavigator::DIRECTION_SERIALIZATION,
+                'type' => Properties::class,
+                'format' => $format,
+                'method' => 'serializeProperties'
+            ];
+
+            $methods[] = [
+                'direction' => GraphNavigator::DIRECTION_DESERIALIZATION,
+                'type' => Properties::class,
+                'format' => $format,
+                'method' => 'deserializeProperties'
             ];
         }
 
@@ -179,7 +197,7 @@ class CollectionsHandler implements SubscribingHandlerInterface
         $type['name'] = 'array';
         $type['params'] = [
             [
-                'name' => AbstractTask::class
+                'name' => AbstractTaskInterface::class
             ]
         ];
 
@@ -207,7 +225,7 @@ class CollectionsHandler implements SubscribingHandlerInterface
         $type['name'] = 'array';
         $type['params'] = [
             [
-                'name' => AbstractTask::class
+                'name' => AbstractTaskInterface::class
             ]
         ];
 
@@ -272,6 +290,55 @@ class CollectionsHandler implements SubscribingHandlerInterface
         }
 
         return $matchers;
+    }
+
+    /**
+     * Serialize a Pants\Properties object
+     *
+     * @param VisitorInterface $visitor
+     * @param Properties $properties
+     * @param array $type
+     * @param Context $context
+     * @return array
+     */
+    public function serializeProperties(
+        VisitorInterface $visitor,
+        Properties $properties,
+        array $type,
+        Context $context
+    ): array
+    {
+        $type['name'] = 'array';
+        $type['params'] = [
+            'name' => 'string'
+        ];
+
+        return $visitor->visitArray($properties->toArray(), $type, $context);
+    }
+
+    /**
+     * Deserialize a Pants\Properties object
+     *
+     * @param VisitorInterface $visitor
+     * @param array $data
+     * @param array $type
+     * @param Context $context
+     * @return Properties
+     */
+    public function deserializeProperties(
+        VisitorInterface $visitor,
+        array $data,
+        array $type,
+        Context $context
+    ): Properties
+    {
+        $properties = new Properties();
+
+        foreach ($data as $key => $value) {
+            $properties->{$key} = $value;
+        }
+
+        return $properties;
     }
 
 }

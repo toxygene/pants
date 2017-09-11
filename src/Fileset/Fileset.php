@@ -38,6 +38,7 @@ use JMS\Serializer\Annotation as JMS;
 use Iterator;
 use IteratorAggregate;
 use Pants\BuildException;
+use Pants\ContextInterface;
 use Pants\Fileset\Fileset\MatcherInterface;
 use Pants\Fileset\Fileset\Matchers;
 use Pants\Fileset\Fileset\WhitelistBlacklistFilterIterator;
@@ -45,13 +46,11 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
 /**
- * Abstraction of a set of files
+ * Standard fileset
  *
  * @JMS\ExclusionPolicy("all")
- *
- * @package Pants\Fileset
  */
-class Fileset implements IteratorAggregate
+class Fileset implements FilesetInterface
 {
 
     /**
@@ -92,15 +91,18 @@ class Fileset implements IteratorAggregate
     /**
      * {@inheritdoc}
      */
-    public function getIterator(): Iterator
+    public function getIterator(ContextInterface $context): Iterator
     {
         if (null === $this->getBaseDirectory()) {
             throw new BuildException();
         }
 
+        $baseDirectory = $context->getProperties()
+            ->filter($this->getBaseDirectory());
+
         $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator(
-                $this->getBaseDirectory(),
+                $baseDirectory,
                 FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO | FilesystemIterator::SKIP_DOTS
             ),
             RecursiveIteratorIterator::CHILD_FIRST

@@ -36,7 +36,7 @@ use Pants\Project;
 use Pants\Property\Properties;
 use Pants\Target\Target;
 use Pants\Target\Targets;
-use Pants\Task\Task;
+use Pants\Task\TaskInterface;
 use Pants\Task\Tasks;
 use PHPUnit\Framework\TestCase;
 
@@ -96,8 +96,8 @@ class ProjectTest extends TestCase
      */
     public function testTasksAreExecutedBeforeTargets()
     {
-        /** @var Task|\PHPUnit_Framework_MockObject_MockObject $task */
-        $task = $this->createMock(Task::class);
+        /** @var TaskInterface|\PHPUnit_Framework_MockObject_MockObject $task */
+        $task = $this->createMock(TaskInterface::class);
 
         $task->expects($this->once())
             ->method('execute')

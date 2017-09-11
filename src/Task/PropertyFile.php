@@ -34,8 +34,7 @@
 namespace Pants\Task;
 
 use JMS\Serializer\Annotation as JMS;
-use Pants\BuildException;
-use Pants\Project;
+use Pants\ContextInterface;
 
 /**
  * Set properties from a file task
@@ -44,7 +43,7 @@ use Pants\Project;
  *
  * @package Pants\Task
  */
-class PropertyFile implements Task
+class PropertyFile implements TaskInterface
 {
 
     /**
@@ -63,23 +62,50 @@ class PropertyFile implements Task
     /**
      * {@inheritdoc}
      */
-    public function execute(Project $project): Task
+    public function execute(ContextInterface $context): TaskInterface
     {
         if (null === $this->getFile()) {
-            throw new BuildException('File not set');
+            $message = 'File not set';
+
+            $context->getLogger()->error(
+                'file not set',
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this
+            );
         }
 
-        $file = $project->getProperties()
+        $file = $context->getProperties()
             ->filter($this->getFile());
 
         foreach (parse_ini_file($file, false, INI_SCANNER_RAW) as $name => $value) {
-            $name = $project->getProperties()
+            $name = $context->getProperties()
                 ->filter($name);
 
-            $value = $project->getProperties()
+            $value = $context->getProperties()
                 ->filter($value);
 
-            $project->getProperties()->{$name} = $value;
+            $context->getLogger()->debug(
+                sprintf(
+                    'Setting property "%s" to value "%s"',
+                    $name,
+                    $value
+                ),
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            $context->getProperties()
+                ->add($name, $value);
         }
 
         return $this;

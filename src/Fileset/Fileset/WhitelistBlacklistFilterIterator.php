@@ -35,8 +35,6 @@ use FilterIterator;
 
 /**
  * Whitelist/blacklist pattern filter iterator
- *
- * @package Pants\Fileset\Fileset
  */
 class WhitelistBlacklistFilterIterator extends FilterIterator
 {
@@ -63,9 +61,7 @@ class WhitelistBlacklistFilterIterator extends FilterIterator
     protected $whitelist = array();
 
     /**
-     * Check whether the current element of the iterator is acceptable
-     *
-     * @return boolean
+     * {@inheritdoc}
      */
     public function accept()
     {

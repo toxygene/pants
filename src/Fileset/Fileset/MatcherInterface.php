@@ -34,9 +34,7 @@ namespace Pants\Fileset\Fileset;
 use SplFileInfo;
 
 /**
- * Matcher interface for the include/exclude filter iterator
- *
- * @package Pants\Fileset\Matcher
+ * Interface for a matcher
  */
 interface MatcherInterface
 {

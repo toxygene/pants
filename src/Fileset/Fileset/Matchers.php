@@ -38,7 +38,7 @@ use Iterator;
 use IteratorAggregate;
 
 /**
- * Container of matchers
+ * Matchers container
  */
 class Matchers implements IteratorAggregate
 {

@@ -33,9 +33,10 @@
 
 namespace Pants\Task;
 
+use ErrorException;
 use JMS\Serializer\Annotation as JMS;
-use Pants\BuildException;
-use Pants\Project;
+use function Pale\run;
+use Pants\ContextInterface;
 
 /**
  * Touch file(s) task
@@ -44,7 +45,7 @@ use Pants\Project;
  *
  * @package Pants\Task
  */
-class Touch implements Task
+class Touch implements TaskInterface
 {
 
     /**
@@ -76,24 +77,73 @@ class Touch implements Task
     /**
      * {@inheritdoc}
      */
-    public function execute(Project $project): Task
+    public function execute(ContextInterface $context): TaskInterface
     {
         if (null === $this->getPath()) {
-            throw new BuildException('Path not set');
+            $message = 'Path not set';
+
+            $context->getLogger()->error(
+                $message,
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this
+            );
         }
 
-        $path = $project->getProperties()
+        $path = $context->getProperties()
             ->filter($this->getPath());
 
         if (null !== $this->getTime()) {
-            $time = $project->getProperties()
+            $time = $context->getProperties()
                 ->filter($this->getTime());
         } else {
             $time = time(); // todo this is kind of ugly
         }
 
-        if (!touch($path, $time)) {
-            throw new BuildException('');
+        $context->getLogger()->debug(
+            sprintf(
+                'Touching path "%s" with time "%s"',
+                $path,
+                $time
+            ),
+            [
+                'target' => $context->getCurrentTarget()
+                    ->getName()
+            ]
+        );
+
+        try {
+            run(function() use ($path, $time) {
+                touch($path, $time);
+            });
+        } catch (ErrorException $e) {
+            $message = sprintf(
+                'Could not touch path "%s" with time "%s"',
+                $path,
+                $time
+            );
+
+            $context->getLogger()->error(
+                $message,
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this,
+                $e
+            );
         }
 
         return $this;

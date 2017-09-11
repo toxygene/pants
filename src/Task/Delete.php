@@ -33,9 +33,13 @@
 
 namespace Pants\Task;
 
+use FilesystemIterator;
 use JMS\Serializer\Annotation as JMS;
-use Pants\BuildException;
-use Pants\Project;
+use Pants\ContextInterface;
+use Pants\Fileset\FilesetInterface;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use SplFileObject;
 
 /**
  * Delete file(s) task
@@ -44,7 +48,7 @@ use Pants\Project;
  *
  * @package Pants\Task
  */
-class Delete implements Task
+class Delete implements TaskInterface
 {
 
     /**
@@ -56,9 +60,22 @@ class Delete implements Task
      * @JMS\Type("Pants\Fileset\Fileset")
      * @JMS\XmlElement(cdata=false)
      *
-     * @var Fileset|null
+     * @var FilesetInterface|null
      */
     protected $fileset;
+
+    /**
+     * Follow symlinks
+     *
+     * @JMS\Expose()
+     * @JMS\SerializedName("follow-symlinks")
+     * @JMS\SkipWhenEmpty()
+     * @JMS\Type("boolean")
+     * @JMS\XmlElement(cdata=false)
+     *
+     * @var bool|null
+     */
+    protected $followSymlinks;
 
     /**
      * Path to delete
@@ -77,9 +94,9 @@ class Delete implements Task
      * Recursive flag
      *
      * @JMS\Expose()
-     * @JMS\SerializedName("boolean")
+     * @JMS\SerializedName("recursive")
      * @JMS\SkipWhenEmpty()
-     * @JMS\Type("string")
+     * @JMS\Type("boolean")
      * @JMS\XmlElement(cdata=false)
      *
      * @var bool|null
@@ -89,26 +106,38 @@ class Delete implements Task
     /**
      * {@inheritdoc}
      */
-    public function execute(Project $project): Task
+    public function execute(ContextInterface $context): TaskInterface
     {
+        // todo support for follow symlinks
+
         if (null === $this->getPath() && null === $this->getFileset()) {
-            throw new BuildException('Path not set');
+            $message = 'Path not set';
+
+            $context->getLogger()->error(
+                $message,
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this
+            );
         }
 
         if (null !== $this->getPath()) {
-            $path = $project->getProperties()
+            $path = $context->getProperties()
                 ->filter($this->getPath());
 
-            if (!$this->delete($path)) {
-                throw new BuildException();
-            }
+            $this->delete($path, $this->getRecursive());
         }
 
         if (null !== $this->getFileset()) {
-            foreach ($this->getFileset() as $path) {
-                if (!$this->delete($path)) {
-                    throw new BuildException();
-                }
+            foreach ($this->getFileset()->getIterator($context) as $path) {
+                $this->delete($path, $this->getRecursive());
             }
         }
 
@@ -118,11 +147,21 @@ class Delete implements Task
     /**
      * Get the fileset to apply the delete to
      *
-     * @return Fileset|null
+     * @return FilesetInterface|null
      */
     public function getFileset()
     {
         return $this->fileset;
+    }
+
+    /**
+     * Get the follow symlinks flag
+     *
+     * @return bool
+     */
+    public function getFollowSymlinks()
+    {
+        return true === $this->followSymlinks;
     }
 
     /**
@@ -160,6 +199,18 @@ class Delete implements Task
     }
 
     /**
+     * Set the follow symlinks flag
+     *
+     * @param bool $followSymlinks
+     * @return self
+     */
+    public function setFollowSymlinks(bool $followSymlinks): self
+    {
+        $this->followSymlinks = $followSymlinks;
+        return $this;
+    }
+
+    /**
      * Set the path to apply the delete to
      *
      * @param string $path
@@ -189,14 +240,48 @@ class Delete implements Task
      * Unlink a path
      *
      * @param string $path
+     * @param bool $recursive
      * @return bool
      */
-    protected function delete($path)
+    protected function delete($path, bool $recursive)
     {
-        if (is_dir($path)) {
-            return rmdir($path);
+        // todo add support for skipping if the path doesn't exist
+        // todo logging
+
+        if ($recursive) {
+            $flags = FilesystemIterator::KEY_AS_PATHNAME |
+                FilesystemIterator::CURRENT_AS_FILEINFO |
+                FilesystemIterator::SKIP_DOTS;
+
+            if ($this->getFollowSymlinks()) {
+                $flags |= FilesystemIterator::FOLLOW_SYMLINKS;
+            }
+
+            /** @var RecursiveIteratorIterator|SplFileObject[] $iterator */
+            $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($path, $flags),
+                RecursiveIteratorIterator::CHILD_FIRST
+            );
+
+            foreach ($iterator as $item) {
+                if ($item->isDir()) {
+                    if (!rmdir($item)) {
+                        return false;
+                    }
+                } else {
+                    if (!unlink($item)) {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
         } else {
-            return unlink($path);
+            if (is_dir($path)) {
+                return rmdir($path);
+            } else {
+                return unlink($path);
+            }
         }
     }
 

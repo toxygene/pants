@@ -31,7 +31,7 @@
 
 namespace PantsTest\Task;
 
-use Pants\Task\Task;
+use Pants\Task\TaskInterface;
 use Pants\Task\Tasks;
 use PHPUnit\Framework\TestCase;
 
@@ -75,8 +75,8 @@ class TasksTest extends TestCase
      */
     public function testTasksCanBeAdded()
     {
-        /** @var Task|\PHPUnit_Framework_MockObject_MockObject $mockTask */
-        $mockTask = $this->createMock(Task::class);
+        /** @var TaskInterface|\PHPUnit_Framework_MockObject_MockObject $mockTask */
+        $mockTask = $this->createMock(TaskInterface::class);
         
         $this->tasks
             ->add($mockTask);

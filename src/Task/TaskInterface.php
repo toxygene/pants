@@ -31,27 +31,23 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
-namespace Pants\Task\Execute;
+namespace Pants\Task;
 
-use RuntimeException;
+use Pants\ContextInterface;
 
 /**
+ * Task interface
  *
+ * @package Pants\Tasks
  */
-class CommandFailedToRunException extends RuntimeException
+interface TaskInterface
 {
-
     /**
-     * Constructor
+     * Execute the task
      *
-     * @param string $command
-     * @param string $directory
+     * @param ContextInterface $context
+     * @return TaskInterface
+     * @throws BuildException
      */
-    public function __construct($command, $directory)
-    {
-        $this->command   = $command;
-        $this->directory = $directory;
-        
-        parent::__construct("'{$command}' failed to run");
-    }
+    public function execute(ContextInterface $context): self;
 }

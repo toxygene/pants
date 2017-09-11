@@ -33,9 +33,10 @@
 
 namespace Pants\Task;
 
+use ErrorException;
 use JMS\Serializer\Annotation as JMS;
-use Pants\BuildException;
-use Pants\Project;
+use function Pale\run;
+use Pants\ContextInterface;
 
 /**
  * Symlink file task
@@ -44,7 +45,7 @@ use Pants\Project;
  *
  * @package Pants\Task
  */
-class Symlink implements Task
+class Symlink implements TaskInterface
 {
 
     /**
@@ -61,39 +62,103 @@ class Symlink implements Task
     protected $link;
 
     /**
-     * Target file
+     * Source file
      *
      * @JMS\Expose()
-     * @JMS\SerializedName("target")
+     * @JMS\SerializedName("source")
      * @JMS\SkipWhenEmpty()
      * @JMS\Type("string")
      * @JMS\XmlElement(cdata=false)
      *
      * @var string|null
      */
-    protected $target;
+    protected $source;
 
     /**
      * {@inheritdoc}
      */
-    public function execute(Project $project): Task
+    public function execute(ContextInterface $context): TaskInterface
     {
         if (null === $this->getLink()) {
-            throw new BuildException('Link not set');
+            $message = 'Link not set';
+
+            $context->getLogger()->error(
+                $message,
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this
+            );
         }
 
-        if (null === $this->getTarget()) {
-            throw new BuildException('Target not set');
+        if (null === $this->getSource()) {
+            $message = 'Source not set';
+
+            $context->getLogger()->error(
+                $message,
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this
+            );
         }
 
-        $target = $project->getProperties()
-            ->filter($this->getTarget());
+        $source = $context->getProperties()
+            ->filter($this->getSource());
 
-        $link = $project->getProperties()
+        $link = $context->getProperties()
             ->filter($this->getLink());
 
-        if (!symlink($target, $link)) {
-            throw new BuildException('');
+        $context->getLogger()->debug(
+            sprintf(
+                'Symlinking source "%s" to link "%s"',
+                $source,
+                $link
+            ),
+            [
+                'target' => $context->getCurrentTarget()
+                    ->getName()
+            ]
+        );
+
+        try {
+            run(function() use ($source, $link) {
+                symlink($source, $link);
+            });
+        } catch (ErrorException $e) {
+            $message = sprintf(
+                'Could not symlink source "%s" to link "%s" because "%s"',
+                $source,
+                $link,
+                $e->getMessage()
+            );
+
+            $context->getLogger()->error(
+                $message,
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this,
+                $e
+            );
         }
 
         return $this;
@@ -110,13 +175,13 @@ class Symlink implements Task
     }
 
     /**
-     * Get the target
+     * Get the source
      *
      * @return string|null
      */
-    public function getTarget()
+    public function getSource()
     {
-        return $this->target;
+        return $this->source;
     }
     
     /**
@@ -132,14 +197,14 @@ class Symlink implements Task
     }
 
     /**
-     * Set the target
+     * Set the source
      *
-     * @param string $target
+     * @param string $source
      * @return self
      */
-    public function setTarget(string $target): self
+    public function setSource(string $source): self
     {
-        $this->target = $target;
+        $this->source = $source;
         return $this;
     }
 }

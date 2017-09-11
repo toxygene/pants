@@ -33,9 +33,10 @@
 
 namespace Pants\Task;
 
+use ErrorException;
 use JMS\Serializer\Annotation as JMS;
-use Pants\BuildException;
-use Pants\Project;
+use function Pale\run;
+use Pants\ContextInterface;
 use Traversable;
 
 /**
@@ -45,7 +46,7 @@ use Traversable;
  *
  * @package Pants\Task
  */
-class Chgrp implements Task
+class Chgrp implements TaskInterface
 {
 
     /**
@@ -71,61 +72,90 @@ class Chgrp implements Task
     /**
      * {@inheritdoc}
      */
-    public function execute(Project $project): Task
+    public function execute(ContextInterface $context): TaskInterface
     {
         if (null === $this->getFiles()) {
-            $project->getLogger()->error(
-                'files not set',
+            $message = 'Files not set';
+
+            $context->getLogger()->error(
+                $message,
                 [
-                    'task' => self::class
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
                 ]
             );
 
-            throw new BuildException('Files are not set');
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this
+            );
         }
 
         if (null === $this->getGroup()) {
-            $project->getLogger()->error(
-                'group not set',
+            $message = 'Group not set';
+
+            $context->getLogger()->error(
+                $message,
                 [
-                    'task' => self::class
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
                 ]
             );
 
-            throw new BuildException('Group is not set');
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this
+            );
         }
 
-        $group = $project->getProperties()
+        $group = $context->getProperties()
             ->filter($this->getGroup());
 
-        $project->getLogger()->debug(
-            'filtered group',
-            [
-                'group' => $group
-            ]
-        );
-
         foreach ($this->getFiles() as $file) {
-            $file = $project->getProperties()
+            $file = $context->getProperties()
                 ->filter($file);
 
-            $project->getLogger()->debug(
-                'filtered file',
+            $context->getLogger()->debug(
+                sprintf(
+                    'Setting group "%s" on file "%s"',
+                    $group,
+                    $file
+                ),
                 [
-                    'file' => $file
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
                 ]
             );
 
-            if (!chgrp($file, (int) $group)) {
-                $project->getLogger()->error(
-                    'could not set group on file',
+            try {
+                run(function () use ($file, $group) {
+                    chgrp($file, (int)$group);
+                });
+            } catch (ErrorException $e) {
+                $message = sprintf(
+                    'Could not set group "%s" on file "%s" because "%s"',
+                    $group,
+                    $file,
+                    $e->getMessage()
+                );
+
+                $context->getLogger()->error(
+                    $message,
                     [
-                        'group' => $group,
-                        'files' => $file
+                        'target' => $context->getCurrentTarget()
+                            ->getName(),
+                        'reason' => $e->getMessage()
                     ]
                 );
 
-                throw new BuildException("Could not set group \"{$group}\" on file \"{$file}\"");
+                throw new BuildException(
+                    $message,
+                    $context->getCurrentTarget(),
+                    $this,
+                    $e
+                );
             }
         }
 

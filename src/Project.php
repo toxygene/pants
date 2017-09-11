@@ -35,16 +35,21 @@ namespace Pants;
 
 use JMS\Serializer\Annotation as JMS;
 use Pants\Property\Properties;
+use Pants\Property\PropertiesInterface;
+use Pants\Target\Executor\Executor;
 use Pants\Target\Targets;
-use Pants\Task\Task;
+use Pants\Target\TargetsInterface;
+use Pants\Task\Call;
+use Pants\Task\TaskInterface;
 use Pants\Task\Tasks;
+use Pants\Task\TasksInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
 /**
- * Project
+ * Standard project
  *
  * @JMS\ExclusionPolicy("all")
  * @JMS\XmlNamespace(uri="http://www.github.com/toxygene/pants")
@@ -52,35 +57,9 @@ use Psr\Log\NullLogger;
  *
  * @package Pants
  */
-class Project implements LoggerAwareInterface
+class Project implements ProjectInterface, LoggerAwareInterface
 {
     use LoggerAwareTrait;
-
-    /**
-     * Base directory
-     *
-     * @JMS\Expose()
-     * @JMS\SerializedName("base_directory")
-     * @JMS\SkipWhenEmpty()
-     * @JMS\Type("string")
-     * @JMS\XmlAttribute()
-     *
-     * @var string
-     */
-    protected $baseDirectory;
-
-    /**
-     * Default task name
-     *
-     * @JMS\Expose()
-     * @JMS\SerializedName("default")
-     * @JMS\SkipWhenEmpty()
-     * @JMS\Type("string")
-     * @JMS\XmlAttribute()
-     *
-     * @var string
-     */
-    protected $default;
 
     /**
      * Properties
@@ -89,7 +68,7 @@ class Project implements LoggerAwareInterface
      * @JMS\SerializedName("properties")
      * @JMS\Type("Pants\Property\Properties")
      *
-     * @var Properties
+     * @var PropertiesInterface
      */
     protected $properties;
 
@@ -101,7 +80,7 @@ class Project implements LoggerAwareInterface
      * @JMS\Type("Pants\Target\Targets")
      * @JMS\XmlList(entry="target")
      *
-     * @var Targets
+     * @var TargetsInterface
      */
     protected $targets;
 
@@ -113,7 +92,7 @@ class Project implements LoggerAwareInterface
      * @JMS\Type("Pants\Task\Tasks")
      * @JMS\XmlList(entry="task")
      *
-     * @var Tasks|Task[]
+     * @var TasksInterface|TaskInterface[]
      */
     protected $tasks;
 
@@ -122,78 +101,10 @@ class Project implements LoggerAwareInterface
      */
     public function __construct()
     {
+        $this->logger = new NullLogger();
         $this->properties = new Properties();
-        $this->targets    = new Targets();
-        $this->tasks      = new Tasks();
-    }
-
-    /**
-     * Execute targets
-     *
-     * @param array $targets
-     * @return self
-     */
-    public function execute($targets = array()): self
-    {
-        $this->resetExecutedTasks()
-            ->setupBaseDirectory()
-            ->setupBuiltinProperties();
-
-        $this->getLogger()->info(
-            'executing tasks'
-        );
-
-        foreach ($this->getTasks() as $task) {
-            $task->execute($this);
-        }
-
-        if (empty($targets)) {
-            $this->getLogger()->info(
-                'no targets specified'
-            );
-
-            if (!$this->getDefault()) {
-                $this->getLogger()->warning(
-                    'no default target set, bailing out'
-                );
-
-                return $this;
-            }
-
-            $targets = [$this->getDefault()];
-        }
-
-        $this->getLogger()->info(
-            'executing targets',
-            $targets
-        );
-
-        foreach ($targets as $target) {
-            $this->getTargets()
-                ->execute($target, $this);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Get the base directory
-     *
-     * @return string|null
-     */
-    public function getBaseDirectory()
-    {
-        return $this->baseDirectory;
-    }
-
-    /**
-     * Get the default target name
-     *
-     * @return string|null
-     */
-    public function getDefault()
-    {
-        return $this->default;
+        $this->targets = new Targets();
+        $this->tasks = new Tasks();
     }
 
     /**
@@ -203,17 +114,13 @@ class Project implements LoggerAwareInterface
      */
     public function getLogger()
     {
-        if (null === $this->logger) {
-            $this->logger = new NullLogger();
-        }
-
         return $this->logger;
     }
 
     /**
      * Get the properties
      *
-     * @return Properties
+     * @return PropertiesInterface
      */
     public function getProperties()
     {
@@ -221,9 +128,18 @@ class Project implements LoggerAwareInterface
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function getTargetDescriptions(): array
+    {
+        return $this->getTargets()
+            ->getDescriptions();
+    }
+
+    /**
      * Get the targets
      *
-     * @return Targets
+     * @return TargetsInterface
      */
     public function getTargets()
     {
@@ -233,7 +149,7 @@ class Project implements LoggerAwareInterface
     /**
      * Get the tasks
      *
-     * @return Tasks|Task[]
+     * @return TasksInterface|TaskInterface[]
      */
     public function getTasks()
     {
@@ -241,65 +157,60 @@ class Project implements LoggerAwareInterface
     }
 
     /**
-     * Set the base directory
-     *
-     * @param string $baseDirectory
-     * @return self
+     * {@inheritdoc}
      */
-    public function setBaseDirectory(string $baseDirectory): self
+    public function execute(array $targets = []): ProjectInterface
     {
-        $this->baseDirectory = $baseDirectory;
-        return $this;
-    }
+        $this->setup();
 
-    /**
-     * Set the default target name
-     *
-     * @param string $default
-     * @return Project
-     */
-    public function setDefault(string $default): self
-    {
-        $this->default = $default;
-        return $this;
-    }
+        $this->getLogger()->info(
+            'executing tasks'
+        );
 
-    /**
-     * Setup the base directory
-     *
-     * @return self
-     */
-    protected function setupBaseDirectory(): self
-    {
-        if (null !== $this->getBaseDirectory()) {
-            $this->getLogger()->info(
-                'changing working directory',
-                [
-                    'directory' => $this->getBaseDirectory()
-                ]
-            );
+        $context = new Context(
+            $this->getProperties(),
+            new Executor($this->getTargets()),
+            $this->getLogger()
+        );
 
-            if (!chdir($this->getBaseDirectory())) {
-                $this->getLogger()->error(
-                    'Could not set the working directory',
-                    [
-                        'directory' => $this->getBaseDirectory()
-                    ]
-                );
-
-                throw new BuildException('');
-            }
+        foreach ($this->getTasks() as $task) {
+            $task->execute($context);
         }
 
+        if (empty($targets)) {
+            $this->getLogger()->info(
+                'no targets specified'
+            );
+
+            if (!$this->getProperties()->exists(PropertiesInterface::DEFAULT_TARGET_NAME)) {
+                $this->getLogger()->warning(
+                    'no default target set, bailing out'
+                );
+
+                return $this;
+            }
+
+            $targets = [
+                $this->getProperties()
+                    ->get(PropertiesInterface::DEFAULT_TARGET_NAME)
+            ];
+        }
+
+        $this->getLogger()->info(
+            'executing targets',
+            $targets
+        );
+
+        $context->getExecutor()
+            ->executeMultiple($targets, $context);
+
         return $this;
     }
 
     /**
-     * Setup the builtin properties
-     *
-     * @return self
+     * {@inheritdoc}
      */
-    protected function setupBuiltinProperties(): self
+    protected function setup(): ProjectInterface
     {
         $builtinProperties = [
             'basedir' => getcwd(),
@@ -322,20 +233,7 @@ class Project implements LoggerAwareInterface
         );
 
         $this->getProperties()
-            ->add($builtinProperties);
-
-        return $this;
-    }
-
-    /**
-     * Reset the list of executed tasks
-     *
-     * @return Project
-     */
-    protected function resetExecutedTasks(): self
-    {
-        $this->getTargets()
-            ->resetExecutedTargets();
+            ->merge($builtinProperties);
 
         return $this;
     }

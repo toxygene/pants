@@ -2,7 +2,7 @@
 /**
  * Pants
  *
- * Copyright (c) 2011-2017, Justin Hendrickson
+ * Copyright (c) 2017, Justin Hendrickson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -31,33 +31,21 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
-namespace Pants\Task\Execute;
+namespace Pants\Fileset;
 
-use RuntimeException;
+use Iterator;
+use Pants\ContextInterface;
 
 /**
- *
+ * Interface for a fileset
  */
-class CommandReturnedErrorException extends RuntimeException
+interface FilesetInterface
 {
-
     /**
-     * Constructor
+     * Get an iterator for the fileset
      *
-     * @param string $command
-     * @param string $directory
-     * @param string $return
-     * @param string $stdout
-     * @param string $stderr
+     * @param ContextInterface $context
+     * @return Iterator
      */
-    public function __construct($command, $directory, $return, $stdout, $stderr)
-    {
-        $this->command   = $command;
-        $this->directory = $directory;
-        $this->return    = $return;
-        $this->stdout    = $stdout;
-        $this->stderr    = $stderr;
-        
-        parent::__construct("'{$command}' failed: '{$stderr}'");
-    }
+    public function getIterator(ContextInterface $context): Iterator;
 }

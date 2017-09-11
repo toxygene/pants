@@ -34,10 +34,7 @@
 namespace Pants\Task;
 
 use JMS\Serializer\Annotation as JMS;
-use Pants\BuildException;
-use Pants\Project;
-use Pants\Task\Execute\CommandFailedToRunException;
-use Pants\Task\Execute\CommandReturnedErrorException;
+use Pants\ContextInterface;
 
 /**
  * Execute a shell command task
@@ -46,7 +43,7 @@ use Pants\Task\Execute\CommandReturnedErrorException;
  *
  * @package Pants\Task
  */
-class Execute implements Task
+class Execute implements TaskInterface
 {
 
     /**
@@ -78,21 +75,51 @@ class Execute implements Task
     /**
      * {@inheritdoc}
      */
-    public function execute(Project $project): Task
+    public function execute(ContextInterface $context): TaskInterface
     {
+        // todo add support for storing stdout to a property
+        // todo add support for storing stderr to a property
+        // todo add support for command exit code to a property
+
         if (null === $this->getCommand()) {
-            throw new BuildException('Command is not set');
+            $message = 'Command not set';
+
+            $context->getLogger()->error(
+                $message,
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this
+            );
         }
 
-        $command = $project->getProperties()
+        $command = $context->getProperties()
             ->filter($this->getCommand());
 
-        $directory = $project->getProperties()
+        $directory = $context->getProperties()
             ->filter($this->getDirectory());
 
         $descriptorSpec = array(
             1 => array('pipe', 'w'),
             2 => array('pipe', 'w')
+        );
+
+        $context->getLogger()->debug(
+            sprintf(
+                'Executing command "%s" in directory "%s"',
+                $command,
+                $directory
+            ),
+            [
+                'target' => $context->getCurrentTarget()
+                    ->getName()
+            ]
         );
 
         $process = proc_open(
@@ -103,7 +130,25 @@ class Execute implements Task
         );
 
         if (false === $process) {
-            throw new CommandFailedToRunException($command, $directory);
+            $message = sprintf(
+                'Could not execute command "%s" in directory "%s"',
+                $command,
+                $directory
+            );
+
+            $context->getLogger()->error(
+                $message,
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this
+            );
         }
 
         $stdout = stream_get_contents($pipes[1]);
@@ -115,12 +160,24 @@ class Execute implements Task
         $return = proc_close($process);
 
         if (0 !== $return) {
-            throw new CommandReturnedErrorException(
+            $message = sprintf(
+                'Command "%s" in directory "%s" failed because "%s"',
                 $command,
                 $directory,
-                $return,
-                $stdout,
                 $stderr
+            );
+
+            $context->getLogger()->error(
+                $message,
+                [
+                    'target' => $context->getCurrentTarget()
+                ]
+            );
+
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this
             );
         }
 

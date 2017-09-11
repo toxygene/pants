@@ -37,11 +37,11 @@ use InvalidArgumentException;
 use Pants\Project;
 
 /**
- * Targets container
+ * Standard targets container
  *
  * @package Pants\Target
  */
-class Targets
+class Targets implements TargetsInterface
 {
 
     /**
@@ -52,60 +52,9 @@ class Targets
     protected $targets = array();
 
     /**
-     * @var string[]
+     * {@inheritdoc}
      */
-    private $executedTargets = [];
-
-    /**
-     * Get a target
-     *
-     * @param string $name
-     * @return Target
-     * @throws InvalidArgumentException
-     */
-    public function __get(string $name): Target
-    {
-        if (!isset($this->$name)) {
-            throw new InvalidArgumentException("There is no target with the name of '{$name}'");
-        }
-
-        return $this->targets[$name];
-    }
-
-    /**
-     * Check if a target exists
-     *
-     * @param string $name
-     * @return boolean
-     */
-    public function __isset(string $name): bool
-    {
-        return isset($this->targets[$name]);
-    }
-
-    /**
-     * Unset a target
-     *
-     * @param string $name
-     * @throws InvalidArgumentException
-     */
-    public function __unset(string $name)
-    {
-        if (!isset($this->$name)) {
-            throw new InvalidArgumentException("There is no target with the name of '{$name}'");
-        }
-
-        unset($this->targets[$name]);
-    }
-
-    /**
-     * Add a target
-     *
-     * @param Target $target
-     * @return self
-     * @throws InvalidArgumentException
-     */
-    public function add(Target $target): self
+    public function add(Target $target): TargetsInterface
     {
         $name = $target->getName();
 
@@ -119,32 +68,29 @@ class Targets
     }
 
     /**
-     * Execute a task
-     *
-     * Tracks and only executes a target one time.
-     *
-     * @param string $target
-     * @param Project $project
-     * @return self
+     * {@inheritdoc}
      */
-    public function execute(string $target, Project $project): self
+    public function exists(string $name): bool
     {
-        if (false === in_array($target, $this->executedTargets)) {
-            $this->executedTargets[] = $target;
-
-            $this->$target
-                ->execute($project);
-        }
-
-        return $this;
+        return isset($this->targets[$name]);
     }
 
     /**
-     * Get the names and descriptions of the targets
-     *
-     * @return string[]
+     * {@inheritdoc}
      */
-    public function getDescriptions()
+    public function get(string $name): TargetInterface
+    {
+        if (!isset($this->targets[$name])) {
+            throw new InvalidArgumentException("There is no target with the name of '{$name}'");
+        }
+
+        return $this->targets[$name];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getDescriptions(): array
     {
         $descriptions = array();
         foreach ($this->targets as $name => $target) {
@@ -156,25 +102,25 @@ class Targets
     }
 
     /**
-     * Get all the targets
-     *
-     * @return Target[]
+     * {@inheritdoc}
+     */
+    public function remove(string $name): TargetsInterface
+    {
+        if (!isset($this->$name)) {
+            throw new InvalidArgumentException("There is no target with the name of '{$name}'");
+        }
+
+        unset($this->targets[$name]);
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function toArray(): array
     {
         return $this->targets;
-    }
-
-    /**
-     * Reset the list of executed tasks
-     *
-     * @return self
-     */
-    public function resetExecutedTargets(): self
-    {
-        $this->executedTargets = [];
-
-        return $this;
     }
 
 }

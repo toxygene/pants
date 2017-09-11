@@ -33,9 +33,10 @@
 
 namespace Pants\Task;
 
+use ErrorException;
 use JMS\Serializer\Annotation as JMS;
-use Pants\BuildException;
-use Pants\Project;
+use function Pale\run;
+use Pants\ContextInterface;
 use Traversable;
 
 /**
@@ -45,7 +46,7 @@ use Traversable;
  *
  * @package Pants\Task
  */
-class Chown implements Task
+class Chown implements TaskInterface
 {
 
     /**
@@ -71,25 +72,88 @@ class Chown implements Task
     /**
      * {@inheritdoc}
      */
-    public function execute(Project $project): Task
+    public function execute(ContextInterface $context): TaskInterface
     {
         if (!$this->getFiles()) {
-            throw new BuildException('Files are not set');
+            $message = 'Files not set';
+
+            $context->getLogger()->error(
+                $message,
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this
+            );
         }
 
         if (!$this->getOwner()) {
-            throw new BuildException('Owner is not set');
+            $message = 'Owner not set';
+
+            $context->getLogger()->error(
+                $message,
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this
+            );
         }
 
-        $owner = $project->getProperties()
+        $owner = $context->getProperties()
             ->filter($this->getOwner());
 
         foreach ($this->getFiles() as $file) {
-            $file = $project->getProperties()
+            $file = $context->getProperties()
                 ->filter($file);
 
-            if (!chown($file, $owner)) {
-                throw new BuildException('');
+            $context->getLogger()->debug(
+                sprintf(
+                    'Setting owner "%owner" on file "%file"',
+                    $owner,
+                    $file
+                ),
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            try {
+                run(function() use ($file, $owner) {
+                    chown($file, $owner);
+                });
+            } catch (ErrorException $e) {
+                $message = sprintf(
+                    'Could not set owner "%s" on file "%s" because "%s"',
+                    $owner,
+                    $file,
+                    $e->getMessage()
+                );
+
+                $context->getLogger()->error(
+                    $message,
+                    [
+                        'target' => $context->getCurrentTarget()
+                    ]
+                );
+
+                throw new BuildException(
+                    $message,
+                    $context->getCurrentTarget(),
+                    $this,
+                    $e
+                );
             }
         }
 

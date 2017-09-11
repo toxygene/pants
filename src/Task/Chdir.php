@@ -33,9 +33,10 @@
 
 namespace Pants\Task;
 
+use ErrorException;
 use JMS\Serializer\Annotation as JMS;
-use Pants\BuildException;
-use Pants\Project;
+use function Pale\run;
+use Pants\ContextInterface;
 
 /**
  * Change the current working directory task
@@ -44,7 +45,7 @@ use Pants\Project;
  *
  * @package Pants\Task
  */
-class Chdir implements Task
+class Chdir implements TaskInterface
 {
 
     /**
@@ -63,38 +64,64 @@ class Chdir implements Task
     /**
      * {@inheritdoc}
      */
-    public function execute(Project $project): Task
+    public function execute(ContextInterface $context): TaskInterface
     {
         if (null === $this->getDirectory()) {
-            $project->getLogger()->error(
-                'directory not set',
+            $context->getLogger()->error(
+                'Directory not set',
                 [
-                    'task' => __CLASS__
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
                 ]
             );
 
-            throw new BuildException('Directory not set');
+            throw new BuildException(
+                'Directory not set',
+                $context->getCurrentTarget(),
+                $this
+            );
         }
 
-        $directory = $project->getProperties()
+        $directory = $context->getProperties()
             ->filter($this->getDirectory());
 
-        $project->getLogger()->debug(
-            'filtered directory',
+        $context->getLogger()->debug(
+            sprintf(
+                'Changing current working directory to "%s"',
+                $directory
+            ),
             [
-                'directory' => $directory
+                'target' => $context->getCurrentTarget()
+                    ->getName()
             ]
         );
 
-        if (!chdir($directory)) {
-            $project->getLogger()->error(
-                'could not set the current directory',
+        try {
+            run(function() use ($directory) {
+                return chdir($directory);
+            });
+        } catch (ErrorException $e) {
+            $message = sprintf(
+                'Could not change the current working directory to "%s" because "%s"',
+                $directory,
+                $e->getMessage()
+            );
+
+            $context->getLogger()->error(
+                $message,
                 [
-                    'directory' => $directory
+                    'target' => $context->getCurrentTarget()
+                        ->getName(),
+                    'reason' => $e->getMessage()
                 ]
             );
 
-            throw new BuildException('Could not set the current directory to "{$this->getDirectory()}"');
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this,
+                $e
+            );
         }
 
         return $this;

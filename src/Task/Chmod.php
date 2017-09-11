@@ -33,9 +33,10 @@
 
 namespace Pants\Task;
 
+use ErrorException;
 use JMS\Serializer\Annotation as JMS;
-use Pants\BuildException;
-use Pants\Project;
+use function Pale\run;
+use Pants\ContextInterface;
 use Traversable;
 
 /**
@@ -45,7 +46,7 @@ use Traversable;
  *
  * @package Pants\Task
  */
-class Chmod implements Task
+class Chmod implements TaskInterface
 {
 
     /**
@@ -71,17 +72,45 @@ class Chmod implements Task
     /**
      * {@inheritdoc}
      */
-    public function execute(Project $project): Task
+    public function execute(ContextInterface $context): TaskInterface
     {
         if (null === $this->getFiles()) {
-            throw new BuildException('Files are not set');
+            $message = 'Files not set';
+
+            $context->getLogger()->debug(
+                $message,
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this
+            );
         }
 
         if (null === $this->getMode()) {
-            throw new BuildException('Mode is not set');
+            $message = 'Mode not set';
+
+            $context->getLogger()->debug(
+                $message,
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this
+            );
         }
 
-        $mode = $project->getProperties()
+        $mode = $context->getProperties()
             ->filter($this->getMode());
 
         if (is_string($mode)) {
@@ -89,11 +118,47 @@ class Chmod implements Task
         }
 
         foreach ($this->getFiles() as $file) {
-            $file = $project->getProperties()
+            $file = $context->getProperties()
                 ->filter($file);
 
-            if (!chmod($file, $mode)) {
-                throw new BuildException('');
+            $context->getLogger()->debug(
+                sprintf(
+                    'Setting mode "%s" on file "%s"',
+                    $mode,
+                    $file
+                ),
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            try {
+                run(function () use ($file, $mode) {
+                    chmod($file, $mode);
+                });
+            } catch (ErrorException $e) {
+                $message = sprintf(
+                    'Could not set mode "%s" on file "%s" because "%s"',
+                    $mode,
+                    $file,
+                    $e->getMessage()
+                );
+
+                $context->getLogger()->error(
+                    $message,
+                    [
+                        'target' => $context->getCurrentTarget()
+                            ->getName()
+                    ]
+                );
+
+                throw new BuildException(
+                    $message,
+                    $context->getCurrentTarget(),
+                    $this,
+                    $e
+                );
             }
         }
 

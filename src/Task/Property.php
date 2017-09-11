@@ -34,8 +34,7 @@
 namespace Pants\Task;
 
 use JMS\Serializer\Annotation as JMS;
-use Pants\BuildException;
-use Pants\Project;
+use Pants\ContextInterface;
 
 /**
  * Set a property task
@@ -44,7 +43,7 @@ use Pants\Project;
  *
  * @package Pants\Task
  */
-class Property extends AbstractTask
+class Property extends AbstractTaskInterface
 {
 
     /**
@@ -76,19 +75,46 @@ class Property extends AbstractTask
     /**
      * {@inheritdoc}
      */
-    public function execute(Project $project): Task
+    public function execute(ContextInterface $context): TaskInterface
     {
         if (null === $this->getName()) {
-            throw new BuildException('Name not set');
+            $message = 'Name not set';
+
+            $context->getLogger()->error(
+                $message,
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this
+            );
         }
 
-        $name = $project->getProperties()
+        $name = $context->getProperties()
             ->filter($this->getName());
 
-        $value = $project->getProperties()
+        $value = $context->getProperties()
             ->filter($this->getValue());
 
-        $project->getProperties()->{$name} = $value;
+        $context->getLogger()->debug(
+            sprintf(
+                'Setting property "%s" to "%s"',
+                $name,
+                $value
+            ),
+            [
+                'target' => $context->getCurrentTarget()
+                    ->getName()
+            ]
+        );
+
+        $context->getProperties()
+            ->add($name, $value);
 
         return $this;
     }

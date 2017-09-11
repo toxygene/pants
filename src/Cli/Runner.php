@@ -40,6 +40,7 @@ use GetOpt\Operand;
 use GetOpt\Option;
 use JMS\Serializer\Handler\HandlerRegistry;
 use JMS\Serializer\Metadata\ClassMetadata;
+use JMS\Serializer\Serializer;
 use JMS\Serializer\SerializerBuilder;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -47,7 +48,7 @@ use Pants\Fileset\Fileset\AbstractMatcher;
 use Pants\Fileset\Fileset\Regexp;
 use Pants\Jms\CollectionsHandler;
 use Pants\Project;
-use Pants\Task\AbstractTask;
+use Pants\Task\AbstractTaskInterface;
 use Pants\Task\Call;
 use Pants\Task\Chdir;
 use Pants\Task\Chgrp;
@@ -70,8 +71,6 @@ use Pants\Task\Touch;
 
 /**
  * Runner
- *
- * @package Pants\Cli
  */
 class Runner
 {
@@ -129,27 +128,41 @@ class Runner
             $matches[1]
         );
 
-        if ($opt->getOption('verbose')) {
-            $logger = new Logger('pants');
+        $logger = new Logger('pants');
 
-            if (2 === $opt->getOption('verbose')) {
+        switch ($opt->getOption('verbose')) {
+            case 4:
                 $level = Logger::DEBUG;
-            } else {
+                break;
+
+            case 3:
                 $level = Logger::INFO;
-            }
+                break;
 
-            $logger->pushHandler(new StreamHandler('php://stdout', $level));
+            case 2:
+                $level = Logger::NOTICE;
+                break;
 
-            $project->setLogger($logger);
+            case 1:
+                $level = Logger::WARNING;
+                break;
+
+            default:
+                $level = Logger::ERROR;
+                break;
         }
+
+        $logger->pushHandler(new StreamHandler('php://stdout', $level));
+
+        $project->setLogger($logger);
 
         if ($opt->getOption('list')) {
             $maxWidth = 0;
-            foreach ($project->getTargets()->getDescriptions() as $name => $description) {
+            foreach ($project->getTargetDescriptions() as $name => $description) {
                 $maxWidth = max($maxWidth, strlen($name));
             }
 
-            foreach ($project->getTargets()->getDescriptions() as $name => $description) {
+            foreach ($project->getTargetDescriptions() as $name => $description) {
                 printf("%{$maxWidth}s\t%s", $name, $description);
                 echo PHP_EOL;
             }
@@ -161,9 +174,13 @@ class Runner
     }
 
     /**
-     * @return \JMS\Serializer\Serializer
+     * Build the serializer
+     *
+     * @return Serializer
+     *
+     * @todo implement a mechanism for registering new task classes
      */
-    protected function buildSerializer(): \JMS\Serializer\Serializer
+    protected function buildSerializer(): Serializer
     {
         AnnotationRegistry::registerLoader('class_exists');
 
@@ -183,7 +200,6 @@ class Runner
             'copy' => Copy::class,
             'delete' => Delete::class,
             'execute' => Execute::class,
-            'fileset' => Fileset::class,
             'input' => Input::class,
             'mkdir' => Mkdir::class,
             'move' => Move::class,
@@ -196,12 +212,12 @@ class Runner
             'touch' => Touch::class
         ];
 
-        $abstractTaskMetadata = new ClassMetadata(AbstractTask::class);
+        $abstractTaskMetadata = new ClassMetadata(AbstractTaskInterface::class);
         $abstractTaskMetadata->setDiscriminator('type', $taskClasses);
         $abstractTaskMetadata->discriminatorDisabled = false;
 
         $serializer->getMetadataFactory()
-            ->getMetadataForClass(AbstractTask::class)
+            ->getMetadataForClass(AbstractTaskInterface::class)
             ->merge($abstractTaskMetadata);
 
         $filesetClasses = [

@@ -34,15 +34,14 @@
 namespace Pants\Task;
 
 use JMS\Serializer\Annotation as JMS;
-use Pants\BuildException;
-use Pants\Project;
+use Pants\ContextInterface;
 
 /**
  * Include a PHP script task
  *
  * @package Pants\Task
  */
-class PhpScript implements Task
+class PhpScript implements TaskInterface
 {
 
     /**
@@ -61,14 +60,39 @@ class PhpScript implements Task
     /**
      * {@inheritdoc}
      */
-    public function execute(Project $project): Task
+    public function execute(ContextInterface $context): TaskInterface
     {
         if (null === $this->getFile()) {
-            throw new BuildException('File not set');
+            $message = 'File not set';
+
+            $context->getLogger()->error(
+                $message,
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this
+            );
         }
 
-        $file = $project->getProperties()
+        $file = $context->getProperties()
             ->filter($this->getFile());
+
+        $context->getLogger()->debug(
+            sprintf(
+                'Requiring file "%s"',
+                $file
+            ),
+            [
+                'target' => $context->getCurrentTarget()
+                    ->getName()
+            ]
+        );
 
         require $file;
 

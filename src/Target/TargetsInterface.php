@@ -2,7 +2,7 @@
 /**
  * Pants
  *
- * Copyright (c) 2011-2017, Justin Hendrickson
+ * Copyright (c) 2017, Justin Hendrickson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -31,23 +31,60 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
-namespace Pants\Task;
+namespace Pants\Target;
 
-use Pants\Project;
+use InvalidArgumentException;
 
 /**
- * Task interface
- *
- * @package Pants\Tasks
+ * Interface for a targets collection
  */
-interface Task
+interface TargetsInterface
 {
+    /**
+     * Add a target
+     *
+     * @param Target $target
+     * @return self
+     * @throws InvalidArgumentException
+     */
+    public function add(Target $target): self;
 
     /**
-     * Execute the task
+     * Check if a target exists
      *
-     * @param Project $project
-     * @return Task
+     * @param string $name
+     * @return boolean
      */
-    public function execute(Project $project): self;
+    public function exists(string $name): bool;
+
+    /**
+     * Get a target
+     *
+     * @param string $name
+     * @return TargetInterface
+     * @throws InvalidArgumentException
+     */
+    public function get(string $name): TargetInterface;
+
+    /**
+     * Get a list of names and descriptions for visible targets
+     *
+     * @return string[]
+     */
+    public function getDescriptions(): array;
+
+    /**
+     * Remove a target
+     *
+     * @param string $name
+     * @throws InvalidArgumentException
+     */
+    public function remove(string $name);
+
+    /**
+     * Get the targets as an array
+     *
+     * @return array
+     */
+    public function toArray(): array;
 }

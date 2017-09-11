@@ -2,7 +2,7 @@
 /**
  * Pants
  *
- * Copyright (c) 2011-2017, Justin Hendrickson
+ * Copyright (c) 2017, Justin Hendrickson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,57 +31,74 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
-namespace Pants\Task;
-
-use ArrayIterator;
-use Iterator;
-use IteratorAggregate;
+namespace Pants\Property;
 
 /**
- * Tasks container
- *
- * @package Pants\Tasks
+ * Properties interface
  */
-class Tasks implements TasksInterface
+interface PropertiesInterface
 {
+    /**
+     * Name of the default target property
+     *
+     * @var string
+     */
+    const DEFAULT_TARGET_NAME = 'project.default-target';
 
     /**
-     * Tasks
+     * Add a property
      *
-     * @var array
+     * @param string $key
+     * @param string|int $value
+     * @return PropertiesInterface
      */
-    protected $tasks = array();
+    public function add(string $key, $value): self;
 
     /**
-     * Add a task
+     * Check if a property exists
      *
-     * @param TaskInterface $task
-     * @return self
+     * @param string $key
+     * @return bool
      */
-    public function add(TaskInterface $task): self
-    {
-        $this->tasks[] = $task;
-
-        return $this;
-    }
+    public function exists(string $key): bool;
 
     /**
-     * Get an iterator
+     * Filter a string
      *
-     * @return Iterator
+     * @param string|int $input
+     * @return string|int
+     * @throws PropertyNameCycleException
      */
-    public function getIterator(): Iterator
-    {
-        return new ArrayIterator($this->tasks);
-    }
+    public function filter($input);
 
     /**
-     * Get all the targets
+     * Get a property
      *
-     * @return TaskInterface[]
+     * @param string $key
+     * @return string|int|false
      */
-    public function toArray(): array
-    {
-        return $this->tasks;
-    }
+    public function get(string $key);
+
+    /**
+     * Merge an array of properties
+     *
+     * @param array $properties
+     * @return PropertiesInterface
+     */
+    public function merge(array $properties): self;
+
+    /**
+     * Remove a property
+     *
+     * @param string $key
+     * @return PropertiesInterface
+     */
+    public function remove(string $key): self;
+
+    /**
+     * Get the properties
+     *
+     * @return array
+     */
+    public function toArray(): array;
 }

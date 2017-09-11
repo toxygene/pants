@@ -37,8 +37,6 @@ use RuntimeException;
 
 /**
  * Property name cycle detected exception
- *
- * @package Pants\Property
  */
 class PropertyNameCycleException extends RuntimeException
 {

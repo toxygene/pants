@@ -34,8 +34,7 @@
 namespace Pants\Task;
 
 use JMS\Serializer\Annotation as JMS;
-use Pants\BuildException;
-use Pants\Project;
+use Pants\ContextInterface;
 
 /**
  * Call another target task
@@ -44,7 +43,7 @@ use Pants\Project;
  *
  * @package Pants\Task
  */
-class Call implements Task
+class Call implements TaskInterface
 {
 
     /**
@@ -63,18 +62,41 @@ class Call implements Task
     /**
      * {@inheritdoc}
      */
-    public function execute(Project $project): Task
+    public function execute(ContextInterface $context): TaskInterface
     {
         if (null === $this->getTarget()) {
-            throw new BuildException('No target set');
+            $context->getLogger()->error(
+                'No target set',
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            throw new BuildException(
+                'No target set',
+                $context->getCurrentTarget(),
+                $this
+            );
         }
-        
-        $target = $project->getProperties()
+
+        $target = $context->getProperties()
             ->filter($this->getTarget());
-        
-        $project->getTargets()
-            ->$target
-            ->execute($project);
+
+        $context->getLogger()->info(
+            sprintf(
+                'Calling target "%s"',
+                $target
+            ),
+            [
+                'target' => $context->getCurrentTarget()
+                    ->getName(),
+                'call target' => $target
+            ]
+        );
+
+        $context->getExecutor()
+            ->executeSingle($target, $context);
 
         return $this;
     }

@@ -34,19 +34,20 @@
 namespace Pants\Target;
 
 use JMS\Serializer\Annotation as JMS;
+use Pants\BuildException;
+use Pants\ContextInterface;
 use Pants\Project;
 use Pants\Property\Properties;
-use Pants\Task\Task;
+use Pants\Task\TaskInterface;
 use Pants\Task\Tasks;
+use Pants\Task\TasksInterface;
 
 /**
- * Target
+ * Standard target
  *
  * @JMS\ExclusionPolicy("all")
- *
- * @package Pants\Target
  */
-class Target implements Task
+class Target implements TargetInterface
 {
 
     /**
@@ -122,7 +123,7 @@ class Target implements Task
      * @JMS\Type("Pants\Task\Tasks")
      * @JMS\XmlList(entry="task")
      *
-     * @var Tasks|Task[]
+     * @var Tasks|TaskInterface[]
      */
     protected $tasks;
 
@@ -154,10 +155,10 @@ class Target implements Task
     /**
      * {@inheritdoc}
      */
-    public function execute(Project $project): Task
+    public function execute(ContextInterface $context): TargetInterface
     {
         foreach ($this->getDepends() as $depends) {
-            $project->getLogger()->info(
+            $context->getLogger()->info(
                 'executing dependent target',
                 [
                     'target' => $this->getName(),
@@ -165,12 +166,12 @@ class Target implements Task
                 ]
             );
 
-            $project->getTargets()
-                ->execute($depends, $project);
+            $context->getExecutor()
+                ->executeSingle($depends, $context);
         }
 
         foreach ($this->getIf() as $if) {
-            $project->getLogger()->debug(
+            $context->getLogger()->debug(
                 'checking if property',
                 [
                     'target' => $this->getName(),
@@ -178,8 +179,8 @@ class Target implements Task
                 ]
             );
 
-            if (!isset($project->getProperties()->$if) || !$project->getProperties()->$if) {
-                $project->getLogger()->info(
+            if (!$context->getProperties()->exists($if) || !$context->getProperties()->get($if)) {
+                $context->getLogger()->info(
                     'if property not set or false',
                     [
                         'target' => $this->getName(),
@@ -192,7 +193,7 @@ class Target implements Task
         }
 
         foreach ($this->getUnless() as $unless) {
-            $project->getLogger()->debug(
+            $context->getLogger()->debug(
                 'checking unless property',
                 [
                     'target' => $this->getName(),
@@ -200,8 +201,8 @@ class Target implements Task
                 ]
             );
 
-            if (isset($project->getProperties()->$unless) && $project->getProperties()->$unless) {
-                $project->getLogger()->info(
+            if ($context->getProperties()->exists($unless) && $context->getProperties()->get($unless)) {
+                $context->getLogger()->info(
                     'unless property set and true',
                     [
                         'target' => $this->getName(),
@@ -213,7 +214,7 @@ class Target implements Task
             }
         }
 
-        $project->getLogger()->info(
+        $context->getLogger()->info(
             'executing target tasks',
             [
                 'target' => $this->getName()
@@ -221,16 +222,25 @@ class Target implements Task
         );
 
         foreach ($this->tasks as $task) {
-            $task->execute($project);
+            try {
+                $task->execute($context);
+            } catch (BuildException $e) {
+                $context->getLogger()->error(
+                    $e->getMessage(),
+                    [
+                        'target' => $this->getName(),
+                        'task' => get_class($task) // todo improve
+                    ]
+                );
+            }
         }
+
 
         return $this;
     }
 
     /**
-     * Get the depends
-     *
-     * @return array
+     * {@inheritdoc}
      */
     public function getDepends(): array
     {
@@ -238,9 +248,7 @@ class Target implements Task
     }
 
     /**
-     * Get the description
-     *
-     * @return string|null
+     * {@inheritdoc}
      */
     public function getDescription()
     {
@@ -248,51 +256,41 @@ class Target implements Task
     }
 
     /**
-     * Get the hidden flag
-     *
-     * @return boolean
+     * {@inheritdoc}
      */
-    public function getHidden()
+    public function getHidden(): bool
     {
         return true === $this->hidden;
     }
 
     /**
-     * Get the if conditionals
-     *
-     * @return string[]
+     * {@inheritdoc}
      */
-    public function getIf()
+    public function getIf(): array
     {
         return $this->if;
     }
 
     /**
-     * Get the name
-     *
-     * @return string
+     * {@inheritdoc}
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
     /**
-     * Get the tasks
-     *
-     * @return Tasks|Task[]
+     * {@inheritdoc}
      */
-    public function getTasks()
+    public function getTasks(): TasksInterface
     {
         return $this->tasks;
     }
 
     /**
-     * Get the unless conditionals
-     *
-     * @return string[]
+     * {@inheritdoc}
      */
-    public function getUnless()
+    public function getUnless(): array
     {
         return $this->unless;
     }

@@ -33,9 +33,10 @@
 
 namespace Pants\Task;
 
+use ErrorException;
 use JMS\Serializer\Annotation as JMS;
-use Pants\BuildException;
-use Pants\Project;
+use function Pale\run;
+use Pants\ContextInterface;
 
 /**
  * Replace tokens in file(s) task
@@ -44,7 +45,7 @@ use Pants\Project;
  *
  * @package Pants\Task
  */
-class TokenFilter implements Task
+class TokenFilter implements TaskInterface
 {
 
     /**
@@ -114,33 +115,93 @@ class TokenFilter implements Task
     /**
      * {@inheritdoc}
      */
-    public function execute(Project $project): Task
+    public function execute(ContextInterface $context): TaskInterface
     {
         if (null === $this->getFile()) {
-            throw new BuildException('File not set');
+            $message = 'File not set';
+
+            $context->getLogger()->error(
+                $message,
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this
+            );
         }
 
-        $endingCharacter = $project->getProperties()
+        $endingCharacter = $context->getProperties()
             ->filter($this->getEndingCharacter());
 
-        $file = $project->getProperties()
+        $file = $context->getProperties()
             ->filter($this->getFile());
 
-        $startingCharacter = $project->getProperties()
+        $startingCharacter = $context->getProperties()
             ->filter($this->getStartingCharacter());
 
         $contents = file_get_contents($file);
 
         foreach ($this->getReplacements() as $token => $value) {
+            $search = $endingCharacter . $token . $startingCharacter;
+
+            $context->getLogger()->debug(
+                sprintf(
+                    'Replacing search "%s" with value "%s" in contents "%s"',
+                    $search,
+                    $value,
+                    $context
+                )
+            );
+
             $contents = str_replace(
-                $endingCharacter . $token . $startingCharacter,
+                $search,
                 $value,
                 $contents
             );
         }
 
-        if (!file_put_contents($file, $contents)) {
-            throw new BuildException('');
+        $context->getLogger()->debug(
+            sprintf(
+                'Writing contents "%s" to file "%s"',
+                $contents,
+                $file
+            ),
+            [
+                'target' => $context->getCurrentTarget()
+                    ->getName()
+            ]
+        );
+
+        try {
+            run(function() use ($file, $contents) {
+                file_put_contents($file, $contents);
+            });
+        } catch (ErrorException $e) {
+            $message = sprintf(
+                'Failed writing contents "%s" to file "%s"',
+                $contents,
+                $file
+            );
+
+            $context->getLogger()->error(
+                $message,
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this,
+                $e
+            );
         }
 
         return $this;

@@ -34,8 +34,7 @@
 namespace Pants\Task;
 
 use JMS\Serializer\Annotation as JMS;
-use Pants\BuildException;
-use Pants\Project;
+use Pants\ContextInterface;
 
 /**
  * Read input task
@@ -44,7 +43,7 @@ use Pants\Project;
  *
  * @package Pants\Task
  */
-class Input implements Task
+class Input implements TaskInterface
 {
 
     /**
@@ -140,10 +139,24 @@ class Input implements Task
     /**
      * {@inheritdoc}
      */
-    public function execute(Project $project): Task
+    public function execute(ContextInterface $context): TaskInterface
     {
         if (!$this->getPropertyName()) {
-            throw new BuildException('Property name not set');
+            $message = 'Property name not set';
+
+            $context->getLogger()->error(
+                $message,
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this
+            );
         }
 
         $inputStream = $this->buildStream(
@@ -155,35 +168,120 @@ class Input implements Task
         );
 
         if ($this->getMessage()) {
-            fwrite($outputStream, $project->getProperties()->filter($this->getMessage()));
+            $message = $context->getProperties()
+                ->filter($this->getMessage());
+
+            $context->getLogger()->debug(
+                sprintf(
+                    'Writing message "%s" to output stream',
+                    $message
+                ),
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            fwrite($outputStream, $message);
         }
 
         $validArgs = array();
 
         foreach ($this->getValidArgs() as $validArg) {
-            $validArgs[] = $project->getProperties()
+            $validArgs[] = $context->getProperties()
                 ->filter($validArg);
         }
 
         if ($validArgs) {
-            fwrite($outputStream, ' [' . implode('/', $validArgs) . ']');
+            $validArgsString = '[' . implode('/', $validArgs) . ']';
+
+            $context->getLogger()->debug(
+                sprintf(
+                    'Writing valid arguments "%s" to output stream',
+                    $validArgsString
+                ),
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            fwrite($outputStream, ' ' . $validArgsString);
         }
 
-        fwrite($outputStream, $project->getProperties()->filter($this->getPromptCharacter()) . ' ');
+        $promptCharacter = $context->getProperties()
+            ->filter($this->getPromptCharacter());
+
+        $context->getLogger()->debug(
+            sprintf(
+                'Writing prompt character "%s" to output stream',
+                $promptCharacter
+            ),
+            [
+                'target' => $context->getCurrentTarget()
+                    ->getName()
+            ]
+        );
+
+        fwrite($outputStream, $promptCharacter . ' ');
 
         $value = trim(fgets($inputStream));
 
         if (trim($value) == '' && null !== $this->getDefaultValue()) {
-            $value = $project->getProperties()
+            $defaultValue = $context->getProperties()
                 ->filter($this->getDefaultValue());
+
+            $context->getLogger()->debug(
+                sprintf(
+                    'Using default value "%s"',
+                    $defaultValue
+                ),
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            $value = $defaultValue;
         }
 
         if ($validArgs && !in_array($value, $validArgs)) {
-            throw new BuildException('Invalid argument');
+            $message = sprintf(
+                'Value "%s" is not a valid value "%s"',
+                $value,
+                '[' . implode('/', $validArgs) . ']'
+            );
+
+            $context->getLogger()->error(
+                $message,
+                [
+                    'target' => $context->getCurrentTarget()
+                        ->getName()
+                ]
+            );
+
+            throw new BuildException(
+                $message,
+                $context->getCurrentTarget(),
+                $this
+            );
         }
 
-        $project->getProperties()
-            ->{$this->getPropertyName()} = $value;
+        $propertyName = $this->getPropertyName();
+
+        $context->getLogger()->debug(
+            sprintf(
+                'Setting property "%s" to value "%s"',
+                $propertyName,
+                $value
+            ),
+            [
+                'target' => $context->getCurrentTarget()
+                    ->getName()
+            ]
+        );
+
+        $context->getProperties()->add($propertyName, $value);
 
         return $this;
     }

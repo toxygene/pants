@@ -31,14 +31,71 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
-namespace Pants\Task;
+namespace Pants\Target;
 
-use JMS\Serializer\Annotation as JMS;
+use Pants\ContextInterface;
+use Pants\Task\TaskInterface;
+use Pants\Task\TasksInterface;
 
 /**
- * @JMS\Discriminator(disabled=true)
- * @JMS\XmlDiscriminator(attribute=true)
+ * Interface for a target
  */
-abstract class AbstractTask implements Task
+interface TargetInterface
 {
+    /**
+     * Get the depends
+     *
+     * @return string[]
+     */
+    public function getDepends(): array;
+
+    /**
+     * Get the description
+     *
+     * @return string|null
+     */
+    public function getDescription();
+
+    /**
+     * Get the hidden flag
+     *
+     * @return boolean
+     */
+    public function getHidden(): bool;
+
+    /**
+     * Get the if conditionals
+     *
+     * @return string[]
+     */
+    public function getIf(): array;
+
+    /**
+     * Get the name
+     *
+     * @return string
+     */
+    public function getName(): string;
+
+    /**
+     * Get the tasks
+     *
+     * @return TasksInterface|TaskInterface[]
+     */
+    public function getTasks(): TasksInterface;
+
+    /**
+     * Get the unless conditionals
+     *
+     * @return string[]
+     */
+    public function getUnless(): array;
+
+    /**
+     * Execute the task
+     *
+     * @param ContextInterface $context
+     * @return self
+     */
+    public function execute(ContextInterface $context): self;
 }

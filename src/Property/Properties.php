@@ -40,10 +40,8 @@ use JMS\Serializer\Annotation as JMS;
  * Properties container
  *
  * @JMS\ExclusionPolicy("all")
- *
- * @package Pants\Property
  */
-class Properties
+class Properties implements PropertiesInterface
 {
 
     /**
@@ -57,112 +55,100 @@ class Properties
      *
      * @var array
      */
-    protected $items = array();
+    protected $properties = array();
 
     /**
-     * Get a property
-     *
-     * @param string $name
-     * @return string
-     * @throws InvalidArgumentException
+     * {@inheritdoc}
      */
-    public function __get(string $name): string
+    public function add(string $name, $value): PropertiesInterface
+    {
+        if (isset($this->properties[$name])) {
+            throw new InvalidArgumentException();
+        }
+
+        $this->properties[$name] = $value;
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function get(string $name): string
     {
         $filteredName = $this->filter($name);
 
-        if (!isset($this->$filteredName)) {
+        if (!isset($this->properties[$filteredName])) {
             throw new InvalidArgumentException("There is no property with a name of '{$name}'");
         }
 
-        return $this->items[$filteredName];
+        return $this->properties[$filteredName];
     }
 
     /**
-     * Check if a property exists
-     *
-     * @param string $name
-     * @return boolean
+     * {@inheritdoc}
      */
-    public function __isset(string $name): bool
+    public function exists(string $name): bool
     {
-        return isset($this->items[$this->filter($name)]);
+        return isset($this->properties[$this->filter($name)]);
     }
 
     /**
-     * Set a property
-     *
-     * @param string $name
-     * @param mixed $value
+     * {@inheritdoc}
      */
-    public function __set(string $name, $value)
+    public function filter($input, array $encountered = array())
     {
-        $this->items[$name] = $value;
+        return $this->filterWhileCheckingForCycles($input);
     }
 
     /**
-     * To string
+     * Filter a string while checking for cycles
      *
-     * @codeCoverageIgnore
-     * @return string
+     * @param int|string $input
+     * @param string[] $encountered
+     * @return int|string
      */
-    public function __toString(): string
+    protected function filterWhileCheckingForCycles($input, array $encountered = [])
     {
-        $properties = array();
-        foreach ($this->items as $key => $value) {
-            $properties[] = "{$key} = {$value}";
+        while (preg_match('#^(.*)\${(.*?)}(.*)$#', $input, $matches)) {
+            if (in_array($matches[2], $encountered)) {
+                throw new PropertyNameCycleException(); // todo need a message
+            }
+
+            $encountered[] = $matches[2];
+            $input = $matches[1] . $this->filterWhileCheckingForCycles($this->{$matches[2]}, $encountered) . $matches[3];
         }
-        return implode("\n", $properties);
+        return $input;
     }
 
     /**
-     * Unset a property
-     *
-     * @param string $name
+     * {@inheritdoc}
      */
-    public function __unset(string $name)
-    {
-        $filteredName = $this->filter($name);
-
-        if (!isset($this->$filteredName)) {
-            throw new InvalidArgumentException("There is no property with a name of '{$name}'");
-        }
-
-        unset($this->items[$filteredName]);
-    }
-
-    /**
-     * Add multiple properties from an array
-     *
-     * @param array $properties
-     * @return self
-     */
-    public function add(array $properties): self
+    public function merge(array $properties): PropertiesInterface
     {
         foreach ($properties as $name => $value) {
-            $this->$name = $value;
+            $this->add($name, $value);
         }
 
         return $this;
     }
 
     /**
-     * Filter a string by converting properties to their values
-     *
-     * @param string|int $string
-     * @param string[] $encountered
-     * @return string|int
-     * @throws PropertyNameCycleException
+     * {@inheritdoc}
      */
-    public function filter($string, array $encountered = array())
+    public function remove(string $key): PropertiesInterface
     {
-        while (preg_match('#^(.*)\${(.*?)}(.*)$#', $string, $matches)) {
-            if (in_array($matches[2], $encountered)) {
-                throw new PropertyNameCycleException();
-            }
-
-            $encountered[] = $matches[2];
-            $string = $matches[1] . $this->filter($this->{$matches[2]}, $encountered) . $matches[3];
+        if (isset($this->properties[$key])) {
+            unset($this->properties[$key]);
         }
-        return $string;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function toArray(): array
+    {
+        return $this->properties;
     }
 }

@@ -36,7 +36,7 @@ use Pants\Project;
 use Pants\Property\Properties;
 use Pants\Target\Target;
 use Pants\Target\Targets;
-use Pants\Task\Task;
+use Pants\Task\TaskInterface;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -134,8 +134,8 @@ class TargetTest extends TestCase
      */
     public function testTasksAreExecutedOnTargetExecute()
     {
-        /** @var Task|\PHPUnit_Framework_MockObject_MockObject $mockTask */
-        $mockTask = $this->createMock(Task::class);
+        /** @var TaskInterface|\PHPUnit_Framework_MockObject_MockObject $mockTask */
+        $mockTask = $this->createMock(TaskInterface::class);
 
         $mockTask->expects($this->once())
             ->method('execute')
@@ -161,8 +161,8 @@ class TargetTest extends TestCase
         /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
         $mockProject = $this->createMock(Project::class);
 
-        /** @var Task|\PHPUnit_Framework_MockObject_MockObject $mockTask */
-        $mockTask = $this->createMock(Task::class);
+        /** @var TaskInterface|\PHPUnit_Framework_MockObject_MockObject $mockTask */
+        $mockTask = $this->createMock(TaskInterface::class);
 
         $mockTask->expects($this->never())
             ->method('execute');
@@ -188,8 +188,8 @@ class TargetTest extends TestCase
         /** @var Properties|\PHPUnit_Framework_MockObject_MockObject $mockProperties */
         $mockProperties = $this->createMock(Properties::class);
 
-        /** @var Task|\PHPUnit_Framework_MockObject_MockObject $mockTask */
-        $mockTask = $this->createMock(Task::class);
+        /** @var TaskInterface|\PHPUnit_Framework_MockObject_MockObject $mockTask */
+        $mockTask = $this->createMock(TaskInterface::class);
 
         $mockProject->expects($this->any())
             ->method('getProperties')
