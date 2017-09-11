@@ -97,7 +97,7 @@ class Chdir implements TaskInterface
         );
 
         try {
-            run(function() use ($directory) {
+            run(function () use ($directory) {
                 return chdir($directory);
             });
         } catch (ErrorException $e) {

@@ -77,5 +77,4 @@ class Matchers implements IteratorAggregate
     {
         return $this->matchers;
     }
-
 }

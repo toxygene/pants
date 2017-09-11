@@ -120,7 +120,7 @@ class Touch implements TaskInterface
         );
 
         try {
-            run(function() use ($path, $time) {
+            run(function () use ($path, $time) {
                 touch($path, $time);
             });
         } catch (ErrorException $e) {

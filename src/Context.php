@@ -46,8 +46,7 @@ class Context implements ContextInterface
         PropertiesInterface $properties,
         ExecutorInterface $executor,
         LoggerInterface $logger
-    )
-    {
+    ) {
         $this->properties = $properties;
         $this->executor = $executor;
         $this->logger = $logger;

@@ -354,5 +354,4 @@ class Target implements TargetInterface
         $this->unless = $unless;
         return $this;
     }
-
 }

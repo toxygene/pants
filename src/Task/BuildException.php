@@ -32,8 +32,7 @@ class BuildException extends BaseBuildException
         TargetInterface $target,
         TaskInterface $task,
         Throwable $throwable = null
-    )
-    {
+    ) {
         parent::__construct(
             $message,
             null,

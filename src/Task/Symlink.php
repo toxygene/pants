@@ -134,7 +134,7 @@ class Symlink implements TaskInterface
         );
 
         try {
-            run(function() use ($source, $link) {
+            run(function () use ($source, $link) {
                 symlink($source, $link);
             });
         } catch (ErrorException $e) {

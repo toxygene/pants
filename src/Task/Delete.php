@@ -284,5 +284,4 @@ class Delete implements TaskInterface
             }
         }
     }
-
 }

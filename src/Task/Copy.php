@@ -128,7 +128,7 @@ class Copy implements TaskInterface
         );
 
         try {
-            run(function() use ($source, $destination) {
+            run(function () use ($source, $destination) {
                 copy($source, $destination);
             });
         } catch (ErrorException $e) {

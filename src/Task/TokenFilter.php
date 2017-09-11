@@ -178,7 +178,7 @@ class TokenFilter implements TaskInterface
         );
 
         try {
-            run(function() use ($file, $contents) {
+            run(function () use ($file, $contents) {
                 file_put_contents($file, $contents);
             });
         } catch (ErrorException $e) {

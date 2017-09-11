@@ -130,7 +130,7 @@ class Chown implements TaskInterface
             );
 
             try {
-                run(function() use ($file, $owner) {
+                run(function () use ($file, $owner) {
                     chown($file, $owner);
                 });
             } catch (ErrorException $e) {

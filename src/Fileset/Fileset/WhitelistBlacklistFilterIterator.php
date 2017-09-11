@@ -154,5 +154,4 @@ class WhitelistBlacklistFilterIterator extends FilterIterator
         $this->whitelist = $whitelist;
         return $this;
     }
-
 }

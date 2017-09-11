@@ -151,7 +151,7 @@ class Mkdir extends AbstractTaskInterface
         );
 
         try {
-            run(function() use ($path, $mode) {
+            run(function () use ($path, $mode) {
                 mkdir($path, $mode, $this->getRecursive());
             });
         } catch (ErrorException $e) {

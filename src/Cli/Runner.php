@@ -89,7 +89,7 @@ class Runner
                 Option::create('f', 'file', GetOpt::REQUIRED_ARGUMENT)
                     ->setDescription('Set the build file')
                     ->setDefaultValue('build.xml')
-                    ->setValidation(function($file) { // todo doesn't appear to be working, possible due default value?
+                    ->setValidation(function ($file) { // todo doesn't appear to be working, possible due default value?
                         return file_exists($file);
                     }),
                 Option::create('l', 'list', GetOpt::NO_ARGUMENT)

@@ -88,5 +88,4 @@ class Regexp implements MatcherInterface
         $this->pattern = $pattern;
         return $this;
     }
-
 }

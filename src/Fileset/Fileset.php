@@ -189,5 +189,4 @@ class Fileset implements FilesetInterface
         $this->whitelist = $whitelist;
         return $this;
     }
-
 }

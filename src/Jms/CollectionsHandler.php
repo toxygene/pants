@@ -134,8 +134,7 @@ class CollectionsHandler implements SubscribingHandlerInterface
         Targets $targets,
         array $type,
         Context $context
-    ): array
-    {
+    ): array {
         $type['name'] = 'array';
         $type['params'] = [
             [
@@ -160,8 +159,7 @@ class CollectionsHandler implements SubscribingHandlerInterface
         array $data,
         array $type,
         Context $context
-    )
-    {
+    ) {
         $targets = new Targets();
 
         $type['name'] = 'array';
@@ -192,8 +190,7 @@ class CollectionsHandler implements SubscribingHandlerInterface
         Tasks $tasks,
         array $type,
         Context $context
-    ): array
-    {
+    ): array {
         $type['name'] = 'array';
         $type['params'] = [
             [
@@ -218,8 +215,7 @@ class CollectionsHandler implements SubscribingHandlerInterface
         array $data,
         array $type,
         Context $context
-    ): Tasks
-    {
+    ): Tasks {
         $tasks = new Tasks();
 
         $type['name'] = 'array';
@@ -250,8 +246,7 @@ class CollectionsHandler implements SubscribingHandlerInterface
         Matchers $matchers,
         array $type,
         Context $context
-    ): array
-    {
+    ): array {
         $type['name'] = 'array';
         $type['params'] = [
             'name' => AbstractMatcher::class
@@ -274,8 +269,7 @@ class CollectionsHandler implements SubscribingHandlerInterface
         array $data,
         array $type,
         Context $context
-    ): Matchers
-    {
+    ): Matchers {
         $matchers = new Matchers();
 
         $type['name'] = 'array';
@@ -306,8 +300,7 @@ class CollectionsHandler implements SubscribingHandlerInterface
         Properties $properties,
         array $type,
         Context $context
-    ): array
-    {
+    ): array {
         $type['name'] = 'array';
         $type['params'] = [
             'name' => 'string'
@@ -330,8 +323,7 @@ class CollectionsHandler implements SubscribingHandlerInterface
         array $data,
         array $type,
         Context $context
-    ): Properties
-    {
+    ): Properties {
         $properties = new Properties();
 
         foreach ($data as $key => $value) {
@@ -340,5 +332,4 @@ class CollectionsHandler implements SubscribingHandlerInterface
 
         return $properties;
     }
-
 }

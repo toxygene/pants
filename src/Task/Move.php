@@ -278,7 +278,7 @@ class Move implements TaskInterface
     protected function rename($source, $destination, ContextInterface $context)
     {
         try {
-            run(function() use ($source, $destination) {
+            run(function () use ($source, $destination) {
                 rename($source, $destination);
             });
         } catch (ErrorException $e) {
@@ -303,6 +303,5 @@ class Move implements TaskInterface
                 $e
             );
         }
-
     }
 }

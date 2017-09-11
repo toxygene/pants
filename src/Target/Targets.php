@@ -121,5 +121,4 @@ class Targets implements TargetsInterface
     {
         return $this->targets;
     }
-
 }
