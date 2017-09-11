@@ -35,7 +35,6 @@ namespace Pants\Task;
 
 use ArrayIterator;
 use Iterator;
-use IteratorAggregate;
 
 /**
  * Tasks container
@@ -53,12 +52,9 @@ class Tasks implements TasksInterface
     protected $tasks = array();
 
     /**
-     * Add a task
-     *
-     * @param TaskInterface $task
-     * @return self
+     * {@inheritdoc}
      */
-    public function add(TaskInterface $task): self
+    public function add(TaskInterface $task): TasksInterface
     {
         $this->tasks[] = $task;
 
@@ -66,9 +62,7 @@ class Tasks implements TasksInterface
     }
 
     /**
-     * Get an iterator
-     *
-     * @return Iterator
+     * {@inheritdoc}
      */
     public function getIterator(): Iterator
     {
@@ -76,9 +70,7 @@ class Tasks implements TasksInterface
     }
 
     /**
-     * Get all the targets
-     *
-     * @return TaskInterface[]
+     * {@inheritdoc}
      */
     public function toArray(): array
     {

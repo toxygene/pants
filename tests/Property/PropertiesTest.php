@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace PantsTest\Properties;
+namespace Pants\Test\Properties;
 
 use Pants\Property\Properties;
 use PHPUnit\Framework\TestCase;
@@ -72,11 +72,11 @@ class PropertiesTest extends TestCase
      */
     public function testGettingAndSettingProperties()
     {
-        $this->properties->one = "two";
-        $this->properties->three = "four";
+        $this->properties->add('one', 'two');
+        $this->properties->add('three', 'four');
 
-        $this->assertEquals("two", $this->properties->one);
-        $this->assertEquals("four", $this->properties->three);
+        $this->assertEquals('two', $this->properties->get('one'));
+        $this->assertEquals('four', $this->properties->get('three'));
     }
 
     /**
@@ -85,7 +85,7 @@ class PropertiesTest extends TestCase
      */
     public function testGettingANonexistantPropertyThrowsAnException()
     {
-        $this->properties->one;
+        $this->properties->get('one');
     }
 
     /**
@@ -93,10 +93,10 @@ class PropertiesTest extends TestCase
      */
     public function testExistanceOfPropertiesCanBeChecked()
     {
-        $this->properties->one = "two";
+        $this->properties->add('one', 'two');
 
-        $this->assertTrue(isset($this->properties->one));
-        $this->assertFalse(isset($this->properties->two));
+        $this->assertTrue($this->properties->exists('one'));
+        $this->assertFalse($this->properties->exists('two'));
     }
 
     /**
@@ -104,10 +104,13 @@ class PropertiesTest extends TestCase
      */
     public function testUnsettingAPropertyRemovesIt()
     {
-        $this->properties->one = "test";
-        unset($this->properties->one);
+        $this->properties->add('one', 'test');
+
+        $this->assertTrue($this->properties->exists('one'));
+
+        $this->properties->remove('one');
         
-        $this->assertFalse(isset($this->properties->one));
+        $this->assertFalse($this->properties->exists('one'));
     }
 
     /**
@@ -116,7 +119,7 @@ class PropertiesTest extends TestCase
      */
     public function testUnsettingANonexistantPropertyThrowsAnException()
     {
-        unset($this->properties->one);
+        $this->properties->remove('one');
     }
     
     /**

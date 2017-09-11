@@ -37,4 +37,18 @@ use IteratorAggregate;
 
 interface TasksInterface extends IteratorAggregate
 {
+    /**
+     * Add a task
+     *
+     * @param TaskInterface $task
+     * @return self
+     */
+    public function add(TaskInterface $task): self;
+
+    /**
+     * Get all the tasks
+     *
+     * @return TaskInterface[]
+     */
+    public function toArray(): array;
 }

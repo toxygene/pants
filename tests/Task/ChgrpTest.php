@@ -29,20 +29,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace PantsTest\Task;
+namespace Pants\Test\Task;
 
 use org\bovigo\vfs\vfsStream;
-use Pants\Project;
-use Pants\Property\Properties;
 use Pants\Task\Chgrp;
-use PHPUnit\Framework\TestCase;
 
 /**
  * Unit tests for the Chgrp task
  * 
  * @coversDefaultClass \Pants\Task\Chgrp
  */
-class ChgrpTest extends TestCase
+class ChgrpTest extends TaskTestCase
 {
 
     /**
@@ -94,30 +91,24 @@ class ChgrpTest extends TestCase
 
     /**
      * @covers ::execute
-     * @expectedException \Pants\BuildException
+     * @expectedException \Pants\Task\BuildException
      */
     public function testFileIsRequired()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
         $this->chgrp
             ->setGroup(1000)
-            ->execute($mockProject);
+            ->execute($this->mockContext);
     }
 
     /**
      * @covers ::execute
-     * @expectedException \Pants\BuildException
+     * @expectedException \Pants\Task\BuildException
      */
     public function testGroupIsRequired()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
         $this->chgrp
             ->setFile($this->file)
-            ->execute($mockProject);
+            ->execute($this->mockContext);
     }
 
 
@@ -127,30 +118,10 @@ class ChgrpTest extends TestCase
      */
     public function testGroupIsSet()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
-        /** @var Properties|\PHPUnit_Framework_MockObject_MockObject $mockProperties */
-        $mockProperties = $this->createMock(Properties::class);
-
-        $mockProject->expects($this->exactly(2))
-            ->method('getProperties')
-            ->will($this->returnValue($mockProperties));
-
-        $mockProperties->expects($this->at(0))
-            ->method('filter')
-            ->with(1000)
-            ->will($this->returnArgument(0));
-
-        $mockProperties->expects($this->at(1))
-            ->method('filter')
-            ->with($this->file)
-            ->will($this->returnArgument(0));
-
         $this->chgrp
             ->setFile($this->file)
             ->setGroup(1000)
-            ->execute($mockProject);
+            ->execute($this->mockContext);
 
         $this->assertEquals(1000, filegroup($this->file));
     }

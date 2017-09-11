@@ -29,18 +29,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace PantsTest\Task;
+namespace Pants\Test\Task;
 
 use org\bovigo\vfs\vfsStream;
-use Pants\Project;
-use Pants\Property\Properties;
 use Pants\Task\Chown;
-use PHPUnit\Framework\TestCase;
 
 /**
  * @coversDefaultClass \Pants\Task\Chown
  */
-class ChownTest extends TestCase
+class ChownTest extends TaskTestCase
 {
 
     /**
@@ -85,30 +82,24 @@ class ChownTest extends TestCase
 
     /**
      * @covers ::execute
-     * @expectedException \Pants\BuildException
+     * @expectedException \Pants\Task\BuildException
      */
     public function testFileIsRequired()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
         $this->chown
             ->setOwner(1000)
-            ->execute($mockProject);
+            ->execute($this->mockContext);
     }
 
     /**
      * @covers ::execute
-     * @expectedException \Pants\BuildException
+     * @expectedException \Pants\Task\BuildException
      */
     public function testOwnerIsRequired()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
         $this->chown
             ->setFile($this->file)
-            ->execute($mockProject);
+            ->execute($this->mockContext);
     }
 
     /**
@@ -117,30 +108,10 @@ class ChownTest extends TestCase
      */
     public function testOwnerIsSet()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
-        /** @var Properties|\PHPUnit_Framework_MockObject_MockObject $mockProperties */
-        $mockProperties = $this->createMock(Properties::class);
-
-        $mockProject->expects($this->exactly(2))
-            ->method('getProperties')
-            ->will($this->returnValue($mockProperties));
-
-        $mockProperties->expects($this->at(0))
-            ->method('filter')
-            ->with(1000)
-            ->will($this->returnValue(1000));
-
-        $mockProperties->expects($this->at(1))
-            ->method('filter')
-            ->with($this->file)
-            ->will($this->returnArgument(0));
-            
         $this->chown
             ->setFile($this->file)
             ->setOwner(1000)
-            ->execute($mockProject);
+            ->execute($this->mockContext);
 
         $this->assertEquals(1000, fileowner($this->file));
     }

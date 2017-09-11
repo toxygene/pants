@@ -29,20 +29,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace PantsTest\Task;
+namespace Pants\Test\Task;
 
 use org\bovigo\vfs\vfsStream;
-use Pants\Project;
-use Pants\Property\Properties;
 use Pants\Task\TokenFilter;
-use PHPUnit\Framework\TestCase;
 
 /**
  * Unit tests for the token filter task
  *
  * @coversDefaultClass \Pants\Task\TokenFilter
  */
-class TokenFilterTest extends TestCase
+class TokenFilterTest extends TaskTestCase
 {
 
     /**
@@ -85,15 +82,12 @@ class TokenFilterTest extends TestCase
 
     /**
      * @covers ::execute
-     * @expectedException \Pants\BuildException
+     * @expectedException \Pants\Task\BuildException
      */
     public function testFileIsRequired()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
         $this->tokenFilter
-            ->execute($mockProject);
+            ->execute($this->mockContext);
     }
     
     /**
@@ -127,26 +121,11 @@ class TokenFilterTest extends TestCase
      */
     public function testTokensAreReplacedInTheFileOnExecute()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
-        /** @var Properties|\PHPUnit_Framework_MockObject_MockObject $mockProperties */
-        $mockProperties = $this->createMock(Properties::class);
-
-        $mockProject->expects($this->any())
-            ->method('getProperties')
-            ->will($this->returnValue($mockProperties));
-
-        $mockProperties->expects($this->any())
-            ->method('filter')
-            ->with($this->anything())
-            ->will($this->returnArgument(0));
-            
         $this->tokenFilter
             ->setFile($this->file)
             ->addReplacement('asdf', 'fdsa')
             ->addReplacement('qwer', 'rewq')
-            ->execute($mockProject);
+            ->execute($this->mockContext);
 
         $this->assertEquals('fdsa $qwer$', file_get_contents($this->file));
     }

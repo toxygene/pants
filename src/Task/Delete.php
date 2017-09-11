@@ -189,10 +189,10 @@ class Delete implements TaskInterface
     /**
      * Set the fileset to apply the delete to
      *
-     * @param Fileset $fileset
+     * @param FilesetInterface $fileset
      * @return self
      */
-    public function setFileset(Fileset $fileset): self
+    public function setFileset(FilesetInterface $fileset): self
     {
         $this->fileset = $fileset;
         return $this;

@@ -29,20 +29,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace PantsTest\Task;
+namespace Pants\Test\Task;
 
-use InvalidArgumentException;
-use Pants\Project;
-use Pants\Property\Properties;
-use Pants\Target\Target;
-use Pants\Target\Targets;
+use Pants\Target\Executor\ExecutorInterface;
+use Pants\Task\BuildException;
 use Pants\Task\Call;
-use PHPUnit\Framework\TestCase;
+use Pants\Task\TaskInterface;
 
 /**
  * @coversDefaultClass \Pants\Target\Call
  */
-class CallTest extends TestCase
+class CallTest extends TaskTestCase
 {
 
     /**
@@ -74,22 +71,19 @@ class CallTest extends TestCase
 
     /**
      * @covers ::execute
-     * @expectedException \Pants\BuildException
+     * @expectedException \Pants\Task\BuildException
      */
-    public function testTargetIsRequired()
+    public function testExecutingTheTaskWithoutATargetCausesABuildException()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
         $this->task
-            ->execute($mockProject);
+            ->execute($this->mockContext);
     }
 
     /**
      * @covers ::getTarget
      * @covers ::setTarget
      */
-    public function testTargetIsConfigurable()
+    public function testTheTargetCantBeInspectedAndChanged()
     {
         $this->task
             ->setTarget('asdf');
@@ -100,86 +94,53 @@ class CallTest extends TestCase
     /**
      * @covers ::__construct
      * @covers ::execute
-     * @expectedException \InvalidArgumentException
+     * @expectedException \Pants\Task\BuildException
      */
-    public function testAValidTargetIsRequired()
+    public function testExecutingTheTaskWithAnInvalidTargetCausesABuildException()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
+        /** @var ExecutorInterface|\PHPUnit_Framework_MockObject_MockObject $mockExecutor */
+        $mockExecutor = $this->createMock(ExecutorInterface::class);
 
-        /** @var Properties|\PHPUnit_Framework_MockObject_MockObject $mockProperties */
-        $mockProperties = $this->createMock(Properties::class);
+        /** @var TaskInterface|\PHPUnit_Framework_MockObject_MockObject $mockTask */
+        $mockTask = $this->createMock(TaskInterface::class);
 
-        /** @var Targets|\PHPUnit_Framework_MockObject_MockObject $mockTargets */
-        $mockTargets = $this->createMock(Targets::class);
+        $this->mockContext
+            ->expects($this->once())
+            ->method('getExecutor')
+            ->will($this->returnValue($mockExecutor));
 
-        $mockProject->expects($this->once())
-            ->method('getProperties')
-            ->will($this->returnValue($mockProperties));
-
-        $mockProperties->expects($this->once())
-            ->method('filter')
-            ->with('asdf')
-            ->will($this->returnValue('asdf'));
-
-        $mockProject->expects($this->once())
-            ->method('getTargets')
-            ->will($this->returnValue($mockTargets));
-
-        $mockTargets->expects($this->once())
-            ->method('__get')
-            ->with('asdf')
-            ->will($this->throwException(new InvalidArgumentException()));
+        $mockExecutor->expects($this->once())
+            ->method('executeSingle')
+            ->with('asdf', $this->mockContext)
+            ->will($this->throwException(new BuildException('message', $this->mockCurrentTarget, $mockTask)));
 
         $this->task
             ->setTarget('asdf')
-            ->execute($mockProject);
+            ->execute($this->mockContext);
     }
 
     /**
      * @covers ::__construct
      * @covers ::execute
      */
-    public function testRequestedTargetIsExecuted()
+    public function testExecutingTheTaskCausesTheTargetToBeExecuted()
     {
-        /** @var Target|\PHPUnit_Framework_MockObject_MockObject $mockTarget */
-        $mockTarget = $this->createMock(Target::class);
+        /** @var ExecutorInterface|\PHPUnit_Framework_MockObject_MockObject */
+        $mockExecutor = $this->createMock(ExecutorInterface::class);
 
-        /** @var Targets|\PHPUnit_Framework_MockObject_MockObject $mockTargets */
-        $mockTargets = $this->createMock(Targets::class);
+        $this->mockContext
+            ->expects($this->once())
+            ->method('getExecutor')
+            ->will($this->returnValue($mockExecutor));
 
-        /** @var Properties|\PHPUnit_Framework_MockObject_MockObject $mockProperties */
-        $mockProperties = $this->createMock(Properties::class);
-
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
-        $mockTarget->expects($this->once())
-            ->method('execute')
-            ->with($mockProject)
+        $mockExecutor->expects($this->once())
+            ->method('executeSingle')
+            ->with('asdf', $this->mockContext)
             ->will($this->returnSelf());
-
-        $mockTargets->expects($this->once())
-            ->method('__get')
-            ->with('asdf')
-            ->will($this->returnValue($mockTarget));
-
-        $mockProperties->expects($this->once())
-            ->method('filter')
-            ->with('asdf')
-            ->will($this->returnValue('asdf'));
-
-        $mockProject->expects($this->once())
-            ->method('getProperties')
-            ->will($this->returnValue($mockProperties));
-
-        $mockProject->expects($this->once())
-            ->method('getTargets')
-            ->will($this->returnValue($mockTargets));
 
         $this->task
             ->setTarget('asdf')
-            ->execute($mockProject);
+            ->execute($this->mockContext);
     }
 
 }

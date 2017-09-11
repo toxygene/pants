@@ -29,13 +29,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace PantsTest;
+namespace Pants\Test\Target;
 
-use ArrayIterator;
-use Pants\Project;
+use Pants\ContextInterface;
 use Pants\Property\Properties;
+use Pants\Target\Executor\ExecutorInterface;
 use Pants\Target\Target;
-use Pants\Target\Targets;
 use Pants\Task\TaskInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -141,15 +140,15 @@ class TargetTest extends TestCase
             ->method('execute')
             ->will($this->returnValue($mockTask));
 
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
+        /** @var ContextInterface|\PHPUnit_Framework_MockObject_MockObject $mockProject */
+        $mockContext = $this->createMock(ContextInterface::class);
 
         $this->target
             ->getTasks()
             ->add($mockTask);
 
         $this->target
-            ->execute($mockProject);
+            ->execute($mockContext);
     }
 
     /**
@@ -158,8 +157,8 @@ class TargetTest extends TestCase
      */
     public function testTasksAreNotExecutedIfIfIsNotSet()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
+        /** @var ContextInterface|\PHPUnit_Framework_MockObject_MockObject $mockProject */
+        $mockContext = $this->createMock(ContextInterface::class);
 
         /** @var TaskInterface|\PHPUnit_Framework_MockObject_MockObject $mockTask */
         $mockTask = $this->createMock(TaskInterface::class);
@@ -173,7 +172,7 @@ class TargetTest extends TestCase
 
         $this->target
             ->setIf(array('one'))
-            ->execute($mockProject);
+            ->execute($mockContext);
     }
 
     /**
@@ -182,8 +181,8 @@ class TargetTest extends TestCase
      */
     public function testTasksAreNotExecutedIfUnlessIsSet()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
+        /** @var ContextInterface|\PHPUnit_Framework_MockObject_MockObject $mockContext */
+        $mockContext = $this->createMock(ContextInterface::class);
 
         /** @var Properties|\PHPUnit_Framework_MockObject_MockObject $mockProperties */
         $mockProperties = $this->createMock(Properties::class);
@@ -191,17 +190,24 @@ class TargetTest extends TestCase
         /** @var TaskInterface|\PHPUnit_Framework_MockObject_MockObject $mockTask */
         $mockTask = $this->createMock(TaskInterface::class);
 
-        $mockProject->expects($this->any())
+        $mockContext->expects($this->any())
             ->method('getProperties')
             ->will($this->returnValue($mockProperties));
 
-        $mockProperties->expects($this->once())
-            ->method('__get')
+        $mockProperties->expects($this->any())
+            ->method('exists')
+            ->with('one')
+            ->will($this->returnValue(true));
+
+        $mockProperties->expects($this->any())
+            ->method('get')
             ->with('one')
             ->will($this->returnValue(true));
 
         $mockTask->expects($this->never())
-            ->method('execute');
+            ->method('execute')
+            ->with($mockContext)
+            ->will($this->returnSelf());
 
         $this->target
             ->getTasks()
@@ -209,7 +215,7 @@ class TargetTest extends TestCase
 
         $this->target
             ->setUnless(array('one'))
-            ->execute($mockProject);
+            ->execute($mockContext);
     }
     
     /**
@@ -218,32 +224,24 @@ class TargetTest extends TestCase
      */
     public function testDependIsExecuted()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
+        /** @var ContextInterface|\PHPUnit_Framework_MockObject_MockObject $mockContext */
+        $mockContext = $this->createMock(ContextInterface::class);
 
-        /** @var Targets|\PHPUnit_Framework_MockObject_MockObject $mockTargets */
-        $mockTargets = $this->createMock(Targets::class);
+        /** @var ExecutorInterface|\PHPUnit_Framework_MockObject_MockObject $mockExecutor */
+        $mockExecutor = $this->createMock(ExecutorInterface::class);
 
-        /** @var Target|\PHPUnit_Framework_MockObject_MockObject $mockTargets */
-        $mockTarget = $this->createMock(Target::class);
+        $mockContext->expects($this->any())
+            ->method('getExecutor')
+            ->will($this->returnValue($mockExecutor));
 
-        $mockProject->expects($this->any())
-            ->method('getTargets')
-            ->will($this->returnValue($mockTargets));
-
-        $mockTargets->expects($this->once())
-            ->method('__get')
+        $mockExecutor->expects($this->once())
+            ->method('executeSingle')
             ->with('test')
-            ->will($this->returnValue($mockTarget));
-
-        $mockTarget->expects($this->once())
-            ->method('execute')
-            ->with($mockProject)
             ->will($this->returnSelf());
 
         $this->target
             ->setDepends(array('test'))
-            ->execute($mockProject);
+            ->execute($mockContext);
     }
 
 }

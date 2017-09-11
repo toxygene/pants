@@ -29,18 +29,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace PantsTest\Task;
+namespace Pants\Test\Task;
 
-use Pants\Project;
 use Pants\Task\Symlink;
-use PHPUnit\Framework\TestCase;
 
 /**
  * Unit tests for the symlink task
  * 
  * @coversDefaultClass \Pants\Task\Symlink
  */
-class SymlinkTest extends TestCase
+class SymlinkTest extends TaskTestCase
 {
 
     /**
@@ -72,29 +70,23 @@ class SymlinkTest extends TestCase
     
     /**
      * @covers ::execute
-     * @expectedException \Pants\BuildException
+     * @expectedException \Pants\Task\BuildException
      */
     public function testMissingLinkThrowsException()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
         $this->task
-            ->execute($mockProject);
+            ->execute($this->mockContext);
     }
     
     /**
      * @covers ::execute
-     * @expectedException \Pants\BuildException
+     * @expectedException \Pants\Task\BuildException
      */
     public function testMissingTargetThrowsException()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-        
         $this->task
             ->setLink('test')
-            ->execute($mockProject);
+            ->execute($this->mockContext);
     }
     
     /**

@@ -29,17 +29,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace PantsTest\Task;
+namespace Pants\Test\Task;
 
-use Pants\Project;
-use Pants\Property\Properties;
 use Pants\Task\Execute;
-use PHPUnit\Framework\TestCase;
 
 /**
  * @coversDefaultClass \Pants\Task\Execute
  */
-class ExecuteTest extends TestCase
+class ExecuteTest extends TaskTestCase
 {
 
     /**
@@ -70,28 +67,23 @@ class ExecuteTest extends TestCase
 
     /**
      * @covers ::execute
-     * @expectedException \Pants\BuildException
+     * @expectedException \Pants\Task\BuildException
      */
     public function testCommandIsRequired()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
         $this->task
-            ->execute($mockProject);
+            ->execute($this->mockContext);
     }
 
     /**
      * @covers ::execute
-     * @expectedException \Pants\BuildException
+     * @expectedException \Pants\Task\BuildException
      */
     public function testFailureThrowsABuildException()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
         $this->task
-            ->execute($mockProject);
+            ->setCommand('asdf')
+            ->execute($this->mockContext);
     }
 
     /**
@@ -99,69 +91,56 @@ class ExecuteTest extends TestCase
      */
     public function testExecuteRunsCommand()
     {
+        $this->markTestIncomplete('Implement storing stdout to property');
+
+        // todo store output
+
         $directory = __DIR__ . '/_files';
-        $command = 'exit'; // todo does this work on windows?
+        $command = 'echo "test"'; // todo does this work on windows?
 
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
-        /** @var Properties|\PHPUnit_Framework_MockObject_MockObject $mockProperties */
-        $mockProperties = $this->createMock(Properties::class);
-
-        $mockProject->expects($this->exactly(2))
-            ->method('getProperties')
-            ->will($this->returnValue($mockProperties));
-
-        $mockProperties->expects($this->at(0))
-            ->method('filter')
-            ->with($command)
-            ->will($this->returnArgument(0));
-
-        $mockProperties->expects($this->at(1))
-            ->method('filter')
-            ->with($directory)
-            ->will($this->returnArgument(0));
+        $this->mockProperties
+            ->expects($this->once())
+            ->method('add')
+            ->with('stdout', 'test');
 
         $this->task
             ->setCommand($command)
             ->setDirectory($directory)
-            ->execute($mockProject);
+            ->setStdoutPropertyName('stdout')
+            ->execute($this->mockContext);
     }
     
     /**
      * @covers ::__construct
      * @covers ::execute
-     * @expectedException \Pants\Task\Execute\CommandReturnedErrorException
+     * @expectedException \Pants\Task\BuildException
      */
     public function testFailedCommandThrowsException()
     {
+        $this->markTestIncomplete('Implement storing stderr and return value to property');
+
+        // todo store stderr
+        // todo store return value
+
         $directory = __DIR__ . '/_files';
         $command = 'exit 1'; // todo does this work on windows?
 
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
+        $this->mockProperties
+            ->expects($this->once())
+            ->method('add')
+            ->with('stderr', 'error');
 
-        /** @var Properties|\PHPUnit_Framework_MockObject_MockObject $mockProperties */
-        $mockProperties = $this->createMock(Properties::class);
-
-        $mockProject->expects($this->exactly(2))
-            ->method('getProperties')
-            ->will($this->returnValue($mockProperties));
-
-        $mockProperties->expects($this->at(0))
-            ->method('filter')
-            ->with($command)
-            ->will($this->returnArgument(0));
-
-        $mockProperties->expects($this->at(1))
-            ->method('filter')
-            ->with($directory)
-            ->will($this->returnArgument(0));
+        $this->mockProperties
+            ->expects($this->once())
+            ->method('add')
+            ->with('return value', 1);
 
         $this->task
             ->setCommand($command)
             ->setDirectory($directory)
-            ->execute($mockProject);
+            ->setStderrPropertyName('stderr')
+            ->setReturnValuePropertyName('return value')
+            ->execute($this->mockContext);
     }
     
     /**

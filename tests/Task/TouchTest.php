@@ -29,20 +29,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace PantsTest\Task;
+namespace Pants\Test\Task;
 
 use org\bovigo\vfs\vfsStream;
-use Pants\Project;
-use Pants\Property\Properties;
 use Pants\Task\Touch;
-use PHPUnit\Framework\TestCase;
 
 /**
  * Unit tests for the touch task
  *
  * @covers \Pants\Task\Touch
  */
-class TouchTest extends TestCase
+class TouchTest extends TaskTestCase
 {
 
     /**
@@ -109,15 +106,12 @@ class TouchTest extends TestCase
 
     /**
      * @covers ::execute
-     * @expectedException \Pants\BuildException
+     * @expectedException \Pants\Task\BuildException
      */
     public function testFileIsRequired()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
         $this->touch
-            ->execute($mockProject);
+            ->execute($this->mockContext);
     }
 
     /**
@@ -126,31 +120,16 @@ class TouchTest extends TestCase
      */
     public function testTouchingANonExistentFileCreatesItAndSetsTheModifiedTime()
     {
-        $file = vfsStream::url('root') . DIRECTORY_SEPARATOR . 'two';
+        $path = vfsStream::url('root') . DIRECTORY_SEPARATOR . 'two';
         $time = time();
 
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
-        /** @var Properties|\PHPUnit_Framework_MockObject_MockObject $mockProperties */
-        $mockProperties = $this->createMock(Properties::class);
-
-        $mockProject->expects($this->exactly(2))
-            ->method('getProperties')
-            ->will($this->returnValue($mockProperties));
-
-        $mockProperties->expects($this->any())
-            ->method('filter')
-            ->with($this->anything())
-            ->will($this->returnArgument(0));
-
         $this->touch
-            ->setPath($file)
+            ->setPath($path)
             ->setTime($time)
-            ->execute($mockProject);
+            ->execute($this->mockContext);
 
-        $this->assertTrue(file_exists($file));
-        $this->assertEquals($time, filemtime($file));
+        $this->assertTrue(file_exists($path));
+        $this->assertEquals($time, filemtime($path));
     }
 
 }

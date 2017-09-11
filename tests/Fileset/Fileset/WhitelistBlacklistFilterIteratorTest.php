@@ -29,12 +29,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace PantsTest\FileSet;
+namespace Pants\Test\Fileset\Fileset;
 
+use ArrayIterator;
 use FilesystemIterator;
 use org\bovigo\vfs\vfsStream;
-use Pants\FileSet\Fileset;
-use Pants\FileSet\Fileset\MatcherInterface;
+use Pants\Fileset\Fileset\MatcherInterface;
+use Pants\Fileset\Fileset\Matchers;
+use Pants\Fileset\Fileset\WhitelistBlacklistFilterIterator;
 use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
 
@@ -87,14 +89,24 @@ class WhitelistBlacklistFilterIteratorTest extends TestCase
      */
     public function testBlacklistMatchersCanBeSet()
     {
-        $matcher1 = $this->createMock(Matcher::class);
-        $matcher2 = $this->createMock(Matcher::class);
+        /** @var MatcherInterface|\PHPUnit_Framework_MockObject_MockObject $matcher1 */
+        $matcher1 = $this->createMock(MatcherInterface::class);
 
-        $this->filter->setBlacklistMatchers(array($matcher1, $matcher2));
+        /** @var MatcherInterface|\PHPUnit_Framework_MockObject_MockObject $matcher2 */
+        $matcher2 = $this->createMock(MatcherInterface::class);
 
-        $this->assertCount(2, $this->filter->getBlacklistMatchers());
-        $this->assertContains($matcher1, $this->filter->getBlacklistMatchers());
-        $this->assertContains($matcher2, $this->filter->getBlacklistMatchers());
+        /** @var Matchers|\PHPUnit_Framework_MockObject_MockObject $matchers */
+        $matchers = $this->createMock(Matchers::class);
+
+        $matchers->expects($this->any())
+            ->method('getIterator')
+            ->will($this->returnValue(new ArrayIterator([$matcher1, $matcher2])));
+
+        $this->filter->setBlacklist($matchers);
+
+        $this->assertCount(2, $this->filter->getBlacklist());
+        $this->assertContains($matcher1, $this->filter->getBlacklist());
+        $this->assertContains($matcher2, $this->filter->getBlacklist());
     }
 
     /**
@@ -103,14 +115,24 @@ class WhitelistBlacklistFilterIteratorTest extends TestCase
      */
     public function testWhitelistMatchersCanBeSet()
     {
-        $matcher1 = $this->createMock(Matcher::class);
-        $matcher2 = $this->createMock(Matcher::class);
+        /** @var MatcherInterface|\PHPUnit_Framework_MockObject_MockObject $matcher1 */
+        $matcher1 = $this->createMock(MatcherInterface::class);
 
-        $this->filter->setWhitelistMatchers(array($matcher1, $matcher2));
+        /** @var MatcherInterface|\PHPUnit_Framework_MockObject_MockObject $matcher2 */
+        $matcher2 = $this->createMock(MatcherInterface::class);
 
-        $this->assertCount(2, $this->filter->getWhitelistMatchers());
-        $this->assertContains($matcher1, $this->filter->getWhitelistMatchers());
-        $this->assertContains($matcher2, $this->filter->getWhitelistMatchers());
+        /** @var Matchers|\PHPUnit_Framework_MockObject_MockObject $matchers */
+        $matchers = $this->createMock(Matchers::class);
+
+        $matchers->expects($this->any())
+            ->method('getIterator')
+            ->will($this->returnValue(new ArrayIterator([$matcher1, $matcher2])));
+
+        $this->filter->setWhitelist($matchers);
+
+        $this->assertCount(2, $this->filter->getWhitelist());
+        $this->assertContains($matcher1, $this->filter->getWhitelist());
+        $this->assertContains($matcher2, $this->filter->getWhitelist());
     }
 
     /**
@@ -126,41 +148,57 @@ class WhitelistBlacklistFilterIteratorTest extends TestCase
      */
     public function testFilesAreAcceptedIfTheyAreIncludedAndNotExcluded()
     {
-        $whitelist = $this->createMock(Matcher::class);
+        /** @var MatcherInterface|\PHPUnit_Framework_MockObject_MockObject $mockWhitelistMatcher */
+        $mockWhitelistMatcher = $this->createMock(MatcherInterface::class);
 
-        $whitelist->expects($this->at(0))
+        $mockWhitelistMatcher->expects($this->at(0))
             ->method('match')
             ->will($this->returnValue(true));
 
-        $whitelist->expects($this->at(1))
+        $mockWhitelistMatcher->expects($this->at(1))
             ->method('match')
             ->will($this->returnValue(true));
 
-        $whitelist->expects($this->at(2))
+        $mockWhitelistMatcher->expects($this->at(2))
             ->method('match')
             ->will($this->returnValue(false));
 
-        $whitelist->expects($this->at(3))
+        $mockWhitelistMatcher->expects($this->at(3))
             ->method('match')
             ->will($this->returnValue(true));
-                    
-        $blacklist = $this->createMock(Matcher::class);
 
-        $blacklist->expects($this->at(0))
+        /** @var Matchers|\PHPUnit_Framework_MockObject_MockObject $mockWhitelist */
+        $mockWhitelist = $this->createMock(Matchers::class);
+
+        $mockWhitelist->expects($this->any())
+            ->method('getIterator')
+            ->will($this->returnValue(new ArrayIterator([$mockWhitelistMatcher])));
+
+        /** @var MatcherInterface|\PHPUnit_Framework_MockObject_MockObject $mockBlacklistMatcher */
+        $mockBlacklistMatcher = $this->createMock(MatcherInterface::class);
+
+        $mockBlacklistMatcher->expects($this->at(0))
             ->method('match')
             ->will($this->returnValue(false));
             
-        $blacklist->expects($this->at(1))
+        $mockBlacklistMatcher->expects($this->at(1))
             ->method('match')
             ->will($this->returnValue(true));
             
-        $blacklist->expects($this->at(2))
+        $mockBlacklistMatcher->expects($this->at(2))
             ->method('match')
             ->will($this->returnValue(false));
+
+        /** @var Matchers|\PHPUnit_Framework_MockObject_MockObject $mockBlacklist */
+        $mockBlacklist = $this->createMock(Matchers::class);
+
+        $mockBlacklist->expects($this->any())
+            ->method('getIterator')
+            ->will($this->returnValue(new ArrayIterator([$mockBlacklistMatcher])));
 
         $this->filter
-            ->setBlacklistMatchers(array($blacklist))
-            ->setWhitelistMatchers(array($whitelist));
+            ->setBlacklist($mockBlacklist)
+            ->setWhitelist($mockWhitelist);
 
         $results = iterator_to_array($this->filter);
 
@@ -174,26 +212,34 @@ class WhitelistBlacklistFilterIteratorTest extends TestCase
      */
     public function testFilesAreRejectedIfTheyAreExcluded()
     {
-        $blacklist = $this->createMock(Matcher::class);
+        /** @var MatcherInterface|\PHPUnit_Framework_MockObject_MockObject $mockBlacklistMatcher */
+        $mockBlacklistMatcher = $this->createMock(MatcherInterface::class);
 
-        $blacklist->expects($this->at(0))
+        $mockBlacklistMatcher->expects($this->at(0))
             ->method('match')
             ->will($this->returnValue(true));
 
-        $blacklist->expects($this->at(1))
+        $mockBlacklistMatcher->expects($this->at(1))
             ->method('match')
             ->will($this->returnValue(true));
 
-        $blacklist->expects($this->at(2))
+        $mockBlacklistMatcher->expects($this->at(2))
             ->method('match')
             ->will($this->returnValue(false));
 
-        $blacklist->expects($this->at(3))
+        $mockBlacklistMatcher->expects($this->at(3))
             ->method('match')
             ->will($this->returnValue(true));
+
+        /** @var Matchers|\PHPUnit_Framework_MockObject_MockObject $mockBlacklist */
+        $mockBlacklist = $this->createMock(Matchers::class);
+
+        $mockBlacklist->expects($this->any())
+            ->method('getIterator')
+            ->will($this->returnValue(new ArrayIterator([$mockBlacklistMatcher])));
             
         $this->filter
-            ->setBlacklistMatchers(array($blacklist));
+            ->setBlacklist($mockBlacklist);
 
         $results = iterator_to_array($this->filter);
         

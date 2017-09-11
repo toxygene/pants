@@ -29,18 +29,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace PantsTest\Task;
+namespace Pants\Test\Task;
 
 use org\bovigo\vfs\vfsStream;
-use Pants\Project;
-use Pants\Property\Properties;
 use Pants\Task\Copy;
-use PHPUnit\Framework\TestCase;
 
 /**
  * @coversDefaultClass \Pants\Task\Copy
  */
-class CopyTest extends TestCase
+class CopyTest extends TaskTestCase
 {
 
     /**
@@ -84,30 +81,24 @@ class CopyTest extends TestCase
 
     /**
      * @covers ::execute
-     * @expectedException \Pants\BuildException
+     * @expectedException \Pants\Task\BuildException
      */
     public function testFileIsRequired()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
         $this->task
             ->setDestination($this->file . '_1')
-            ->execute($mockProject);
+            ->execute($this->mockContext);
     }
 
     /**
      * @covers ::execute
-     * @expectedException \Pants\BuildException
+     * @expectedException \Pants\Task\BuildException
      */
     public function testDestinationIsRequired()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
         $this->task
             ->setSource($this->file)
-            ->execute($mockProject);
+            ->execute($this->mockContext);
     }
 
     /**
@@ -118,43 +109,11 @@ class CopyTest extends TestCase
     {
         $source = $this->file;
         $destination = $this->file . '_1';
-        
-//        $this->properties
-//            ->expects($this->at(0))
-//            ->method('filter')
-//            ->with($source)
-//            ->will($this->returnArgument(0));
-//
-//        $this->properties
-//            ->expects($this->at(1))
-//            ->method('filter')
-//            ->with($destination)
-//            ->will($this->returnArgument(0));
-
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
-        /** @var Properties|\PHPUnit_Framework_MockObject_MockObject $mockProperties */
-        $mockProperties = $this->createMock(Properties::class);
-
-        $mockProject->expects($this->exactly(2))
-            ->method('getProperties')
-            ->will($this->returnValue($mockProperties));
-
-        $mockProperties->expects($this->at(0))
-            ->method('filter')
-            ->with($source)
-            ->will($this->returnArgument(0));
-
-        $mockProperties->expects($this->at(1))
-            ->method('filter')
-            ->with($destination)
-            ->will($this->returnArgument(0));
 
         $this->task
             ->setSource($source)
             ->setDestination($destination)
-            ->execute($mockProject);
+            ->execute($this->mockContext);
 
         $this->assertTrue(file_exists($destination));
         $this->assertEquals('testing', file_get_contents($destination));

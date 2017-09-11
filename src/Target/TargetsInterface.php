@@ -43,11 +43,11 @@ interface TargetsInterface
     /**
      * Add a target
      *
-     * @param Target $target
+     * @param TargetInterface $target
      * @return self
      * @throws InvalidArgumentException
      */
-    public function add(Target $target): self;
+    public function add(TargetInterface $target): self;
 
     /**
      * Check if a target exists

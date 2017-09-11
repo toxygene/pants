@@ -29,17 +29,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace PantsTest\Task;
+namespace Pants\Test\Task;
 
-use Pants\Project;
-use Pants\Property\Properties;
 use Pants\Task\Chdir;
-use PHPUnit\Framework\TestCase;
 
 /**
  * @coversDefaultClass \Pants\Task\Chdir
  */
-class ChdirTest extends TestCase
+class ChdirTest extends TaskTestCase
 {
 
     /**
@@ -94,42 +91,23 @@ class ChdirTest extends TestCase
 
     /**
      * @covers ::execute
-     * @expectedException \Pants\BuildException
+     * @expectedException \Pants\Task\BuildException
      */
     public function testDirectoryIsRequired()
     {
-        $mockProject = $this->createMock(Project::class);
-
         $this->task
-            ->execute($mockProject);
+            ->execute($this->mockContext);
     }
     
     /**
      * @covers ::execute
-     * @expectedException \PHPUnit\Framework\Error\Warning
+     * @expectedException \Pants\Task\BuildException
      */
     public function testChdirToInvalidDirectoryThrowsErrorException()
     {
-        $directory = '/8pa8pvoiaKVRa8ij4Da4a90uv89';
-
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
-        /** @var Properties|\PHPUnit_Framework_MockObject_MockObject $mockProperties */
-        $mockProperties = $this->createMock(Properties::class);
-
-        $mockProject->expects($this->once())
-            ->method('getProperties')
-            ->will($this->returnValue($mockProperties));
-
-        $mockProperties->expects($this->once())
-            ->method('filter')
-            ->with($directory)
-            ->will($this->returnValue($directory));
-
         $this->task
-            ->setDirectory($directory)
-            ->execute($mockProject);
+            ->setDirectory('/8pa8pvoiaKVRa8ij4Da4a90uv89')
+            ->execute($this->mockContext);
     }
     
     /**
@@ -139,27 +117,12 @@ class ChdirTest extends TestCase
     public function testChdirChangesTheCurrentWorkingDirectory()
     {
         $directory = __DIR__ . '/_files';
-
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
-        /** @var Properties|\PHPUnit_Framework_MockObject_MockObject $mockProperties */
-        $mockProperties = $this->createMock(Properties::class);
-
-        $mockProject->expects($this->once())
-            ->method('getProperties')
-            ->will($this->returnValue($mockProperties));
-
-        $mockProperties->expects($this->once())
-            ->method('filter')
-            ->with($directory)
-            ->will($this->returnValue($directory));
     
         $this->task
             ->setDirectory($directory)
-            ->execute($mockProject);
+            ->execute($this->mockContext);
             
-        $this->assertEquals(realPath(__DIR__ . '/_files'), getcwd());
+        $this->assertEquals(realPath($directory), getcwd());
     }
 
 }

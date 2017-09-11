@@ -35,8 +35,8 @@ namespace Pants\Task;
 
 use ErrorException;
 use JMS\Serializer\Annotation as JMS;
-use function Pale\run;
 use Pants\ContextInterface;
+use function Pale\run;
 
 /**
  * Replace tokens in file(s) task
@@ -154,7 +154,7 @@ class TokenFilter implements TaskInterface
                     'Replacing search "%s" with value "%s" in contents "%s"',
                     $search,
                     $value,
-                    $context
+                    $contents
                 )
             );
 

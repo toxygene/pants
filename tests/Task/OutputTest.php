@@ -29,17 +29,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace PantsTest\Task;
+namespace Pants\Test\Task;
 
-use Pants\Project;
-use Pants\Property\Properties;
 use Pants\Task\Output;
-use PHPUnit\Framework\TestCase;
 
 /**
  * @coversDefaultClass \Pants\Task\Output
  */
-class OutputTest extends TestCase
+class OutputTest extends TaskTestCase
 {
 
     /**
@@ -80,15 +77,12 @@ class OutputTest extends TestCase
 
     /**
      * @covers ::execute
-     * @expectedException \Pants\BuildException
+     * @expectedException \Pants\Task\BuildException
      */
     public function testMessageIsRequired()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
         $this->task
-            ->execute($mockProject);
+            ->execute($this->mockContext);
     }
 
     /**
@@ -96,26 +90,11 @@ class OutputTest extends TestCase
      */
     public function testMessageIsPrintedOnExecute()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
-        /** @var Properties|\PHPUnit_Framework_MockObject_MockObject $mockProperties */
-        $mockProperties = $this->createMock(Properties::class);
-
-        $mockProject->expects($this->any())
-            ->method('getProperties')
-            ->will($this->returnValue($mockProperties));
-
-        $mockProperties->expects($this->any())
-            ->method('filter')
-            ->with($this->anything())
-            ->will($this->returnArgument(0));
-
         ob_start();
 
         $this->task
             ->setMessage('one')
-            ->execute($mockProject);
+            ->execute($this->mockContext);
 
         $output = ob_get_contents();
 

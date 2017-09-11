@@ -135,11 +135,15 @@ class Properties implements PropertiesInterface
     /**
      * {@inheritdoc}
      */
-    public function remove(string $key): PropertiesInterface
+    public function remove(string $name): PropertiesInterface
     {
-        if (isset($this->properties[$key])) {
-            unset($this->properties[$key]);
+        $filteredName = $this->filter($name);
+
+        if (!isset($this->properties[$filteredName])) {
+            throw new InvalidArgumentException();
         }
+
+        unset($this->properties[$filteredName]);
 
         return $this;
     }

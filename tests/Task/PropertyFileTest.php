@@ -29,17 +29,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace PantsTest\Task;
+namespace Pants\Test\Task;
 
-use Pants\Project;
-use Pants\Property\Properties;
 use Pants\Task\PropertyFile;
-use PHPUnit\Framework\TestCase;
 
 /**
  * @coversDefaultClass \Pants\Task\PropertyFile
  */
-class PropertyFileTest extends TestCase
+class PropertyFileTest extends TaskTestCase
 {
 
     /**
@@ -70,15 +67,12 @@ class PropertyFileTest extends TestCase
 
     /**
      * @covers ::execute
-     * @expectedException \Pants\BuildException
+     * @expectedException \Pants\Task\BuildException
      */
     public function testFileIsRequired()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
         $this->task
-            ->execute($mockProject);
+            ->execute($this->mockContext);
     }
 
     /**
@@ -86,36 +80,27 @@ class PropertyFileTest extends TestCase
      */
     public function testPropertiesAreAdded()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
+        $this->mockProperties
+            ->expects($this->at(3))
+            ->method('add')
+            ->with('one.two', 'three')
+            ->will($this->returnSelf());
 
-        /** @var Properties|\PHPUnit_Framework_MockObject_MockObject $mockProperties */
-        $mockProperties = $this->createMock(Properties::class);
+        $this->mockProperties
+            ->expects($this->at(6))
+            ->method('add')
+            ->with('four.five', 'six')
+            ->will($this->returnSelf());
 
-        $mockProject->expects($this->any())
-            ->method('getProperties')
-            ->will($this->returnValue($mockProperties));
-
-        $mockProperties->expects($this->any())
-            ->method('filter')
-            ->with($this->anything())
-            ->will($this->returnArgument(0));
-
-        $mockProperties->expects($this->at(3))
-            ->method('__set')
-            ->with('one.two', 'three');
-
-        $mockProperties->expects($this->at(6))
-            ->method('__set')
-            ->with('four.five', 'six');
-
-        $mockProperties->expects($this->at(9))
-            ->method('__set')
-            ->with('seven.eight', '${one.two}');
+        $this->mockProperties
+            ->expects($this->at(9))
+            ->method('add')
+            ->with('seven.eight', '${one.two}')
+            ->will($this->returnSelf());
 
         $this->task
             ->setFile(__DIR__ . '/_files/properties-1.ini')
-            ->execute($mockProject);
+            ->execute($this->mockContext);
     }
 
 }

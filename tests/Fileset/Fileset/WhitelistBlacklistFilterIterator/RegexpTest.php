@@ -29,12 +29,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace PantsTest\FileSet\WhitelistBlacklistFilterIterator;
+namespace Pants\Test\Fileset\Fileset\WhitelistBlacklistFilterIterator;
 
 use org\bovigo\vfs\vfsStream;
+use Pants\Fileset\Fileset\Regexp;
 use PHPUnit\Framework\TestCase;
 use SplFileInfo;
-use Pants\FileSet\Fileset\Regexp;
 
 /**
  * Unit tests for the regex matcher
@@ -58,7 +58,7 @@ class RegexpTest extends TestCase
     {
         parent::setUp();
 
-        $this->matcher = new Regexp('test');
+        $this->matcher = new Regexp();
         
         vfsStream::setup('root', null, array(
             'one' => array(
@@ -87,7 +87,7 @@ class RegexpTest extends TestCase
      */
     public function testPatternCanBeSet()
     {
-        $this->assertEquals('test', $this->matcher->getPattern());
+        $this->assertNull($this->matcher->getPattern());
         
         $this->matcher
             ->setPattern('asdf');
@@ -101,24 +101,21 @@ class RegexpTest extends TestCase
     public function testRegexpIsComparedToSubjectToDetermineMatch()
     {
         $this->matcher
-            ->setBaseDirectory(vfsStream::url('one/two'))
             ->setPattern('#^asdf$#');
 
-        $this->assertTrue($this->matcher->match(new SplFileInfo(vfsStream::url('one/two/asdf'))));
-        $this->assertFalse($this->matcher->match(new SplFileInfo(vfsStream::url('one/two/qwerty'))));
-    }
-    
-    /**
-     * @covers ::getBaseDirectory
-     * @covers ::setBaseDirectory
-     */
-    public function testBaseDirectoryCanBeSet()
-    {
-        $this->matcher
-            ->setBaseDirectory('test');
+        $this->assertTrue(
+            $this->matcher->match(
+                new SplFileInfo(vfsStream::url('one/two/asdf')),
+                vfsStream::url('one/two')
+            )
+        );
 
-        $this->assertEquals('test', $this->matcher->getBaseDirectory());
+        $this->assertFalse(
+            $this->matcher->match(
+                new SplFileInfo(vfsStream::url('one/two/qwerty')),
+                vfsStream::url('one/two')
+            )
+        );
     }
-    
 
 }

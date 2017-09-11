@@ -31,13 +31,11 @@
 
 namespace PantsTest;
 
-use ArrayIterator;
+use Pants\ContextInterface;
 use Pants\Project;
-use Pants\Property\Properties;
+use Pants\Property\PropertiesInterface;
 use Pants\Target\Target;
-use Pants\Target\Targets;
 use Pants\Task\TaskInterface;
-use Pants\Task\Tasks;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -73,17 +71,6 @@ class ProjectTest extends TestCase
     }
 
     /**
-     * @covers ::getDefault
-     * @covers ::setDefault
-     */
-    public function testDefaultCanBeSet()
-    {
-        $this->project->setDefault('test');
-
-        $this->assertEquals('test', $this->project->getDefault());
-    }
-
-    /**
      * @covers ::getProperties
      */
     public function testPropertiesCanBeRetrieved()
@@ -101,7 +88,7 @@ class ProjectTest extends TestCase
 
         $task->expects($this->once())
             ->method('execute')
-            ->with($this->project)
+            ->with($this->isInstanceOf(ContextInterface::class))
             ->will($this->returnSelf());
 
         $this->project
@@ -126,32 +113,19 @@ class ProjectTest extends TestCase
 
         $target->expects($this->once())
             ->method('execute')
-            ->with($this->project)
+            ->with($this->isInstanceOf(ContextInterface::class))
             ->will($this->returnSelf());
+
+        $this->project
+            ->getProperties()
+            ->add(PropertiesInterface::DEFAULT_TARGET_NAME, 'default');
 
         $this->project
             ->getTargets()
             ->add($target);
 
         $this->project
-            ->setDefault('default')
             ->execute();
-    }
-
-    /**
-     * @covers ::execute
-     */
-    public function testBaseDirChangesTheCurrentWorkingDirectory()
-    {
-        $cwd = getcwd();
-
-        $this->project
-            ->setBaseDirectory('/')
-            ->execute();
-
-        $this->assertEquals('/', getcwd());
-
-        chdir($cwd);
     }
 
 }

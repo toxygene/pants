@@ -29,17 +29,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace PantsTest\Task;
+namespace Pants\Test\Task;
 
-use Pants\Project;
-use Pants\Property\Properties;
 use Pants\Task\PhpScript;
-use PHPUnit\Framework\TestCase;
 
 /**
  * @coversDefaultClass \Pants\Task\PhpScript
  */
-class PhpScriptTest extends TestCase
+class PhpScriptTest extends TaskTestCase
 {
 
     /**
@@ -80,15 +77,12 @@ class PhpScriptTest extends TestCase
 
     /**
      * @covers ::execute
-     * @expectedException \Pants\BuildException
+     * @expectedException \Pants\Task\BuildException
      */
     public function testFileIsRequired()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
         $this->task
-            ->execute($mockProject);
+            ->execute($this->mockContext);
     }
 
     /**
@@ -96,28 +90,13 @@ class PhpScriptTest extends TestCase
      */
     public function testScriptIsIncludedOnExecute()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
-        /** @var Properties|\PHPUnit_Framework_MockObject_MockObject $mockProperties */
-        $mockProperties = $this->createMock(Properties::class);
-
-        $mockProject->expects($this->any())
-            ->method('getProperties')
-            ->will($this->returnValue($mockProperties));
-
-        $mockProperties->expects($this->any())
-            ->method('filter')
-            ->with($this->anything())
-            ->will($this->returnArgument(0));
-        
         $this->task
             ->setFile(__DIR__ . '/_files/php-script-1.php');
 
         ob_start();
 
         $this->task
-            ->execute($mockProject);
+            ->execute($this->mockContext);
 
         $output = ob_get_contents();
 

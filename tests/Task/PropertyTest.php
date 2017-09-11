@@ -29,17 +29,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace PantsTest\Task;
+namespace Pants\Test\Task;
 
-use Pants\Project;
-use Pants\Property\Properties;
 use Pants\Task\Property;
-use PHPUnit\Framework\TestCase;
 
 /**
  * @coversDefaultClass \Pants\Task\Property
  */
-class PropertyTest extends TestCase
+class PropertyTest extends TaskTestCase
 {
 
     /**
@@ -94,16 +91,13 @@ class PropertyTest extends TestCase
 
     /**
      * @covers ::execute
-     * @expectedException \Pants\BuildException
+     * @expectedException \Pants\Task\BuildException
      */
     public function testNameIsRequired()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
         $this->task
             ->setValue('value')
-            ->execute($mockProject);
+            ->execute($this->mockContext);
     }
 
     /**
@@ -111,29 +105,16 @@ class PropertyTest extends TestCase
      */
     public function testPropertiesAreSetOnTheProjectOnExecute()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
+        $this->mockProperties
+            ->expects($this->once())
+            ->method('add')
+            ->with('one', 'two')
+            ->will($this->returnSelf());
 
-        /** @var Properties|\PHPUnit_Framework_MockObject_MockObject $mockProperties */
-        $mockProperties = $this->createMock(Properties::class);
-
-        $mockProject->expects($this->any())
-            ->method('getProperties')
-            ->will($this->returnValue($mockProperties));
-
-        $mockProperties->expects($this->any())
-            ->method('filter')
-            ->with($this->anything())
-            ->will($this->returnArgument(0));
-
-        $mockProperties->expects($this->once())
-            ->method('__set')
-            ->with('one', 'two');
-            
         $this->task
             ->setName('one')
             ->setValue('two')
-            ->execute($mockProject);
+            ->execute($this->mockContext);
     }
 
 }

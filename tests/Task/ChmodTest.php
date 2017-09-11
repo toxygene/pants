@@ -29,18 +29,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace PantsTest\Task;
+namespace Pants\Test\Task;
 
 use org\bovigo\vfs\vfsStream;
-use Pants\Project;
-use Pants\Property\Properties;
 use Pants\Task\Chmod;
-use PHPUnit\Framework\TestCase;
 
 /**
  * @coversDefaultClass \Pants\Task\Chmod
  */
-class ChmodTest extends TestCase
+class ChmodTest extends TaskTestCase
 {
 
     /**
@@ -67,7 +64,6 @@ class ChmodTest extends TestCase
         ));
 
         $this->file = vfsStream::url('root/one');
-
         $this->chmod = new Chmod();
     }
 
@@ -85,30 +81,24 @@ class ChmodTest extends TestCase
 
     /**
      * @covers ::execute
-     * @expectedException \Pants\BuildException
+     * @expectedException \Pants\Task\BuildException
      */
     public function testFileIsRequired()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
         $this->chmod
             ->setMode('0777')
-            ->execute($mockProject);
+            ->execute($this->mockContext);
     }
 
     /**
      * @covers ::execute
-     * @expectedException \Pants\BuildException
+     * @expectedException \Pants\Task\BuildException
      */
     public function testModeIsRequired()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
         $this->chmod
             ->setFile($this->file)
-            ->execute($mockProject);
+            ->execute($this->mockContext);
     }
 
     /**
@@ -129,30 +119,10 @@ class ChmodTest extends TestCase
      */
     public function testPermissionsIsSet()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
-        /** @var Properties|\PHPUnit_Framework_MockObject_MockObject $mockProperties */
-        $mockProperties = $this->createMock(Properties::class);
-
-        $mockProject->expects($this->exactly(2))
-            ->method('getProperties')
-            ->will($this->returnValue($mockProperties));
-
-        $mockProperties->expects($this->at(0))
-            ->method('filter')
-            ->with(0654)
-            ->will($this->returnValue(0654));
-
-        $mockProperties->expects($this->at(1))
-            ->method('filter')
-            ->with($this->file)
-            ->will($this->returnArgument(0));
-
         $this->chmod
             ->setFile($this->file)
             ->setMode(0654)
-            ->execute($mockProject);
+            ->execute($this->mockContext);
 
         $this->assertTrue((fileperms($this->file) & 0777) === 0654);
     }
@@ -163,30 +133,10 @@ class ChmodTest extends TestCase
      */
     public function testPermissionsAsAStringCanBeSet()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
-        /** @var Properties|\PHPUnit_Framework_MockObject_MockObject $mockProperties */
-        $mockProperties = $this->createMock(Properties::class);
-
-        $mockProject->expects($this->exactly(2))
-            ->method('getProperties')
-            ->will($this->returnValue($mockProperties));
-
-        $mockProperties->expects($this->at(0))
-            ->method('filter')
-            ->with('654')
-            ->will($this->returnArgument(0));
-
-        $mockProperties->expects($this->at(1))
-            ->method('filter')
-            ->with($this->file)
-            ->will($this->returnArgument(0));
-
         $this->chmod
             ->setFile($this->file)
             ->setMode('654')
-            ->execute($mockProject);
+            ->execute($this->mockContext);
 
         $this->assertTrue((fileperms($this->file) & 0777) === 0654);
     }

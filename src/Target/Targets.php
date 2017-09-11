@@ -34,7 +34,6 @@
 namespace Pants\Target;
 
 use InvalidArgumentException;
-use Pants\Project;
 
 /**
  * Standard targets container
@@ -54,11 +53,11 @@ class Targets implements TargetsInterface
     /**
      * {@inheritdoc}
      */
-    public function add(Target $target): TargetsInterface
+    public function add(TargetInterface $target): TargetsInterface
     {
         $name = $target->getName();
 
-        if (isset($this->{$name})) {
+        if ($this->exists($name)) {
             throw new InvalidArgumentException("A target already exists with the name of '{$name}'");
         }
 
@@ -80,7 +79,7 @@ class Targets implements TargetsInterface
      */
     public function get(string $name): TargetInterface
     {
-        if (!isset($this->targets[$name])) {
+        if (!$this->exists($name)) {
             throw new InvalidArgumentException("There is no target with the name of '{$name}'");
         }
 
@@ -106,7 +105,7 @@ class Targets implements TargetsInterface
      */
     public function remove(string $name): TargetsInterface
     {
-        if (!isset($this->$name)) {
+        if (!$this->exists($name)) {
             throw new InvalidArgumentException("There is no target with the name of '{$name}'");
         }
 

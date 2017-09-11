@@ -29,9 +29,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace PantsTest\Target;
+namespace Pants\Test\Target;
 
 use Pants\Target\Target;
+use Pants\Target\TargetInterface;
 use Pants\Target\Targets;
 use PHPUnit\Framework\TestCase;
 
@@ -86,7 +87,7 @@ class TargetsTest extends TestCase
         $this->targets
             ->add($target);
         
-        $this->assertSame($target, $this->targets->test);
+        $this->assertSame($target, $this->targets->get('test'));
     }
     
     /**
@@ -95,7 +96,7 @@ class TargetsTest extends TestCase
      */
     public function testGettingANonExistentTargetThrowsAnException()
     {
-        $this->targets->test;
+        $this->targets->get('test');
     }
 
     /**
@@ -115,8 +116,8 @@ class TargetsTest extends TestCase
         $this->targets
             ->add($target);
 
-        $this->assertTrue(isset($this->targets->test));
-        $this->assertFalse(isset($this->targets->asdf));
+        $this->assertTrue($this->targets->exists('test'));
+        $this->assertFalse($this->targets->exists('asdf'));
     }
 
     /**
@@ -134,11 +135,11 @@ class TargetsTest extends TestCase
         $this->targets
             ->add($target);
 
-        $this->assertTrue(isset($this->targets->test));
+        $this->assertTrue($this->targets->exists('test'));
 
-        unset($this->targets->test);
+        $this->targets->remove('test');
 
-        $this->assertFalse(isset($this->targets->test));
+        $this->assertFalse($this->targets->exists('test'));
     }
 
     /**
@@ -147,7 +148,7 @@ class TargetsTest extends TestCase
      */
     public function testRemovingATargetThatDoesNotExistThrowsAnException()
     {
-        unset($this->targets->test);
+        $this->targets->remove('test');
     }
 
     /**
@@ -156,8 +157,8 @@ class TargetsTest extends TestCase
      */
     public function testCannotAddATargetWithTheSameNameAsAnExistingTarget()
     {
-        /** @var Target|\PHPUnit_Framework_MockObject_MockObject $target */
-        $target = $this->createMock('\Pants\Target\Target');
+        /** @var TargetInterface|\PHPUnit_Framework_MockObject_MockObject $target */
+        $target = $this->createMock(TargetInterface::class);
 
         $target->expects($this->any())
             ->method('getName')

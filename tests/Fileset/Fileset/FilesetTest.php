@@ -29,16 +29,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace PantsTest\FileSet;
+namespace Pants\Test\Fileset\Fileset;
 
 use org\bovigo\vfs\vfsStream;
-use Pants\FileSet\Fileset;
+use Pants\ContextInterface;
+use Pants\Fileset\Fileset;
+use Pants\Property\PropertiesInterface;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @coversDefaultClass \Pants\FileSet\FileSet
  */
-class FileSetTest extends TestCase
+class FilesetTest extends TestCase
 {
     
     /**
@@ -46,7 +48,7 @@ class FileSetTest extends TestCase
      *
      * @var Fileset
      */
-    protected $fileSet;
+    protected $fileset;
 
     /**
      * {@inheritdoc}
@@ -69,7 +71,8 @@ class FileSetTest extends TestCase
             )
         );
 
-        $this->fileSet = new Fileset(vfsStream::url('root'));
+        $this->fileset = new Fileset();
+        $this->fileset->setBaseDirectory(vfsStream::url('root'));
     }
     
     /**
@@ -87,8 +90,22 @@ class FileSetTest extends TestCase
      */
     public function testIteratesOverAllFilesAndDirectories()
     {
-        $paths = iterator_to_array($this->fileSet);
-        
+        /** @var ContextInterface|\PHPUnit_Framework_MockObject_MockObject $mockContext */
+        $mockContext = $this->createMock(ContextInterface::class);
+
+        $mockProperties = $this->createMock(PropertiesInterface::class);
+
+        $mockContext->expects($this->any())
+            ->method('getProperties')
+            ->will($this->returnValue($mockProperties));
+
+        $mockProperties->expects($this->any())
+            ->method('filter')
+            ->with($this->anything())
+            ->will($this->returnArgument(0));
+
+        $paths = iterator_to_array($this->fileset->getIterator($mockContext));
+
         $this->assertCount(6, $paths);
         $this->assertContains(vfsStream::url('root/.git'), $paths);
         $this->assertContains(vfsStream::url('root/.gitignore'), $paths);

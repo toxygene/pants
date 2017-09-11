@@ -29,25 +29,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace PantsTest\Task;
+namespace Pants\Test\Task;
 
 use org\bovigo\vfs\vfsStream;
-use Pants\Project;
-use Pants\Property\Properties;
 use Pants\Task\Delete;
-use PHPUnit\Framework\TestCase;
 
 /**
  * @coversDefaultClass \Pants\Task\Delete
  */
-class DeleteTest extends TestCase
+class DeleteTest extends TaskTestCase
 {
     
     /**
-     * File to delete
+     * Path to delete
      * @var string
      */
-    protected $file;
+    protected $path;
 
     /**
      * Delete task
@@ -66,7 +63,7 @@ class DeleteTest extends TestCase
             'test' => 'test'
         ));
         
-        $this->file = vfsStream::url('root/test');
+        $this->path = vfsStream::url('root/test');
         
         $this->task = new Delete();
     }
@@ -78,21 +75,18 @@ class DeleteTest extends TestCase
     {
         parent::tearDown();
 
-        unset($this->file);
+        unset($this->path);
         unset($this->task);
     }
 
     /**
      * @covers ::execute
-     * @expectedException \Pants\BuildException
+     * @expectedException \Pants\Task\BuildException
      */
     public function testFileIsRequired()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
         $this->task
-            ->execute($mockProject);
+            ->execute($this->mockContext);
     }
 
     /**
@@ -101,26 +95,9 @@ class DeleteTest extends TestCase
      */
     public function testFailureThrowsABuildException()
     {
-        $file = 'something-that-does-not-exist';
-
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
-        /** @var Properties|\PHPUnit_Framework_MockObject_MockObject $mockProperties */
-        $mockProperties = $this->createMock(Properties::class);
-
-        $mockProject->expects($this->once())
-            ->method('getProperties')
-            ->will($this->returnValue($mockProperties));
-
-        $mockProperties->expects($this->once())
-            ->method('filter')
-            ->with($file)
-            ->will($this->returnArgument(0));
-
         $this->task
-            ->setFile($file)
-            ->execute($mockProject);
+            ->setPath('something-that-does-not-exist')
+            ->execute($this->mockContext);
     }
 
     /**
@@ -129,26 +106,11 @@ class DeleteTest extends TestCase
      */
     public function testFileIsDeleted()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
-        /** @var Properties|\PHPUnit_Framework_MockObject_MockObject $mockProperties */
-        $mockProperties = $this->createMock(Properties::class);
-
-        $mockProject->expects($this->once())
-            ->method('getProperties')
-            ->will($this->returnValue($mockProperties));
-
-        $mockProperties->expects($this->once())
-            ->method('filter')
-            ->with($this->file)
-            ->will($this->returnArgument(0));
-
         $this->task
-            ->setFile($this->file)
-            ->execute($mockProject);
+            ->setPath($this->path)
+            ->execute($this->mockContext);
              
-        $this->assertFalse(file_exists($this->file));
+        $this->assertFalse(file_exists($this->path));
     }
 
 }

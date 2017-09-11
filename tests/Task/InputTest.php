@@ -29,17 +29,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace PantsTest\Task;
+namespace Pants\Test\Task;
 
-use Pants\Project;
-use Pants\Property\Properties;
 use Pants\Task\Input;
-use PHPUnit\Framework\TestCase;
 
 /**
  * @coversDefaultClass \Pants\Task\Input
  */
-class InputTest extends TestCase
+class InputTest extends TaskTestCase
 {
 
     /**
@@ -131,15 +128,12 @@ class InputTest extends TestCase
     
     /**
      * @covers ::execute
-     * @expectedException \Pants\BuildException
+     * @expectedException \Pants\Task\BuildException
      */
     public function testPropertyNameIsRequired()
     {
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
         $this->task
-            ->execute($mockProject);
+            ->execute($this->mockContext);
     }
     
     /**
@@ -149,18 +143,6 @@ class InputTest extends TestCase
     public function testMessageIsOutput()
     {
         $message = 'message';
-        
-//        $this->properties
-//            ->expects($this->at(0))
-//            ->method('filter')
-//            ->with($message)
-//            ->will($this->returnArgument(0));
-//
-//        $this->properties
-//            ->expects($this->at(1))
-//            ->method('filter')
-//            ->with('?')
-//            ->will($this->returnArgument(0));
 
         $input = fopen('php://memory', 'a+');
         fwrite($input, PHP_EOL);
@@ -168,27 +150,12 @@ class InputTest extends TestCase
         
         $output = fopen('php://memory', 'a+');
 
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
-        /** @var Properties|\PHPUnit_Framework_MockObject_MockObject $mockProperties */
-        $mockProperties = $this->createMock(Properties::class);
-
-        $mockProject->expects($this->exactly(3))
-            ->method('getProperties')
-            ->will($this->returnValue($mockProperties));
-
-        $mockProperties->expects($this->any())
-            ->method('filter')
-            ->with($this->anything())
-            ->will($this->returnArgument(0));
-
         $this->task
             ->setInputStream($input)
             ->setOutputStream($output)
             ->setPropertyName('test')
             ->setMessage($message)
-            ->execute($mockProject);
+            ->execute($this->mockContext);
 
         fseek($output, 0);
         $this->assertEquals('message? ', stream_get_contents($output));
@@ -211,27 +178,12 @@ class InputTest extends TestCase
         
         $output = fopen('php://memory', 'a+');
 
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
-        /** @var Properties|\PHPUnit_Framework_MockObject_MockObject $mockProperties */
-        $mockProperties = $this->createMock(Properties::class);
-
-        $mockProject->expects($this->exactly(2))
-            ->method('getProperties')
-            ->will($this->returnValue($mockProperties));
-
-        $mockProperties->expects($this->any())
-            ->method('filter')
-            ->with($this->anything())
-            ->will($this->returnArgument(0));
-
         $this->task
             ->setInputStream($input)
             ->setOutputStream($output)
             ->setPropertyName('test')
             ->setPromptCharacter($promptCharacter)
-            ->execute($mockProject);
+            ->execute($this->mockContext);
         
         fseek($output, 0);
         $this->assertEquals(': ', stream_get_contents($output));
@@ -251,33 +203,18 @@ class InputTest extends TestCase
         
         $output = fopen('php://memory', 'a+');
 
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
-        /** @var Properties|\PHPUnit_Framework_MockObject_MockObject $mockProperties */
-        $mockProperties = $this->createMock(Properties::class);
-
-        $mockProject->expects($this->exactly(3))
-            ->method('getProperties')
-            ->will($this->returnValue($mockProperties));
-
-        $mockProperties->expects($this->any())
-            ->method('filter')
-            ->with($this->anything())
-            ->will($this->returnArgument(0));
-
-        $mockProperties->expects($this->once())
-            ->method('__set')
-            ->with('test', $defaultValue);
+        $this->mockProperties
+            ->expects($this->once())
+            ->method('add')
+            ->with('test', $defaultValue)
+            ->will($this->returnSelf());
 
         $this->task
             ->setInputStream($input)
             ->setOutputStream($output)
             ->setDefaultValue($defaultValue)
-            ->setPropertyName('test');
-
-        $this->task
-            ->execute($mockProject);
+            ->setPropertyName('test')
+            ->execute($this->mockContext);
     }
     
     /**
@@ -292,27 +229,12 @@ class InputTest extends TestCase
         
         $output = fopen('php://memory', 'a+');
 
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
-        /** @var Properties|\PHPUnit_Framework_MockObject_MockObject $mockProperties */
-        $mockProperties = $this->createMock(Properties::class);
-
-        $mockProject->expects($this->exactly(4))
-            ->method('getProperties')
-            ->will($this->returnValue($mockProperties));
-
-        $mockProperties->expects($this->any())
-            ->method('filter')
-            ->with($this->anything())
-            ->will($this->returnArgument(0));
-            
         $this->task
             ->setInputStream($input)
             ->setOutputStream($output)
             ->setPropertyName('test')
             ->setValidArgs(array('one', 'two'))
-            ->execute($mockProject);
+            ->execute($this->mockContext);
 
         fseek($output, 0);
         $this->assertContains('[one/two]', stream_get_contents($output));
@@ -320,7 +242,7 @@ class InputTest extends TestCase
     
     /**
      * @covers ::execute
-     * @expectedException \Pants\BuildException
+     * @expectedException \Pants\Task\BuildException
      */
     public function testExceptionIsThrownWhenInvalidArgumentIsUsed()
     {
@@ -330,27 +252,12 @@ class InputTest extends TestCase
         
         $output = fopen('php://memory', 'a+');
 
-        /** @var Project|\PHPUnit_Framework_MockObject_MockObject $mockProject */
-        $mockProject = $this->createMock(Project::class);
-
-        /** @var Properties|\PHPUnit_Framework_MockObject_MockObject $mockProperties */
-        $mockProperties = $this->createMock(Properties::class);
-
-        $mockProject->expects($this->exactly(3))
-            ->method('getProperties')
-            ->will($this->returnValue($mockProperties));
-
-        $mockProperties->expects($this->any())
-            ->method('filter')
-            ->with($this->anything())
-            ->will($this->returnArgument(0));
-
         $this->task
             ->setInputStream($input)
             ->setOutputStream($output)
             ->setPropertyName('test')
             ->setValidArgs(array('one', 'two'))
-            ->execute($mockProject);
+            ->execute($this->mockContext);
     }
 
 }
