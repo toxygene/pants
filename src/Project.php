@@ -115,6 +115,16 @@ class Project implements ProjectInterface, LoggerAwareInterface
     }
 
     /**
+     * Get the properties
+     *
+     * @return PropertiesInterface
+     */
+    public function getProperties(): PropertiesInterface
+    {
+        return $this->properties;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function execute(array $targets = []): ProjectInterface

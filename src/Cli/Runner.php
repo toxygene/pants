@@ -76,7 +76,6 @@ use Pants\Task\Touch;
  */
 class Runner
 {
-
     /**
      * Run the cli
      *
@@ -96,6 +95,8 @@ class Runner
                     }),
                 Option::create('l', 'list', GetOpt::NO_ARGUMENT)
                     ->setDescription('Print a list of targets from the build file'),
+                Option::create('p', 'property', GetOpt::MULTIPLE_ARGUMENT)
+                    ->setDescription('Set a property name and value (x=y)'),
                 Option::create('v', 'verbose', GetOpt::NO_ARGUMENT)
                     ->setDescription('Verbose output (can be set up to four times)'),
                 Option::create('V', 'version', GetOpt::NO_ARGUMENT)
@@ -119,6 +120,7 @@ class Runner
         }
 
         if ($opt->getOption('version')) {
+            // todo hook up to some kind of build script
             echo '0.0.1' . PHP_EOL;
             exit;
         }
@@ -181,6 +183,13 @@ class Runner
             }
 
             exit;
+        }
+
+        foreach ($opt->getOption('property') as $propertyString) {
+            list ($key, $value) = explode('=', $propertyString, 2);
+
+            $project->getProperties()
+                ->add($key, $value);
         }
 
         $project->execute($opt->getOperands());
