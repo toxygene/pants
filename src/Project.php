@@ -115,9 +115,7 @@ class Project implements ProjectInterface, LoggerAwareInterface
     }
 
     /**
-     * Get the properties
-     *
-     * @return PropertiesInterface
+     * {@inheritdoc}
      */
     public function getProperties(): PropertiesInterface
     {

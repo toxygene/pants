@@ -33,6 +33,8 @@
 
 namespace Pants;
 
+use Pants\Property\PropertiesInterface;
+
 /**
  * Interface for a project
  *
@@ -40,6 +42,13 @@ namespace Pants;
  */
 interface ProjectInterface
 {
+    /**
+     * Get the properties
+     *
+     * @return PropertiesInterface
+     */
+    public function getProperties(): PropertiesInterface;
+
     /**
      * Get a list of names and descriptions for visible targets
      *
