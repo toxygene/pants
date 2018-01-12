@@ -327,7 +327,7 @@ class CollectionsHandler implements SubscribingHandlerInterface
         $properties = new Properties();
 
         foreach ($data as $key => $value) {
-            $properties->{$key} = $value;
+            $properties->add($key, $value);
         }
 
         return $properties;
