@@ -116,7 +116,6 @@ class TokenFilterTest extends TaskTestCase
     }
 
     /**
-     * @covers ::__construct
      * @covers ::execute
      */
     public function testTokensAreReplacedInTheFileOnExecute()

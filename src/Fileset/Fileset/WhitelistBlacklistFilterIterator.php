@@ -2,7 +2,7 @@
 /**
  * Pants
  *
- * Copyright (c) 2011-2017, Justin Hendrickson
+ * Copyright (c) 2011-2018, Justin Hendrickson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,129 +29,99 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+declare(strict_types=1);
+
 namespace Pants\Fileset\Fileset;
 
 use FilterIterator;
+use Iterator;
 
 /**
  * Whitelist/blacklist pattern filter iterator
  */
 class WhitelistBlacklistFilterIterator extends FilterIterator
 {
-
     /**
      * Base directory
      *
-     * @var string|null
+     * @var string
      */
     protected $baseDirectory;
 
     /**
      * Blacklist
      *
-     * @var Matchers|MatcherInterface[]|null
+     * @var MatcherInterface|null
      */
-    protected $blacklist = array();
+    protected $blacklist;
 
     /**
      * Whitelist
      *
-     * @var Matchers|MatcherInterface[]|null
+     * @var MatcherInterface|null
      */
-    protected $whitelist = array();
+    protected $whitelist;
+
+    /**
+     * Constructor
+     *
+     * @param Iterator $iterator
+     * @param string $baseDirectory
+     * @param MatcherInterface|null $whitelist
+     * @param MatcherInterface|null $blacklist
+     */
+    public function __construct(
+        Iterator $iterator,
+        string $baseDirectory,
+        ?MatcherInterface $whitelist = null,
+        ?MatcherInterface $blacklist = null
+    )
+    {
+        parent::__construct($iterator);
+
+        $this->baseDirectory = $baseDirectory;
+        $this->blacklist = $blacklist;
+        $this->whitelist = $whitelist;
+    }
 
     /**
      * {@inheritdoc}
      */
     public function accept()
     {
-        if ($this->getWhitelist()) {
-            foreach ($this->getWhitelist() as $whitelist) {
-                if ($whitelist->match($this->getInnerIterator()->current(), $this->getBaseDirectory())) {
-                    foreach ($this->getBlacklist() as $blacklist) {
-                        if ($blacklist->match($this->getInnerIterator()->current(), $this->getBaseDirectory())) {
-                            return false;
-                        }
-                    }
-                    return true;
-                }
+        if (null != $this->whitelist) {
+            if (
+                !$this->whitelist
+                    ->match(
+                        $this->getInnerIterator()->current(),
+                        $this->baseDirectory
+                    )
+            ) {
+                return false;
             }
-            
-            return false;
-        } else {
-            foreach ($this->getBlacklist() as $blacklist) {
-                if ($blacklist->match($this->getInnerIterator()->current(), $this->getBaseDirectory())) {
-                    return false;
-                }
+
+            if (
+                null != $this->blacklist &&
+                $this->blacklist
+                    ->match(
+                        $this->getInnerIterator()->current(),
+                        $this->baseDirectory
+                    )
+            ) {
+                return false;
             }
-            
+
             return true;
         }
-    }
 
-    /**
-     * Get the base directory
-     *
-     * @return string|null
-     */
-    public function getBaseDirectory()
-    {
-        return $this->baseDirectory;
-    }
+        if (null != $this->blacklist) {
+            return !$this->blacklist
+                ->match(
+                    $this->getInnerIterator()->current(),
+                    $this->baseDirectory
+                );
+        }
 
-    /**
-     * Get the blacklist
-     *
-     * @return Matchers|MatcherInterface[]|null
-     */
-    public function getBlacklist()
-    {
-        return $this->blacklist;
-    }
-
-    /**
-     * Get the whitelist
-     *
-     * @return Matchers|MatcherInterface[]|null
-     */
-    public function getWhitelist()
-    {
-        return $this->whitelist;
-    }
-
-    /**
-     * Set the base directory
-     *
-     * @param string $baseDirectory
-     * @return self
-     */
-    public function setBaseDirectory(string $baseDirectory): self
-    {
-        $this->baseDirectory = $baseDirectory;
-        return $this;
-    }
-
-    /**
-     * Set the exclude patterns
-     *
-     * @param Matchers|MatcherInterface[] $blacklist
-     * @return self
-     */
-    public function setBlacklist(Matchers $blacklist)
-    {
-        $this->blacklist = $blacklist;
-        return $this;
-    }
-
-    /**
-     * Set the include patterns
-     *
-     * @param Matchers|MatcherInterface[] $whitelist
-     * @return self
-     */
-    public function setWhitelist(Matchers $whitelist)
-    {
-        $this->whitelist = $whitelist;
-        return $this;
+        return true;
     }
 }

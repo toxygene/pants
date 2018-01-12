@@ -67,8 +67,8 @@ class PropertiesTest extends TestCase
     }
 
     /**
-     * @covers ::__get
-     * @covers ::__set
+     * @covers ::get
+     * @covers ::add
      */
     public function testGettingAndSettingProperties()
     {
@@ -80,16 +80,16 @@ class PropertiesTest extends TestCase
     }
 
     /**
-     * @covers ::__get
+     * @covers ::get
      * @expectedException \InvalidArgumentException
      */
-    public function testGettingANonexistantPropertyThrowsAnException()
+    public function testGettingANonExistantPropertyThrowsAnException()
     {
         $this->properties->get('one');
     }
 
     /**
-     * @covers ::__isset
+     * @covers ::exists
      */
     public function testExistanceOfPropertiesCanBeChecked()
     {
@@ -100,7 +100,7 @@ class PropertiesTest extends TestCase
     }
 
     /**
-     * @covers ::__unset
+     * @covers ::remove
      */
     public function testUnsettingAPropertyRemovesIt()
     {
@@ -114,7 +114,7 @@ class PropertiesTest extends TestCase
     }
 
     /**
-     * @covers ::__unset
+     * @covers ::remove
      * @expectedException \InvalidArgumentException
      */
     public function testUnsettingANonexistantPropertyThrowsAnException()
@@ -127,8 +127,8 @@ class PropertiesTest extends TestCase
      */
     public function testFilteringReplacesPropertiesWithTheirValues()
     {
-        $this->properties->one = "two";
-        $this->properties->three = '${one}';
+        $this->properties->add('one', 'two');
+        $this->properties->add('three', '${one}');
 
         $this->assertEquals(
             "test two test two test",
@@ -142,8 +142,8 @@ class PropertiesTest extends TestCase
      */
     public function testDetectedPropertyCyclesThrowAnException()
     {
-        $this->properties->one = '${two}';
-        $this->properties->two = '${one}';
+        $this->properties->add('one', '${two}');
+        $this->properties->add('two', '${one}');
 
         $this->properties->filter('${one}');
     }

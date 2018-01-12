@@ -137,7 +137,6 @@ class InputTest extends TaskTestCase
     }
     
     /**
-     * @covers ::__construct
      * @covers ::execute
      */
     public function testMessageIsOutput()
@@ -165,7 +164,6 @@ class InputTest extends TaskTestCase
     }
     
     /**
-     * @covers ::__construct
      * @covers ::execute
      */
     public function testPromptCharacterIsOutput()
@@ -190,7 +188,6 @@ class InputTest extends TaskTestCase
     }
     
     /**
-     * @covers ::__construct
      * @covers ::execute
      */
     public function testDefaultValueIsUsedWhenThereInNoInput()
@@ -218,7 +215,6 @@ class InputTest extends TaskTestCase
     }
     
     /**
-     * @covers ::__construct
      * @covers ::execute
      */
     public function testValidArgsAreOutput()

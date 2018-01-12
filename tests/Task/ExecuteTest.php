@@ -83,6 +83,7 @@ class ExecuteTest extends TaskTestCase
     {
         $this->task
             ->setCommand('asdf')
+            ->setPrintStderr(false)
             ->execute($this->mockContext);
     }
 
@@ -142,29 +143,4 @@ class ExecuteTest extends TaskTestCase
             ->setReturnValuePropertyName('return value')
             ->execute($this->mockContext);
     }
-    
-    /**
-     * @covers ::getCommand
-     * @covers ::setCommand
-     */
-    public function testCommandCanBeSet()
-    {
-        $this->task
-            ->setCommand('asdf');
-            
-        $this->assertEquals('asdf', $this->task->getCommand());
-    }
-    
-    /**
-     * @covers ::getDirectory
-     * @covers ::setDirectory
-     */
-    public function testDirectoryCanBeSet()
-    {
-        $this->task
-            ->setDirectory('asdf');
-            
-        $this->assertEquals('asdf', $this->task->getDirectory());
-    }
-
 }

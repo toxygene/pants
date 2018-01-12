@@ -2,7 +2,7 @@
 /**
  * Pants
  *
- * Copyright (c) 2011-2017, Justin Hendrickson
+ * Copyright (c) 2011-2018, Justin Hendrickson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -16,7 +16,7 @@
  *       products derived from this software without specific prior written
  *       permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 'AS IS'
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
@@ -43,8 +43,20 @@ use Pants\ContextInterface;
  *
  * @package Pants\Task
  */
-class Output extends AbstractTaskInterface
+class Output implements TaskInterface
 {
+    /**
+     * Flag to append a newline
+     *
+     * @JMS\Expose()
+     * @JMS\SerializedName("append-newline")
+     * @JMS\SkipWhenEmpty()
+     * @JMS\Type("boolean")
+     * @JMS\XmlElement(cdata=false)
+     *
+     * @var bool|null
+     */
+    protected $appendNewline;
 
     /**
      * Message to display
@@ -64,7 +76,7 @@ class Output extends AbstractTaskInterface
      */
     public function execute(ContextInterface $context): TaskInterface
     {
-        if (null === $this->getMessage()) {
+        if (null === $this->message) {
             $message = 'Message not set';
 
             $context->getLogger()->error(
@@ -82,8 +94,10 @@ class Output extends AbstractTaskInterface
             );
         }
 
+        $appendNewline = $this->appendNewline ?? true;
+
         $filteredMessage = $context->getProperties()
-            ->filter($this->getMessage());
+            ->filter($this->message);
 
         $context->getLogger()->debug(
             sprintf(
@@ -97,17 +111,23 @@ class Output extends AbstractTaskInterface
 
         echo $filteredMessage;
 
+        if ($appendNewline) {
+            echo PHP_EOL;
+        }
+
         return $this;
     }
 
     /**
-     * Get the message
+     * Set the append newline flag
      *
-     * @return string|null
+     * @param boolean $appendNewline
+     * @return self
      */
-    public function getMessage()
+    public function setAppendNewline(boolean $appendNewline): self
     {
-        return $this->message;
+        $this->appendNewline = $appendNewline;
+        return $this;
     }
 
     /**

@@ -37,7 +37,7 @@ use Pants\Task\Touch;
 /**
  * Unit tests for the touch task
  *
- * @covers \Pants\Task\Touch
+ * @coversDefaultClass \Pants\Task\Touch
  */
 class TouchTest extends TaskTestCase
 {
@@ -81,10 +81,10 @@ class TouchTest extends TaskTestCase
     }
     
     /**
-     * @covers ::getFile
-     * @covers ::setFile
+     * @covers ::getPath
+     * @covers ::setPath
      */
-    public function testFileCanBeSet()
+    public function testPathCanBeSet()
     {
         $this->touch
             ->setPath('test');
@@ -115,7 +115,6 @@ class TouchTest extends TaskTestCase
     }
 
     /**
-     * @covers ::__construct
      * @covers ::execute
      */
     public function testTouchingANonExistentFileCreatesItAndSetsTheModifiedTime()

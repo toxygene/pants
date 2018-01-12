@@ -34,6 +34,7 @@ namespace Pants\Test\Target;
 use Pants\Target\Target;
 use Pants\Target\TargetInterface;
 use Pants\Target\Targets;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -70,7 +71,7 @@ class TargetsTest extends TestCase
     }
 
     /**
-     * @covers ::__get
+     * @covers ::get
      * @covers ::add
      */
     public function testTargetsCanBeAdded()
@@ -91,7 +92,7 @@ class TargetsTest extends TestCase
     }
     
     /**
-     * @covers ::__get
+     * @covers ::get
      * @expectedException \InvalidArgumentException
      */
     public function testGettingANonExistentTargetThrowsAnException()
@@ -100,7 +101,7 @@ class TargetsTest extends TestCase
     }
 
     /**
-     * @covers ::__isset
+     * @covers ::exists
      */
     public function testTargetsCanBeCheckedForExistance()
     {
@@ -121,7 +122,7 @@ class TargetsTest extends TestCase
     }
 
     /**
-     * @covers ::__unset
+     * @covers ::remove
      */
     public function testTargetsCanBeRemoved()
     {
@@ -143,7 +144,7 @@ class TargetsTest extends TestCase
     }
 
     /**
-     * @covers ::__unset
+     * @covers ::remove
      * @expectedException \InvalidArgumentException
      */
     public function testRemovingATargetThatDoesNotExistThrowsAnException()
@@ -174,7 +175,8 @@ class TargetsTest extends TestCase
      */
     public function testDescriptionsCanBeRetrieved()
     {
-        $target = $this->getMockBuilder('\Pants\Target\Target')
+        /** @var TargetInterface|\PHPUnit_Framework_MockObject_MockObject $target */
+        $target = $this->getMockBuilder(TargetInterface::class)
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -197,7 +199,8 @@ class TargetsTest extends TestCase
      */
     public function testHiddenTargetsAreNotAddedToDescriptions()
     {
-        $target = $this->getMockBuilder('\Pants\Target\Target')
+        /** @var TargetInterface|MockObject $target */
+        $target = $this->getMockBuilder(TargetInterface::class)
             ->disableOriginalConstructor()
             ->getMock();
 

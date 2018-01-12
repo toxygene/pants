@@ -2,7 +2,7 @@
 /**
  * Pants
  *
- * Copyright (c) 2011-2017, Justin Hendrickson
+ * Copyright (c) 2011-2018, Justin Hendrickson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,8 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace Pants\Cli;
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
@@ -44,11 +46,11 @@ use JMS\Serializer\Serializer;
 use JMS\Serializer\SerializerBuilder;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
-use Pants\Fileset\Fileset\AbstractMatcher;
+use Pants\Fileset\Fileset\CompositeMatcher;
+use Pants\Fileset\Fileset\MatcherInterface;
 use Pants\Fileset\Fileset\Regexp;
 use Pants\Jms\CollectionsHandler;
 use Pants\Project;
-use Pants\Task\AbstractTaskInterface;
 use Pants\Task\Call;
 use Pants\Task\Chdir;
 use Pants\Task\Chgrp;
@@ -57,7 +59,6 @@ use Pants\Task\Chown;
 use Pants\Task\Copy;
 use Pants\Task\Delete;
 use Pants\Task\Execute;
-use Pants\Task\Fileset;
 use Pants\Task\Input;
 use Pants\Task\Mkdir;
 use Pants\Task\Move;
@@ -66,6 +67,7 @@ use Pants\Task\PhpScript;
 use Pants\Task\Property;
 use Pants\Task\PropertyFile;
 use Pants\Task\Symlink;
+use Pants\Task\TaskInterface;
 use Pants\Task\TokenFilter;
 use Pants\Task\Touch;
 
@@ -80,13 +82,13 @@ class Runner
      *
      * @var array $argv
      */
-    public function run($argv)
+    public function run(array $argv): void
     {
         $opt = new GetOpt(
             [
                 Option::create('h', 'help', GetOpt::NO_ARGUMENT)
                     ->setDescription('Show the help text'),
-                Option::create('f', 'file', GetOpt::REQUIRED_ARGUMENT)
+                Option::create('f', 'file', GetOpt::OPTIONAL_ARGUMENT)
                     ->setDescription('Set the build file')
                     ->setDefaultValue('build.xml')
                     ->setValidation(function ($file) { // todo doesn't appear to be working, possible due default value?
@@ -94,13 +96,14 @@ class Runner
                     }),
                 Option::create('l', 'list', GetOpt::NO_ARGUMENT)
                     ->setDescription('Print a list of targets from the build file'),
-                Option::create('v', 'verbose', GetOpt::NO_ARGUMENT),
+                Option::create('v', 'verbose', GetOpt::NO_ARGUMENT)
+                    ->setDescription('Verbose output (can be set up to four times)'),
                 Option::create('V', 'version', GetOpt::NO_ARGUMENT)
                     ->setDescription('Print the version number')
             ]
         );
 
-        $opt->addOperand(new Operand('targets', GetOpt::MULTIPLE_ARGUMENT));
+        $opt->addOperand(new Operand('targets', Operand::MULTIPLE));
 
         try {
             $opt->process(array_slice($argv, 1));
@@ -115,18 +118,16 @@ class Runner
             exit;
         }
 
-        $buildFile = $opt->getOption('file');
-
-        if (!preg_match('#.*\.(.*?)$#', $buildFile, $matches)) {
-            exit(1);
+        if ($opt->getOption('version')) {
+            echo '0.0.1' . PHP_EOL;
+            exit;
         }
 
-        /** @var Project $project */
-        $project = $this->buildSerializer()->deserialize(
-            file_get_contents($buildFile),
-            Project::class,
-            $matches[1]
-        );
+        $buildFile = $opt->getOption('file');
+
+        if (!preg_match('~.*\.(.*?)$~', $buildFile, $matches)) {
+            exit(1);
+        }
 
         $logger = new Logger('pants');
 
@@ -154,6 +155,13 @@ class Runner
 
         $logger->pushHandler(new StreamHandler('php://stdout', $level));
 
+        /** @var Project $project */
+        $project = $this->buildSerializer()->deserialize(
+            file_get_contents($buildFile),
+            Project::class,
+            $matches[1]
+        );
+
         $project->setLogger($logger);
 
         if ($opt->getOption('list')) {
@@ -161,6 +169,11 @@ class Runner
             foreach ($project->getTargetDescriptions() as $name => $description) {
                 $maxWidth = max($maxWidth, strlen($name));
             }
+
+            printf("%{$maxWidth}s\t%s", 'Target', 'Description');
+            echo PHP_EOL;
+            printf("%{$maxWidth}s\t%s", '------', '-----------');
+            echo PHP_EOL;
 
             foreach ($project->getTargetDescriptions() as $name => $description) {
                 printf("%{$maxWidth}s\t%s", $name, $description);
@@ -212,25 +225,26 @@ class Runner
             'touch' => Touch::class
         ];
 
-        $abstractTaskMetadata = new ClassMetadata(AbstractTaskInterface::class);
-        $abstractTaskMetadata->setDiscriminator('type', $taskClasses);
-        $abstractTaskMetadata->discriminatorDisabled = false;
+        $taskInterfaceMetadata = new ClassMetadata(TaskInterface::class);
+        $taskInterfaceMetadata->setDiscriminator('type', $taskClasses);
+        $taskInterfaceMetadata->discriminatorDisabled = false;
 
         $serializer->getMetadataFactory()
-            ->getMetadataForClass(AbstractTaskInterface::class)
-            ->merge($abstractTaskMetadata);
+            ->getMetadataForClass(TaskInterface::class)
+            ->merge($taskInterfaceMetadata);
 
         $filesetClasses = [
+            'composite' => CompositeMatcher::class,
             'regexp' => Regexp::class
         ];
 
-        $abstractMatcherMetadata = new ClassMetadata(AbstractMatcher::class);
-        $abstractMatcherMetadata->setDiscriminator('type', $filesetClasses);
-        $abstractMatcherMetadata->discriminatorDisabled = false;
+        $matcherInterfaceMetadata = new ClassMetadata(MatcherInterface::class);
+        $matcherInterfaceMetadata->setDiscriminator('type', $filesetClasses);
+        $matcherInterfaceMetadata->discriminatorDisabled = false;
 
         $serializer->getMetadataFactory()
-            ->getMetadataForClass(AbstractMatcher::class)
-            ->merge($abstractMatcherMetadata);
+            ->getMetadataForClass(MatcherInterface::class)
+            ->merge($matcherInterfaceMetadata);
 
         return $serializer;
     }

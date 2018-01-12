@@ -114,7 +114,6 @@ class ChmodTest extends TaskTestCase
     }
 
     /**
-     * @covers ::__construct
      * @covers ::execute
      */
     public function testPermissionsIsSet()
@@ -128,7 +127,6 @@ class ChmodTest extends TaskTestCase
     }
 
     /**
-     * @covers ::__construct
      * @covers ::execute
      */
     public function testPermissionsAsAStringCanBeSet()

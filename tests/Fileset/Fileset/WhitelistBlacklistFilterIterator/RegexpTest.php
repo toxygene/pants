@@ -39,7 +39,7 @@ use SplFileInfo;
 /**
  * Unit tests for the regex matcher
  * 
- * @coversDefaultClass \Pants\FileSet\WhitelistBlacklistFilterIterator\Regexp
+ * @coversDefaultClass \Pants\Fileset\Fileset\Regexp
  */
 class RegexpTest extends TestCase
 {
@@ -58,7 +58,7 @@ class RegexpTest extends TestCase
     {
         parent::setUp();
 
-        $this->matcher = new Regexp();
+        $this->matcher = new Regexp('#^asdf$#');
         
         vfsStream::setup('root', null, array(
             'one' => array(
@@ -81,28 +81,10 @@ class RegexpTest extends TestCase
     }
     
     /**
-     * @covers ::__construct
-     * @covers ::getPattern
-     * @covers ::setPattern
-     */
-    public function testPatternCanBeSet()
-    {
-        $this->assertNull($this->matcher->getPattern());
-        
-        $this->matcher
-            ->setPattern('asdf');
-
-        $this->assertEquals('asdf', $this->matcher->getPattern());
-    }
-    
-    /**
      * @covers ::match
      */
-    public function testRegexpIsComparedToSubjectToDetermineMatch()
+    public function testFilesThatMatchThePatternAreAccepted()
     {
-        $this->matcher
-            ->setPattern('#^asdf$#');
-
         $this->assertTrue(
             $this->matcher->match(
                 new SplFileInfo(vfsStream::url('one/two/asdf')),

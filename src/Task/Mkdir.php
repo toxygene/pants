@@ -2,7 +2,7 @@
 /**
  * Pants
  *
- * Copyright (c) 2017, Justin Hendrickson
+ * Copyright (c) 2011-2018, Justin Hendrickson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,13 +35,13 @@ namespace Pants\Task;
 
 use ErrorException;
 use JMS\Serializer\Annotation as JMS;
-use function Pale\run;
 use Pants\ContextInterface;
+use function Pale\run;
 
 /**
  * @JMS\ExclusionPolicy("all")
  */
-class Mkdir extends AbstractTaskInterface
+class Mkdir implements TaskInterface
 {
     /**
      * @JMS\Expose()
@@ -141,7 +141,7 @@ class Mkdir extends AbstractTaskInterface
             sprintf(
                 'Creating directory "%s" with mode "%s" and recursive "%s"',
                 $path,
-                $mode,
+                decoct($mode),
                 $this->getRecursive()
             ),
             [
@@ -158,7 +158,7 @@ class Mkdir extends AbstractTaskInterface
             $message = sprintf(
                 'Could not create directory "%s" with mode "%s" and recursive "%s" because "%s"',
                 $path,
-                $mode,
+                decoct($mode),
                 $this->getRecursive(),
                 $e->getMessage()
             );

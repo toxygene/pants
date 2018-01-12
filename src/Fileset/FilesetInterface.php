@@ -2,7 +2,7 @@
 /**
  * Pants
  *
- * Copyright (c) 2017, Justin Hendrickson
+ * Copyright (c) 2011-2018, Justin Hendrickson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,8 @@
  *
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
+
+declare(strict_types=1);
 
 namespace Pants\Fileset;
 

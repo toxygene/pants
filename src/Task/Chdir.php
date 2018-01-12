@@ -2,7 +2,7 @@
 /**
  * Pants
  *
- * Copyright (c) 2014-2017, Justin Hendrickson
+ * Copyright (c) 2011-2018, Justin Hendrickson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,8 +35,8 @@ namespace Pants\Task;
 
 use ErrorException;
 use JMS\Serializer\Annotation as JMS;
-use function Pale\run;
 use Pants\ContextInterface;
+use function Pale\run;
 
 /**
  * Change the current working directory task

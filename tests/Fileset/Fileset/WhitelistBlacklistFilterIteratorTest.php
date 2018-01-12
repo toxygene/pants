@@ -31,17 +31,15 @@
 
 namespace Pants\Test\Fileset\Fileset;
 
-use ArrayIterator;
 use FilesystemIterator;
 use org\bovigo\vfs\vfsStream;
 use Pants\Fileset\Fileset\MatcherInterface;
-use Pants\Fileset\Fileset\Matchers;
 use Pants\Fileset\Fileset\WhitelistBlacklistFilterIterator;
 use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
 
 /**
- * @coversDefaultClass \Pants\FileSet\WhitelistBlacklistFilterIterator
+ * @coversDefaultClass \Pants\Fileset\Fileset\WhitelistBlacklistFilterIterator
  */
 class WhitelistBlacklistFilterIteratorTest extends TestCase
 {
@@ -66,87 +64,28 @@ class WhitelistBlacklistFilterIteratorTest extends TestCase
             'three' => 'test',
             'four' => 'test'
         ));
-
-        $this->filter = new WhitelistBlacklistFilterIterator(new RecursiveDirectoryIterator(
-            vfsStream::url('root'),
-            FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO | FilesystemIterator::SKIP_DOTS
-        ));
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function tearDown()
-    {
-        parent::tearDown();
-
-        unset($this->filter);
-    }
-
-    /**
-     * @covers ::getBlacklistMatchers
-     * @covers ::setBlacklistMatchers
-     */
-    public function testBlacklistMatchersCanBeSet()
-    {
-        /** @var MatcherInterface|\PHPUnit_Framework_MockObject_MockObject $matcher1 */
-        $matcher1 = $this->createMock(MatcherInterface::class);
-
-        /** @var MatcherInterface|\PHPUnit_Framework_MockObject_MockObject $matcher2 */
-        $matcher2 = $this->createMock(MatcherInterface::class);
-
-        /** @var Matchers|\PHPUnit_Framework_MockObject_MockObject $matchers */
-        $matchers = $this->createMock(Matchers::class);
-
-        $matchers->expects($this->any())
-            ->method('getIterator')
-            ->will($this->returnValue(new ArrayIterator([$matcher1, $matcher2])));
-
-        $this->filter->setBlacklist($matchers);
-
-        $this->assertCount(2, $this->filter->getBlacklist());
-        $this->assertContains($matcher1, $this->filter->getBlacklist());
-        $this->assertContains($matcher2, $this->filter->getBlacklist());
-    }
-
-    /**
-     * @covers ::getWhitelistMatchers
-     * @covers ::setWhitelistMatchers
-     */
-    public function testWhitelistMatchersCanBeSet()
-    {
-        /** @var MatcherInterface|\PHPUnit_Framework_MockObject_MockObject $matcher1 */
-        $matcher1 = $this->createMock(MatcherInterface::class);
-
-        /** @var MatcherInterface|\PHPUnit_Framework_MockObject_MockObject $matcher2 */
-        $matcher2 = $this->createMock(MatcherInterface::class);
-
-        /** @var Matchers|\PHPUnit_Framework_MockObject_MockObject $matchers */
-        $matchers = $this->createMock(Matchers::class);
-
-        $matchers->expects($this->any())
-            ->method('getIterator')
-            ->will($this->returnValue(new ArrayIterator([$matcher1, $matcher2])));
-
-        $this->filter->setWhitelist($matchers);
-
-        $this->assertCount(2, $this->filter->getWhitelist());
-        $this->assertContains($matcher1, $this->filter->getWhitelist());
-        $this->assertContains($matcher2, $this->filter->getWhitelist());
     }
 
     /**
      * @covers ::accept
      */
-    public function testEverythingIsIncludedByDefault()
+    public function testAllFilesAndDirectoriesAreIncludedInTheIteratorByDefault()
     {
-        $this->assertCount(4, $this->filter);
+        $filter = new WhitelistBlacklistFilterIterator(
+            new RecursiveDirectoryIterator(
+                vfsStream::url('root'),
+                FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO | FilesystemIterator::SKIP_DOTS
+            ),
+            vfsStream::url('root')
+        );
+
+        $this->assertCount(4, $filter);
     }
 
     /**
      * @covers ::accept
      */
-    public function testFilesAreAcceptedIfTheyAreIncludedAndNotExcluded()
+    public function testAPathIsAcceptedIfItIsInTheWhitelistAndNotInTheBlacklist()
     {
         /** @var MatcherInterface|\PHPUnit_Framework_MockObject_MockObject $mockWhitelistMatcher */
         $mockWhitelistMatcher = $this->createMock(MatcherInterface::class);
@@ -167,13 +106,6 @@ class WhitelistBlacklistFilterIteratorTest extends TestCase
             ->method('match')
             ->will($this->returnValue(true));
 
-        /** @var Matchers|\PHPUnit_Framework_MockObject_MockObject $mockWhitelist */
-        $mockWhitelist = $this->createMock(Matchers::class);
-
-        $mockWhitelist->expects($this->any())
-            ->method('getIterator')
-            ->will($this->returnValue(new ArrayIterator([$mockWhitelistMatcher])));
-
         /** @var MatcherInterface|\PHPUnit_Framework_MockObject_MockObject $mockBlacklistMatcher */
         $mockBlacklistMatcher = $this->createMock(MatcherInterface::class);
 
@@ -189,18 +121,17 @@ class WhitelistBlacklistFilterIteratorTest extends TestCase
             ->method('match')
             ->will($this->returnValue(false));
 
-        /** @var Matchers|\PHPUnit_Framework_MockObject_MockObject $mockBlacklist */
-        $mockBlacklist = $this->createMock(Matchers::class);
+        $filter = new WhitelistBlacklistFilterIterator(
+            new RecursiveDirectoryIterator(
+                vfsStream::url('root'),
+                FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO | FilesystemIterator::SKIP_DOTS
+            ),
+            vfsStream::url('root'),
+            $mockWhitelistMatcher,
+            $mockBlacklistMatcher
+        );
 
-        $mockBlacklist->expects($this->any())
-            ->method('getIterator')
-            ->will($this->returnValue(new ArrayIterator([$mockBlacklistMatcher])));
-
-        $this->filter
-            ->setBlacklist($mockBlacklist)
-            ->setWhitelist($mockWhitelist);
-
-        $results = iterator_to_array($this->filter);
+        $results = iterator_to_array($filter);
 
         $this->assertEquals(2, count($results));
         $this->assertContains(vfsStream::url('root/one'), $results);
@@ -210,7 +141,7 @@ class WhitelistBlacklistFilterIteratorTest extends TestCase
     /**
      * @covers ::accept
      */
-    public function testFilesAreRejectedIfTheyAreExcluded()
+    public function testAPathIsRejectedIfItIsInTheBlacklist()
     {
         /** @var MatcherInterface|\PHPUnit_Framework_MockObject_MockObject $mockBlacklistMatcher */
         $mockBlacklistMatcher = $this->createMock(MatcherInterface::class);
@@ -231,17 +162,17 @@ class WhitelistBlacklistFilterIteratorTest extends TestCase
             ->method('match')
             ->will($this->returnValue(true));
 
-        /** @var Matchers|\PHPUnit_Framework_MockObject_MockObject $mockBlacklist */
-        $mockBlacklist = $this->createMock(Matchers::class);
+        $filter = new WhitelistBlacklistFilterIterator(
+            new RecursiveDirectoryIterator(
+                vfsStream::url('root'),
+                FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO | FilesystemIterator::SKIP_DOTS
+            ),
+            vfsStream::url('root'),
+            null,
+            $mockBlacklistMatcher
+        );
 
-        $mockBlacklist->expects($this->any())
-            ->method('getIterator')
-            ->will($this->returnValue(new ArrayIterator([$mockBlacklistMatcher])));
-            
-        $this->filter
-            ->setBlacklist($mockBlacklist);
-
-        $results = iterator_to_array($this->filter);
+        $results = iterator_to_array($filter);
         
         $this->assertEquals(1, count($results));
         $this->assertContains(vfsStream::url('root/three'), $results);

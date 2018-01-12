@@ -2,7 +2,7 @@
 /**
  * Pants
  *
- * Copyright (c) 2011-2017, Justin Hendrickson
+ * Copyright (c) 2011-2018, Justin Hendrickson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,16 +31,15 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace Pants\Fileset;
 
 use FilesystemIterator;
-use JMS\Serializer\Annotation as JMS;
 use Iterator;
-use IteratorAggregate;
-use Pants\BuildException;
+use JMS\Serializer\Annotation as JMS;
 use Pants\ContextInterface;
 use Pants\Fileset\Fileset\MatcherInterface;
-use Pants\Fileset\Fileset\Matchers;
 use Pants\Fileset\Fileset\WhitelistBlacklistFilterIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -56,11 +55,10 @@ class Fileset implements FilesetInterface
     /**
      * @JMS\Expose()
      * @JMS\SerializedName("base-directory")
-     * @JMS\SkipWhenEmpty()
      * @JMS\Type("string")
      * @JMS\XmlElement(cdata=false)
      *
-     * @var string|null
+     * @var string
      */
     private $baseDirectory;
 
@@ -70,9 +68,9 @@ class Fileset implements FilesetInterface
      * @JMS\Expose()
      * @JMS\SerializedName("blacklist")
      * @JMS\SkipWhenEmpty()
-     * @JMS\Type("Pants\Fileset\Fileset\Matchers")
+     * @JMS\Type("Pants\Fileset\Fileset\MatcherInterface")
      *
-     * @var Matchers|null
+     * @var MatcherInterface|null
      */
     private $blacklist;
 
@@ -82,111 +80,49 @@ class Fileset implements FilesetInterface
      * @JMS\Expose()
      * @JMS\SerializedName("whitelist")
      * @JMS\SkipWhenEmpty()
-     * @JMS\Type("Pants\Fileset\Fileset\Matchers")
+     * @JMS\Type("Pants\Fileset\Fileset\MatcherInterface")
      *
-     * @var Matchers|null
+     * @var MatcherInterface|null
      */
     private $whitelist;
+
+    /**
+     * Constructor
+     *
+     * @param string $baseDirectory
+     * @param MatcherInterface|null $whitelist
+     * @param MatcherInterface|null $blacklist
+     */
+    public function __construct(
+        string $baseDirectory,
+        ?MatcherInterface $whitelist = null,
+        ?MatcherInterface $blacklist = null
+    )
+    {
+        $this->baseDirectory = $baseDirectory;
+        $this->blacklist = $blacklist;
+        $this->whitelist = $whitelist;
+    }
 
     /**
      * {@inheritdoc}
      */
     public function getIterator(ContextInterface $context): Iterator
     {
-        if (null === $this->getBaseDirectory()) {
-            throw new BuildException();
-        }
-
         $baseDirectory = $context->getProperties()
-            ->filter($this->getBaseDirectory());
+            ->filter($this->baseDirectory);
 
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator(
-                $baseDirectory,
-                FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO | FilesystemIterator::SKIP_DOTS
+        return new WhitelistBlacklistFilterIterator(
+            new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator(
+                    $baseDirectory,
+                    FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO | FilesystemIterator::SKIP_DOTS
+                ),
+                RecursiveIteratorIterator::CHILD_FIRST
             ),
-            RecursiveIteratorIterator::CHILD_FIRST
+            $baseDirectory,
+            $this->whitelist,
+            $this->blacklist
         );
-
-        if (null !== $this->getWhitelist() || null !== $this->getBlacklist()) {
-            $iterator = new WhitelistBlacklistFilterIterator($iterator);
-            $iterator->setBaseDirectory($this->getBaseDirectory());
-
-            if (null !== $this->getBlacklist()) {
-                $iterator->setBlacklist($this->getBlacklist());
-            }
-
-            if (null !== $this->getWhitelist()) {
-                $iterator->setWhitelist($this->getWhitelist());
-            }
-        }
-
-        return $iterator;
-    }
-
-    /**
-     * Get the base directory for the fileset
-     *
-     * @return string|null
-     */
-    public function getBaseDirectory()
-    {
-        return $this->baseDirectory;
-    }
-
-    /**
-     * Get the blacklist
-     *
-     * @return Matchers|null
-     */
-    public function getBlacklist()
-    {
-        return $this->blacklist;
-    }
-
-    /**
-     * Get the whitelist
-     *
-     * @return Matchers|null
-     */
-    public function getWhitelist()
-    {
-        return $this->whitelist;
-    }
-
-    /**
-     * Set the base directory for the fileset
-     *
-     * @param string $baseDirectory
-     * @return self
-     */
-    public function setBaseDirectory(string $baseDirectory): self
-    {
-        $this->baseDirectory = $baseDirectory;
-        return $this;
-    }
-
-    /**
-     * Set the blacklist
-     *
-     * @param Matchers $blacklist
-     * @return self
-     */
-    public function setBlacklist(Matchers $blacklist): self
-    {
-        $this->blacklist = $blacklist;
-        return $this;
-    }
-
-    /**
-     * Set the whitelist
-     *
-     * @param Matchers $whitelist
-     * @return self
-     */
-    public function setWhitelist(Matchers $whitelist): self
-    {
-        $this->whitelist = $whitelist;
-        return $this;
     }
 }

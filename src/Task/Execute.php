@@ -2,7 +2,7 @@
 /**
  * Pants
  *
- * Copyright (c) 2011-2017, Justin Hendrickson
+ * Copyright (c) 2011-2018, Justin Hendrickson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,6 +73,32 @@ class Execute implements TaskInterface
     protected $directory;
 
     /**
+     * Flag to print standard error on failure
+     *
+     * @JMS\Expose()
+     * @JMS\SerializedName("print-stderr")
+     * @JMS\SkipWhenEmpty()
+     * @JMS\Type("boolean")
+     * @JMS\XmlElement(cdata=false)
+     *
+     * @var bool|null
+     */
+    protected $printStderr;
+
+    /**
+     * Flag to print standard output on success
+     *
+     * @JMS\Expose()
+     * @JMS\SerializedName("print-stdout")
+     * @JMS\SkipWhenEmpty()
+     * @JMS\Type("boolean")
+     * @JMS\XmlElement(cdata=false)
+     *
+     * @var bool|null
+     */
+    protected $printStdout;
+
+    /**
      * {@inheritdoc}
      */
     public function execute(ContextInterface $context): TaskInterface
@@ -81,7 +107,13 @@ class Execute implements TaskInterface
         // todo add support for storing stderr to a property
         // todo add support for command exit code to a property
 
-        if (null === $this->getCommand()) {
+        $command = $context->getProperties()
+            ->filter($this->command);
+
+        $directory = $context->getProperties()
+            ->filter($this->directory);
+
+        if (null === $command) {
             $message = 'Command not set';
 
             $context->getLogger()->error(
@@ -98,12 +130,6 @@ class Execute implements TaskInterface
                 $this
             );
         }
-
-        $command = $context->getProperties()
-            ->filter($this->getCommand());
-
-        $directory = $context->getProperties()
-            ->filter($this->getDirectory());
 
         $descriptorSpec = array(
             1 => array('pipe', 'w'),
@@ -160,6 +186,12 @@ class Execute implements TaskInterface
         $return = proc_close($process);
 
         if (0 !== $return) {
+            $printStderr = $this->printStderr ?? true;
+
+            if ($printStderr) {
+                echo $stderr;
+            }
+
             $message = sprintf(
                 'Command "%s" in directory "%s" failed because "%s"',
                 $command,
@@ -181,27 +213,37 @@ class Execute implements TaskInterface
             );
         }
 
+        $printStdout = $this->printStdout ?? true;
+
+        if ($printStdout) {
+            echo $stdout;
+        }
+
         return $this;
     }
 
     /**
-     * Get the command to execute
+     * Set the print standard error on failure flag
      *
-     * @return string|null
+     * @param boolean $printStderr
+     * @return self
      */
-    public function getCommand()
+    public function setPrintStderr(bool $printStderr): self
     {
-        return $this->command;
+        $this->printStderr = $printStderr;
+        return $this;
     }
 
     /**
-     * Get the directory to execute the command in
+     * Set the print standard output on success flag
      *
-     * @return string|null
+     * @param boolean $printStdout
+     * @return self
      */
-    public function getDirectory()
+    public function setPrintStdout(bool $printStdout): self
     {
-        return $this->directory;
+        $this->printStdout = $printStdout;
+        return $this;
     }
 
     /**

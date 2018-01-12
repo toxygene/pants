@@ -2,7 +2,7 @@
 /**
  * Pants
  *
- * Copyright (c) 2011-2017, Justin Hendrickson
+ * Copyright (c) 2011-2018, Justin Hendrickson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+declare(strict_types=1);
+
 namespace Pants\Fileset\Fileset;
 
 use SplFileInfo;
@@ -46,5 +48,5 @@ interface MatcherInterface
      * @param string|null $baseDirectory
      * @return boolean
      */
-    public function match(SplFileInfo $file, string $baseDirectory = null);
+    public function match(SplFileInfo $file, string $baseDirectory = null): bool;
 }

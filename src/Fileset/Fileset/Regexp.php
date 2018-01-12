@@ -2,7 +2,7 @@
 /**
  * Pants
  *
- * Copyright (c) 2011-2017, Justin Hendrickson
+ * Copyright (c) 2011-2018, Justin Hendrickson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+declare(strict_types=1);
+
 namespace Pants\Fileset\Fileset;
 
 use JMS\Serializer\Annotation as JMS;
@@ -36,56 +38,44 @@ use SplFileInfo;
 
 /**
  * Matcher that does a regular expression match on the path
+ *
+ * @JMS\ExclusionPolicy("all")
  */
 class Regexp implements MatcherInterface
 {
-
     /**
      * Regular expression pattern to match against
      *
      * @JMS\Expose()
      * @JMS\SerializedName("pattern")
-     * @JMS\SkipWhenEmpty()
      * @JMS\Type("string")
      * @JMS\XmlElement(cdata=false)
      *
      * @var string
      */
     protected $pattern;
-    
+
     /**
-     * Get the regular expression pattern to match against
+     * Constructor
      *
-     * @return string
+     * @param string $pattern
      */
-    public function getPattern()
+    public function __construct(string $pattern)
     {
-        return $this->pattern;
+        $this->pattern = $pattern;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function match(SplFileInfo $file, string $baseDirectory = null)
+    public function match(SplFileInfo $file, string $baseDirectory = null): bool
     {
         $path = preg_replace(
-            '#^' . preg_quote($baseDirectory, '#') . '/#',
+            '~^' . preg_quote($baseDirectory, '~') . '/~',
             '',
             $file->getPathname()
         );
 
-        return preg_match($this->getPattern(), $path) > 0;
-    }
-    
-    /**
-     * Set the regular expression pattern to match against
-     *
-     * @param string $pattern
-     * @return self
-     */
-    public function setPattern($pattern)
-    {
-        $this->pattern = $pattern;
-        return $this;
+        return preg_match($this->pattern, $path) > 0;
     }
 }

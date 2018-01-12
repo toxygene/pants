@@ -66,16 +66,6 @@ class OutputTest extends TaskTestCase
     }
 
     /**
-     * @covers ::getMessage
-     * @covers ::setMessage
-     */
-    public function testMessageCanBeSet()
-    {
-        $this->task->setMessage('one');
-        $this->assertEquals('one', $this->task->getMessage());
-    }
-
-    /**
      * @covers ::execute
      * @expectedException \Pants\Task\BuildException
      */
@@ -100,7 +90,7 @@ class OutputTest extends TaskTestCase
 
         ob_end_clean();
 
-        $this->assertEquals('one', $output);
+        $this->assertEquals("one\n", $output);
     }
 
 }

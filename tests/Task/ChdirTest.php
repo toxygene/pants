@@ -111,7 +111,6 @@ class ChdirTest extends TaskTestCase
     }
     
     /**
-     * @covers ::__construct
      * @covers ::execute
      */
     public function testChdirChangesTheCurrentWorkingDirectory()

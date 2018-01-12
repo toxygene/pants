@@ -2,7 +2,7 @@
 /**
  * Pants
  *
- * Copyright (c) 2017, Justin Hendrickson
+ * Copyright (c) 2011-2018, Justin Hendrickson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,33 +31,42 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace Pants\Fileset\Fileset;
 
 use ArrayIterator;
 use Iterator;
 use IteratorAggregate;
+use JMS\Serializer\Annotation as JMS;
+use SplFileInfo;
 
 /**
- * Matchers container
+ * Composite matcher
+ *
+ * @JMS\ExclusionPolicy("all")
  */
-class Matchers implements IteratorAggregate
+class CompositeMatcher implements IteratorAggregate, MatcherInterface
 {
-
     /**
-     * @var MatcherInterface[]|null
-     */
-    private $matchers;
-
-    /**
-     * Add a matcher
+     * @JMS\Expose()
+     * @JMS\SerializedName("matchers")
+     * @JMS\Type("array<Pants\Fileset\Fileset\MatcherInterface>")
      *
-     * @param MatcherInterface $matcher
-     * @return self
+     * @var MatcherInterface[]
      */
-    public function add(MatcherInterface $matcher): self
+    private $matchers = [];
+
+    /**
+     * Constructor
+     *
+     * @param MatcherInterface[] $matchers
+     */
+    public function __construct(array $matchers)
     {
-        $this->matchers[] = $matcher;
-        return $this;
+        foreach ($matchers as $matcher) {
+            $this->addMatcher($matcher);
+        }
     }
 
     /**
@@ -73,8 +82,35 @@ class Matchers implements IteratorAggregate
      *
      * @return MatcherInterface[]
      */
-    public function toArray(): array
+    public function getMatchers(): array
     {
         return $this->matchers;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function match(SplFileInfo $file, string $baseDirectory = null): bool
+    {
+        foreach ($this->matchers as $matcher) {
+            if ($matcher->match($file, $baseDirectory)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Add a matcher
+     *
+     * @param MatcherInterface $matcher
+     * @return self
+     */
+    private function addMatcher(MatcherInterface $matcher): self
+    {
+        $this->matchers[] = $matcher;
+        return $this;
+    }
+
 }

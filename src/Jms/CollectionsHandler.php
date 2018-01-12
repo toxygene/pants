@@ -2,7 +2,7 @@
 /**
  * Pants
  *
- * Copyright (c) 2017, Justin Hendrickson
+ * Copyright (c) 2011-2018, Justin Hendrickson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,18 +31,20 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace Pants\Jms;
 
 use JMS\Serializer\Context;
 use JMS\Serializer\GraphNavigator;
 use JMS\Serializer\Handler\SubscribingHandlerInterface;
 use JMS\Serializer\VisitorInterface;
-use Pants\Fileset\Fileset\AbstractMatcher;
-use Pants\Fileset\Fileset\Matchers;
+use Pants\Fileset\Fileset\CompositeMatcher;
+use Pants\Fileset\Fileset\MatcherInterface;
 use Pants\Property\Properties;
 use Pants\Target\Target;
 use Pants\Target\Targets;
-use Pants\Task\AbstractTaskInterface;
+use Pants\Task\TaskInterface;
 use Pants\Task\Tasks;
 
 /**
@@ -56,8 +58,8 @@ class CollectionsHandler implements SubscribingHandlerInterface
      */
     public static function getSubscribingMethods(): array
     {
-        $methods = array();
-        $formats = array('json', 'xml', 'yml');
+        $methods = [];
+        $formats = ['json', 'xml', 'yml'];
 
         foreach ($formats as $format) {
             $methods[] = [
@@ -90,14 +92,14 @@ class CollectionsHandler implements SubscribingHandlerInterface
 
             $methods[] = [
                 'direction' => GraphNavigator::DIRECTION_SERIALIZATION,
-                'type' => Matchers::class,
+                'type' => CompositeMatcher::class,
                 'format' => $format,
                 'method' => 'serializeMatchers'
             ];
 
             $methods[] = [
                 'direction' => GraphNavigator::DIRECTION_DESERIALIZATION,
-                'type' => Matchers::class,
+                'type' => CompositeMatcher::class,
                 'format' => $format,
                 'method' => 'deserializeMatchers'
             ];
@@ -156,7 +158,7 @@ class CollectionsHandler implements SubscribingHandlerInterface
      */
     public function deserializeTargets(
         VisitorInterface $visitor,
-        array $data,
+        $data,
         array $type,
         Context $context
     ) {
@@ -194,7 +196,7 @@ class CollectionsHandler implements SubscribingHandlerInterface
         $type['name'] = 'array';
         $type['params'] = [
             [
-                'name' => AbstractTaskInterface::class
+                'name' => TaskInterface::class
             ]
         ];
 
@@ -212,7 +214,7 @@ class CollectionsHandler implements SubscribingHandlerInterface
      */
     public function deserializeTasks(
         VisitorInterface $visitor,
-        array $data,
+        $data,
         array $type,
         Context $context
     ): Tasks {
@@ -221,7 +223,7 @@ class CollectionsHandler implements SubscribingHandlerInterface
         $type['name'] = 'array';
         $type['params'] = [
             [
-                'name' => AbstractTaskInterface::class
+                'name' => TaskInterface::class
             ]
         ];
 
@@ -236,23 +238,23 @@ class CollectionsHandler implements SubscribingHandlerInterface
      * Serialize a Pants\Fileset\Fileset\Matchers object
      *
      * @param VisitorInterface $visitor
-     * @param Matchers $matchers
+     * @param CompositeMatcher $matchers
      * @param array $type
      * @param Context $context
      * @return array
      */
     public function serializeMatchers(
         VisitorInterface $visitor,
-        Matchers $matchers,
+        CompositeMatcher $matchers,
         array $type,
         Context $context
     ): array {
         $type['name'] = 'array';
         $type['params'] = [
-            'name' => AbstractMatcher::class
+            'name' => MatcherInterface::class
         ];
 
-        return $visitor->visitArray($matchers->toArray(), $type, $context);
+        return $visitor->visitArray($matchers->getMatchers(), $type, $context);
     }
 
     /**
@@ -262,28 +264,26 @@ class CollectionsHandler implements SubscribingHandlerInterface
      * @param array $data
      * @param array $type
      * @param Context $context
-     * @return Matchers
+     * @return CompositeMatcher
      */
     public function deserializeMatchers(
         VisitorInterface $visitor,
-        array $data,
+        $data,
         array $type,
         Context $context
-    ): Matchers {
-        $matchers = new Matchers();
-
+    ): CompositeMatcher {
         $type['name'] = 'array';
         $type['params'] = [
             [
-                'name' => AbstractMatcher::class
+                'name' => MatcherInterface::class
             ]
         ];
 
         foreach ($visitor->visitArray($data, $type, $context) as $matcher) {
-            $matchers->add($matcher);
+            $matchers[] = $matcher;
         }
 
-        return $matchers;
+        return new CompositeMatcher($matchers);
     }
 
     /**
@@ -320,7 +320,7 @@ class CollectionsHandler implements SubscribingHandlerInterface
      */
     public function deserializeProperties(
         VisitorInterface $visitor,
-        array $data,
+        $data,
         array $type,
         Context $context
     ): Properties {

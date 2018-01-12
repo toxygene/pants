@@ -38,7 +38,7 @@ use Pants\Property\PropertiesInterface;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @coversDefaultClass \Pants\FileSet\FileSet
+ * @coversDefaultClass \Pants\Fileset\Fileset
  */
 class FilesetTest extends TestCase
 {
@@ -71,8 +71,9 @@ class FilesetTest extends TestCase
             )
         );
 
-        $this->fileset = new Fileset();
-        $this->fileset->setBaseDirectory(vfsStream::url('root'));
+        $this->fileset = new Fileset(
+            vfsStream::url('root')
+        );
     }
     
     /**
@@ -88,7 +89,7 @@ class FilesetTest extends TestCase
     /**
      * @covers ::getIterator
      */
-    public function testIteratesOverAllFilesAndDirectories()
+    public function testIteratorContainsAllTheFilesInTheBaseDirectory()
     {
         /** @var ContextInterface|\PHPUnit_Framework_MockObject_MockObject $mockContext */
         $mockContext = $this->createMock(ContextInterface::class);

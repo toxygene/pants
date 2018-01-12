@@ -39,7 +39,7 @@ use Pants\Task\TaskInterface;
 use PHPUnit\Framework\TestCase;
 
 /**
- *
+ * @coversDefaultClass \Pants\Target\Target
  */
 class TargetTest extends TestCase
 {
@@ -140,7 +140,7 @@ class TargetTest extends TestCase
             ->method('execute')
             ->will($this->returnValue($mockTask));
 
-        /** @var ContextInterface|\PHPUnit_Framework_MockObject_MockObject $mockProject */
+        /** @var ContextInterface|\PHPUnit_Framework_MockObject_MockObject $mockContext */
         $mockContext = $this->createMock(ContextInterface::class);
 
         $this->target
@@ -157,7 +157,7 @@ class TargetTest extends TestCase
      */
     public function testTasksAreNotExecutedIfIfIsNotSet()
     {
-        /** @var ContextInterface|\PHPUnit_Framework_MockObject_MockObject $mockProject */
+        /** @var ContextInterface|\PHPUnit_Framework_MockObject_MockObject $mockContext */
         $mockContext = $this->createMock(ContextInterface::class);
 
         /** @var TaskInterface|\PHPUnit_Framework_MockObject_MockObject $mockTask */

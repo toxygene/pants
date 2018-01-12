@@ -101,7 +101,6 @@ class DeleteTest extends TaskTestCase
     }
 
     /**
-     * @covers ::__construct
      * @covers ::execute
      */
     public function testFileIsDeleted()

@@ -2,7 +2,7 @@
 /**
  * Pants
  *
- * Copyright (c) 2014-2017, Justin Hendrickson
+ * Copyright (c) 2011-2018, Justin Hendrickson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,13 +39,11 @@ use Pants\Property\PropertiesInterface;
 use Pants\Target\Executor\Executor;
 use Pants\Target\Targets;
 use Pants\Target\TargetsInterface;
-use Pants\Task\Call;
 use Pants\Task\TaskInterface;
 use Pants\Task\Tasks;
 use Pants\Task\TasksInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
-use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
 /**
@@ -98,62 +96,22 @@ class Project implements ProjectInterface, LoggerAwareInterface
 
     /**
      * Constructor
+     *
+     * @param Properties $properties
+     * @param Targets $target
+     * @param Tasks $tasks
      */
-    public function __construct()
+    public function __construct(
+        Properties $properties,
+        Targets $target,
+        Tasks $tasks
+    )
     {
         $this->logger = new NullLogger();
-        $this->properties = new Properties();
-        $this->targets = new Targets();
-        $this->tasks = new Tasks();
-    }
 
-    /**
-     * Get the logger
-     *
-     * @return LoggerInterface
-     */
-    public function getLogger()
-    {
-        return $this->logger;
-    }
-
-    /**
-     * Get the properties
-     *
-     * @return PropertiesInterface
-     */
-    public function getProperties()
-    {
-        return $this->properties;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getTargetDescriptions(): array
-    {
-        return $this->getTargets()
-            ->getDescriptions();
-    }
-
-    /**
-     * Get the targets
-     *
-     * @return TargetsInterface
-     */
-    public function getTargets()
-    {
-        return $this->targets;
-    }
-
-    /**
-     * Get the tasks
-     *
-     * @return TasksInterface|TaskInterface[]
-     */
-    public function getTasks()
-    {
-        return $this->tasks;
+        $this->properties = $properties;
+        $this->targets = $target;
+        $this->tasks = $tasks;
     }
 
     /**
@@ -163,48 +121,62 @@ class Project implements ProjectInterface, LoggerAwareInterface
     {
         $this->setup();
 
-        $this->getLogger()->info(
-            'executing tasks'
-        );
+        $this->logger
+            ->info(
+                'executing tasks'
+            );
 
         $context = new Context(
-            $this->getProperties(),
-            new Executor($this->getTargets()),
-            $this->getLogger()
+            $this->properties,
+            new Executor($this->targets),
+            $this->logger
         );
 
-        foreach ($this->getTasks() as $task) {
+        foreach ($this->tasks as $task) {
             $task->execute($context);
         }
 
         if (empty($targets)) {
-            $this->getLogger()->info(
-                'no targets specified'
-            );
-
-            if (!$this->getProperties()->exists(PropertiesInterface::DEFAULT_TARGET_NAME)) {
-                $this->getLogger()->warning(
-                    'no default target set, bailing out'
+            $this->logger
+                ->info(
+                    'no targets specified'
                 );
+
+            if (!$this->properties->exists(PropertiesInterface::DEFAULT_TARGET_NAME)) {
+                $this->logger
+                    ->warning(
+                        'no default target set, bailing out'
+                    );
 
                 return $this;
             }
 
             $targets = [
-                $this->getProperties()
+                $this->properties
                     ->get(PropertiesInterface::DEFAULT_TARGET_NAME)
             ];
         }
 
-        $this->getLogger()->info(
-            'executing targets',
-            $targets
-        );
+        $this->logger
+            ->info(
+                'executing targets',
+                $targets
+            );
 
         $context->getExecutor()
             ->executeMultiple($targets, $context);
 
         return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getTargetDescriptions(): array
+    {
+        // todo add project description?
+        return $this->targets
+            ->getDescriptions();
     }
 
     /**
@@ -223,16 +195,18 @@ class Project implements ProjectInterface, LoggerAwareInterface
             $builtinProperties["env.{$key}"] = $value;
         }
 
-        $this->getLogger()->info(
-            'setting builtin properties'
-        );
+        $this->logger
+            ->info(
+                'setting builtin properties'
+            );
 
-        $this->getLogger()->debug(
-            'builtin properties',
-            $builtinProperties
-        );
+        $this->logger
+            ->debug(
+                'builtin properties',
+                $builtinProperties
+            );
 
-        $this->getProperties()
+        $this->properties
             ->merge($builtinProperties);
 
         return $this;

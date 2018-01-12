@@ -37,7 +37,7 @@ use Pants\Task\Call;
 use Pants\Task\TaskInterface;
 
 /**
- * @coversDefaultClass \Pants\Target\Call
+ * @coversDefaultClass \Pants\Task\Call
  */
 class CallTest extends TaskTestCase
 {
@@ -92,7 +92,6 @@ class CallTest extends TaskTestCase
     }
 
     /**
-     * @covers ::__construct
      * @covers ::execute
      * @expectedException \Pants\Task\BuildException
      */
@@ -120,7 +119,6 @@ class CallTest extends TaskTestCase
     }
 
     /**
-     * @covers ::__construct
      * @covers ::execute
      */
     public function testExecutingTheTaskCausesTheTargetToBeExecuted()

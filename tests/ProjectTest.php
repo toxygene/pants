@@ -33,9 +33,12 @@ namespace PantsTest;
 
 use Pants\ContextInterface;
 use Pants\Project;
+use Pants\Property\Properties;
 use Pants\Property\PropertiesInterface;
 use Pants\Target\Target;
+use Pants\Target\Targets;
 use Pants\Task\TaskInterface;
+use Pants\Task\Tasks;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -57,7 +60,11 @@ class ProjectTest extends TestCase
     {
         parent::setUp();
 
-        $this->project = new Project();
+        $this->project = new Project(
+            new Properties(),
+            new Targets(),
+            new Tasks()
+        );
     }
 
     /**
@@ -68,14 +75,6 @@ class ProjectTest extends TestCase
         parent::tearDown();
 
         unset($this->project);
-    }
-
-    /**
-     * @covers ::getProperties
-     */
-    public function testPropertiesCanBeRetrieved()
-    {
-        $this->assertInstanceOf('Pants\Property\Properties', $this->project->getProperties());
     }
 
     /**

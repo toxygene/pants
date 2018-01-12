@@ -2,7 +2,7 @@
 /**
  * Pants
  *
- * Copyright (c) 2011-2017, Justin Hendrickson
+ * Copyright (c) 2011-2018, Justin Hendrickson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,6 @@ use JMS\Serializer\Annotation as JMS;
  */
 class Properties implements PropertiesInterface
 {
-
     /**
      * Items
      *
@@ -115,7 +114,7 @@ class Properties implements PropertiesInterface
             }
 
             $encountered[] = $matches[2];
-            $input = $matches[1] . $this->filterWhileCheckingForCycles($this->{$matches[2]}, $encountered) . $matches[3];
+            $input = $matches[1] . $this->filterWhileCheckingForCycles($this->get($matches[2]), $encountered) . $matches[3];
         }
         return $input;
     }

@@ -11,7 +11,8 @@
         "mikey179/vfsStream": "^1.6",
         "ulrichsg/getopt-php": "^3.0",
         "monolog/monolog": "^1.23",
-        "toxygene/pale": "^1.0"
+        "toxygene/pale": "^1.0",
+        "phpstan/phpstan": "^0.9.1"
     },
     "require-dev": {
         "phpunit/phpunit": "^6.2"

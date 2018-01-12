@@ -103,7 +103,6 @@ class ChownTest extends TaskTestCase
     }
 
     /**
-     * @covers ::__construct
      * @covers ::execute
      */
     public function testOwnerIsSet()
