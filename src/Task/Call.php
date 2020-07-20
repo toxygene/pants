@@ -31,10 +31,13 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace Pants\Task;
 
 use JMS\Serializer\Annotation as JMS;
 use Pants\ContextInterface;
+use Pants\Task\Exception\MissingPropertyException;
 
 /**
  * Call another target task
@@ -51,75 +54,51 @@ class Call implements TaskInterface
      *
      * @JMS\Expose()
      * @JMS\SerializedName("target")
-     * @JMS\SkipWhenEmpty()
      * @JMS\Type("string")
      * @JMS\XmlElement(cdata=false)
      *
-     * @var string|null
+     * @var string
      */
     protected $target;
+
+    /**
+     * Constructor
+     *
+     * @param string $target
+     */
+    public function __construct(string $target)
+    {
+        $this->target = $target;
+    }
 
     /**
      * {@inheritdoc}
      */
     public function execute(ContextInterface $context): TaskInterface
     {
-        if (null === $this->getTarget()) {
-            $context->getLogger()->error(
-                'No target set',
-                [
-                    'target' => $context->getCurrentTarget()
-                        ->getName()
-                ]
-            );
-
-            throw new BuildException(
-                'No target set',
+        if (empty($this->target)) {
+            throw new MissingPropertyException(
+                'target',
                 $context->getCurrentTarget(),
                 $this
             );
         }
 
         $target = $context->getProperties()
-            ->filter($this->getTarget());
+            ->filter($this->target);
 
         $context->getLogger()->info(
-            sprintf(
-                'Calling target "%s"',
-                $target
-            ),
+            'Calling target "{call_target}" from "{current_target}"',
             [
-                'target' => $context->getCurrentTarget()
+                'current_target' => $context->getCurrentTarget()
                     ->getName(),
-                'call target' => $target
+                'call_target' => $target
             ]
         );
 
         $context->getExecutor()
             ->executeSingle($target, $context);
 
-        return $this;
-    }
-
-    /**
-     * Get the name of the target to call
-     *
-     * @return string|null
-     */
-    public function getTarget()
-    {
-        return $this->target;
-    }
-
-    /**
-     * Set the name of the target to call
-     *
-     * @param string $target
-     * @return self
-     */
-    public function setTarget(string $target): self
-    {
-        $this->target = $target;
         return $this;
     }
 }

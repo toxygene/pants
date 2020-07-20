@@ -33,18 +33,18 @@
 
 declare(strict_types=1);
 
-namespace Pants\Fileset;
+namespace Pants;
 
 use Iterator;
 use Pants\ContextInterface;
 
 /**
- * Interface for a fileset
+ * Interface for files
  */
-interface FilesetInterface
+interface FilesInterface
 {
     /**
-     * Get an iterator for the fileset
+     * Get an iterator for the files
      *
      * @param ContextInterface $context
      * @return Iterator

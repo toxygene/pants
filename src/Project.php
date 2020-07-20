@@ -31,6 +31,8 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace Pants;
 
 use JMS\Serializer\Annotation as JMS;
@@ -95,6 +97,14 @@ class Project implements ProjectInterface, LoggerAwareInterface
     protected $tasks;
 
     /**
+     * {@inheritdoc}
+     */
+    static public function getVersion()
+    {
+        return '0.0.1'; // todo connect to a build system
+    }
+
+    /**
      * Constructor
      *
      * @param Properties $properties
@@ -130,9 +140,7 @@ class Project implements ProjectInterface, LoggerAwareInterface
         $this->setup();
 
         $this->logger
-            ->info(
-                'executing tasks'
-            );
+            ->info('executing tasks');
 
         $context = new Context(
             $this->properties,
@@ -146,15 +154,11 @@ class Project implements ProjectInterface, LoggerAwareInterface
 
         if (empty($targets)) {
             $this->logger
-                ->info(
-                    'no targets specified'
-                );
+                ->info('no targets specified');
 
             if (!$this->properties->exists(PropertiesInterface::DEFAULT_TARGET_NAME)) {
                 $this->logger
-                    ->warning(
-                        'no default target set, bailing out'
-                    );
+                    ->warning('no default target set, bailing out');
 
                 return $this;
             }
@@ -171,8 +175,13 @@ class Project implements ProjectInterface, LoggerAwareInterface
                 $targets
             );
 
-        $context->getExecutor()
-            ->executeMultiple($targets, $context);
+        try {
+            $context->getExecutor()
+                ->executeMultiple($targets, $context);
+        } catch (BuildException $e) {
+            $this->logger
+                ->error($e->getMessage());
+        }
 
         return $this;
     }
@@ -188,14 +197,14 @@ class Project implements ProjectInterface, LoggerAwareInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Run setup tasks
      */
     protected function setup(): ProjectInterface
     {
         $builtinProperties = [
             'basedir' => getcwd(),
             'host.os' => PHP_OS,
-            'pants.version' => '@version@',
+            'pants.version' => self::getVersion(),
             'php.version' => PHP_VERSION
         ];
 
@@ -204,9 +213,7 @@ class Project implements ProjectInterface, LoggerAwareInterface
         }
 
         $this->logger
-            ->info(
-                'setting builtin properties'
-            );
+            ->info('setting builtin properties');
 
         $this->logger
             ->debug(

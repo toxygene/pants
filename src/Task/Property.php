@@ -31,10 +31,14 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace Pants\Task;
 
 use JMS\Serializer\Annotation as JMS;
 use Pants\ContextInterface;
+use Pants\Task\Exception\MissingPropertyException;
+use Pants\Task\Exception\TaskException;
 
 /**
  * Set a property task
@@ -45,17 +49,15 @@ use Pants\ContextInterface;
  */
 class Property implements TaskInterface
 {
-
     /**
      * Name
      *
      * @JMS\Expose()
      * @JMS\SerializedName("name")
-     * @JMS\SkipWhenEmpty()
      * @JMS\Type("string")
      * @JMS\XmlElement(cdata=false)
      *
-     * @var string|null
+     * @var string
      */
     protected $name;
 
@@ -64,11 +66,10 @@ class Property implements TaskInterface
      *
      * @JMS\Expose()
      * @JMS\SerializedName("value")
-     * @JMS\SkipWhenEmpty()
      * @JMS\Type("string")
      * @JMS\XmlElement(cdata=false)
      *
-     * @var string|null
+     * @var string
      */
     protected $value;
 
@@ -77,37 +78,25 @@ class Property implements TaskInterface
      */
     public function execute(ContextInterface $context): TaskInterface
     {
-        if (null === $this->getName()) {
-            $message = 'Name not set';
+        $name = $context->getProperties()
+            ->filter($this->name);
 
-            $context->getLogger()->error(
-                $message,
-                [
-                    'target' => $context->getCurrentTarget()
-                        ->getName()
-                ]
-            );
-
-            throw new BuildException(
-                $message,
+        if (empty($name)) {
+            throw new MissingPropertyException(
+                'name',
                 $context->getCurrentTarget(),
                 $this
             );
         }
 
-        $name = $context->getProperties()
-            ->filter($this->getName());
-
         $value = $context->getProperties()
-            ->filter($this->getValue());
+            ->filter($this->value);
 
         $context->getLogger()->debug(
-            sprintf(
-                'Setting property "%s" to "%s"',
-                $name,
-                $value
-            ),
+            'Setting property "{name}" to "{value}"',
             [
+                'name' => $name,
+                'value' => $value,
                 'target' => $context->getCurrentTarget()
                     ->getName()
             ]
@@ -116,50 +105,6 @@ class Property implements TaskInterface
         $context->getProperties()
             ->add($name, $value);
 
-        return $this;
-    }
-
-    /**
-     * Get the name
-     *
-     * @return string|null
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * Get the value
-     *
-     * @return string|null
-     */
-    public function getValue()
-    {
-        return $this->value;
-    }
-
-    /**
-     * Set the name
-     *
-     * @param string $name
-     * @return self
-     */
-    public function setName(string $name): self
-    {
-        $this->name = $name;
-        return $this;
-    }
-
-    /**
-     * Set the value
-     *
-     * @param string $value
-     * @return self
-     */
-    public function setValue(string $value): self
-    {
-        $this->value = $value;
         return $this;
     }
 }

@@ -31,10 +31,15 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace Pants\Task;
 
 use JMS\Serializer\Annotation as JMS;
+use Pants\BuildException;
 use Pants\ContextInterface;
+use Pants\Task\Exception\MissingPropertyException;
+use Pants\Task\Exception\TaskException;
 
 /**
  * Read input task
@@ -45,7 +50,6 @@ use Pants\ContextInterface;
  */
 class Input implements TaskInterface
 {
-
     /**
      * Default value
      *
@@ -107,7 +111,7 @@ class Input implements TaskInterface
      * @JMS\Type("string")
      * @JMS\XmlElement(cdata=false)
      *
-     * @var string|null
+     * @var string
      */
     protected $promptCharacter = '?';
 
@@ -116,11 +120,10 @@ class Input implements TaskInterface
      *
      * @JMS\Expose()
      * @JMS\SerializedName("property-name")
-     * @JMS\SkipWhenEmpty()
      * @JMS\Type("string")
      * @JMS\XmlElement(cdata=false)
      *
-     * @var string|null
+     * @var string
      */
     protected $propertyName;
 
@@ -141,42 +144,28 @@ class Input implements TaskInterface
      */
     public function execute(ContextInterface $context): TaskInterface
     {
-        if (!$this->getPropertyName()) {
-            $message = 'Property name not set';
+        $propertyName = $context->getProperties()
+            ->filter($this->propertyName);
 
-            $context->getLogger()->error(
-                $message,
-                [
-                    'target' => $context->getCurrentTarget()
-                        ->getName()
-                ]
-            );
-
-            throw new BuildException(
-                $message,
+        if (empty($propertyName)) {
+            throw new MissingPropertyException(
+                'property-name',
                 $context->getCurrentTarget(),
                 $this
             );
         }
 
-        $inputStream = $this->buildStream(
-            $this->getInputStream()
-        );
+        $inputStream = $this->buildStream($this->inputStream);
+        $outputStream = $this->buildStream($this->outputStream);
 
-        $outputStream = $this->buildStream(
-            $this->getOutputStream()
-        );
+        $message = $context->getProperties()
+            ->filter($this->message);
 
-        if ($this->getMessage()) {
-            $message = $context->getProperties()
-                ->filter($this->getMessage());
-
+        if (!empty($message)) {
             $context->getLogger()->debug(
-                sprintf(
-                    'Writing message "%s" to output stream',
-                    $message
-                ),
+                'Writing message "{message}" to output stream',
                 [
+                    'message' => $message,
                     'target' => $context->getCurrentTarget()
                         ->getName()
                 ]
@@ -185,24 +174,22 @@ class Input implements TaskInterface
             fwrite($outputStream, $message);
         }
 
-        $validArgs = array();
+        $validArgs = [];
 
-        foreach ($this->getValidArgs() as $validArg) {
-            $validArgs[] = $context->getProperties()
-                ->filter($validArg);
-        }
+        if (!empty($validArgs)) {
+            foreach ($this->validArgs as $validArg) {
+                $validArgs[] = $context->getProperties()
+                    ->filter($validArg);
+            }
 
-        if ($validArgs) {
             $validArgsString = '[' . implode('/', $validArgs) . ']';
 
             $context->getLogger()->debug(
-                sprintf(
-                    'Writing valid arguments "%s" to output stream',
-                    $validArgsString
-                ),
+                'Writing valid arguments "{valid_args}" to output stream',
                 [
                     'target' => $context->getCurrentTarget()
-                        ->getName()
+                        ->getName(),
+                    'valid_args' => $validArgsString
                 ]
             );
 
@@ -210,14 +197,12 @@ class Input implements TaskInterface
         }
 
         $promptCharacter = $context->getProperties()
-            ->filter($this->getPromptCharacter());
+            ->filter($this->promptCharacter);
 
         $context->getLogger()->debug(
-            sprintf(
-                'Writing prompt character "%s" to output stream',
-                $promptCharacter
-            ),
+            'Writing prompt character "{prompt_character}" to output stream',
             [
+                'prompt_character' => $promptCharacter,
                 'target' => $context->getCurrentTarget()
                     ->getName()
             ]
@@ -227,16 +212,14 @@ class Input implements TaskInterface
 
         $value = trim(fgets($inputStream));
 
-        if (trim($value) == '' && null !== $this->getDefaultValue()) {
-            $defaultValue = $context->getProperties()
-                ->filter($this->getDefaultValue());
+        $defaultValue = $context->getProperties()
+            ->filter($this->defaultValue);
 
+        if (empty($value) && !empty($defaultValue)) {
             $context->getLogger()->debug(
-                sprintf(
-                    'Using default value "%s"',
-                    $defaultValue
-                ),
+                'Using default value "{default_value}"',
                 [
+                    'default_value' => $defaultValue,
                     'target' => $context->getCurrentTarget()
                         ->getName()
                 ]
@@ -245,37 +228,23 @@ class Input implements TaskInterface
             $value = $defaultValue;
         }
 
-        if ($validArgs && !in_array($value, $validArgs)) {
-            $message = sprintf(
-                'Value "%s" is not a valid value "%s"',
-                $value,
-                '[' . implode('/', $validArgs) . ']'
-            );
-
-            $context->getLogger()->error(
-                $message,
-                [
-                    'target' => $context->getCurrentTarget()
-                        ->getName()
-                ]
-            );
-
-            throw new BuildException(
-                $message,
+        if (!empty($validArgs) && !in_array($value, $validArgs)) {
+            throw new TaskException(
+                sprintf(
+                    'Value "%s" is not a valid value "%s"',
+                    $value,
+                    '[' . implode('/', $validArgs) . ']'
+                ),
                 $context->getCurrentTarget(),
                 $this
             );
         }
 
-        $propertyName = $this->getPropertyName();
-
         $context->getLogger()->debug(
-            sprintf(
-                'Setting property "%s" to value "%s"',
-                $propertyName,
-                $value
-            ),
+            'Setting property "{property_name}" to value "{value}"',
             [
+                'name' => $propertyName,
+                'property_value' => $value,
                 'target' => $context->getCurrentTarget()
                     ->getName()
             ]
@@ -287,165 +256,11 @@ class Input implements TaskInterface
     }
 
     /**
-     * Get the default value
-     *
-     * @return string|null
-     */
-    public function getDefaultValue()
-    {
-        return $this->defaultValue;
-    }
-
-    /**
-     * Get the input stream
-     *
-     * @return string|resource|null
-     */
-    public function getInputStream()
-    {
-        return $this->inputStream;
-    }
-
-    /**
-     * Get the message
-     *
-     * @return string|null
-     */
-    public function getMessage()
-    {
-        return $this->message;
-    }
-
-    /**
-     * Get the output stream
-     *
-     * @return string|resource|null
-     */
-    public function getOutputStream()
-    {
-        return $this->outputStream;
-    }
-
-    /**
-     * Get the prompt character
-     *
-     * @return string|null
-     */
-    public function getPromptCharacter()
-    {
-        return $this->promptCharacter;
-    }
-
-    /**
-     * Get the property name
-     *
-     * @return string|null
-     */
-    public function getPropertyName()
-    {
-        return $this->propertyName;
-    }
-
-    /**
-     * Get the valid arguments
-     *
-     * @return string[]
-     */
-    public function getValidArgs()
-    {
-        return $this->validArgs;
-    }
-
-    /**
-     * Set the default value
-     *
-     * @param string $defaultValue
-     * @return self
-     */
-    public function setDefaultValue(string $defaultValue): self
-    {
-        $this->defaultValue = $defaultValue;
-        return $this;
-    }
-
-    /**
-     * Set the input stream
-     *
-     * @param string|resource $inputStream
-     * @return self
-     */
-    public function setInputStream($inputStream): self
-    {
-        $this->inputStream = $inputStream;
-        return $this;
-    }
-
-    /**
-     * Set the message
-     *
-     * @param string $message
-     * @return self
-     */
-    public function setMessage(string $message): self
-    {
-        $this->message = $message;
-        return $this;
-    }
-
-    /**
-     * Set the output stream
-     *
-     * @param string|resource $outputStream
-     * @return self
-     */
-    public function setOutputStream($outputStream): self
-    {
-        $this->outputStream = $outputStream;
-        return $this;
-    }
-
-    /**
-     * Set the prompt character
-     *
-     * @param string $promptCharacter
-     * @return self
-     */
-    public function setPromptCharacter(string $promptCharacter): self
-    {
-        $this->promptCharacter = $promptCharacter;
-        return $this;
-    }
-
-    /**
-     * Set the property name
-     *
-     * @param string $propertyName
-     * @return self
-     */
-    public function setPropertyName(string $propertyName): self
-    {
-        $this->propertyName = $propertyName;
-        return $this;
-    }
-    
-    /**
-     * Set the valid arguments
-     *
-     * @param array $validArgs
-     * @return self
-     */
-    public function setValidArgs(array $validArgs): self
-    {
-        $this->validArgs = $validArgs;
-        return $this;
-    }
-
-    /**
      * Build a stream
      *
      * @param string|resource|null $stream
      * @return resource
-     * @throws BuildException
+     * @throws TaskException
      */
     private function buildStream($stream)
     {
@@ -464,7 +279,7 @@ class Input implements TaskInterface
                 return STDERR;
 
             default:
-                throw new BuildException('');
+                throw new BuildException();
         }
     }
 }

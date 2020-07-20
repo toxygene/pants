@@ -67,7 +67,7 @@ class ExecuteTest extends TaskTestCase
 
     /**
      * @covers ::execute
-     * @expectedException \Pants\Task\BuildException
+     * @expectedException \Pants\Task\Exception\TaskException
      */
     public function testCommandIsRequired()
     {
@@ -77,7 +77,7 @@ class ExecuteTest extends TaskTestCase
 
     /**
      * @covers ::execute
-     * @expectedException \Pants\Task\BuildException
+     * @expectedException \Pants\Task\Exception\TaskException
      */
     public function testFailureThrowsABuildException()
     {
@@ -114,7 +114,7 @@ class ExecuteTest extends TaskTestCase
     /**
      * @covers ::__construct
      * @covers ::execute
-     * @expectedException \Pants\Task\BuildException
+     * @expectedException \Pants\Task\Exception\TaskException
      */
     public function testFailedCommandThrowsException()
     {

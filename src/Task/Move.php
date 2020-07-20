@@ -31,13 +31,18 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace Pants\Task;
 
 use ErrorException;
 use JMS\Serializer\Annotation as JMS;
 use Pants\ContextInterface;
-use Pants\Fileset\Fileset;
+use Pants\Files;
 use function Pale\run;
+use Pants\FilesInterface;
+use Pants\Task\Exception\MissingPropertyException;
+use Pants\Task\Exception\TaskException;
 
 /**
  * Move file task
@@ -48,19 +53,18 @@ use function Pale\run;
  */
 class Move implements TaskInterface
 {
-
     /**
      * Fileset to move
      *
      * @JMS\Expose()
      * @JMS\SerializedName("fileset")
      * @JMS\SkipWhenEmpty()
-     * @JMS\Type("Pants\Fileset\Fileset")
+     * @JMS\Type("Pants\Fileset\FilesetInterface")
      * @JMS\XmlElement(cdata=false)
      *
-     * @var Fileset|null
+     * @var FilesInterface|null
      */
-    protected $fileSet;
+    protected $fileset;
 
     /**
      * Target file
@@ -80,11 +84,10 @@ class Move implements TaskInterface
      *
      * @JMS\Expose()
      * @JMS\SerializedName("destination")
-     * @JMS\SkipWhenEmpty()
      * @JMS\Type("string")
      * @JMS\XmlElement(cdata=false)
      *
-     * @var string|null
+     * @var string
      */
     protected $destination;
 
@@ -93,49 +96,29 @@ class Move implements TaskInterface
      */
     public function execute(ContextInterface $context): TaskInterface
     {
-        if (null === $this->getSource() && null === $this->getFileset()) {
-            $message = 'Source not set';
+        $source = $context->getProperties()
+            ->filter($this->source);
 
-            $context->getLogger()->error(
-                $message,
-                [
-                    'target' => $context->getCurrentTarget()
-                        ->getName()
-                ]
-            );
-
-            throw new BuildException(
-                $message,
-                $context->getCurrentTarget(),
-                $this
-            );
-        }
-
-        if (null === $this->getDestination()) {
-            $message = 'Directory not set';
-
-            $context->getLogger()->error(
-                $message,
-                [
-                    'target' => $context->getCurrentTarget()
-                        ->getName()
-                ]
-            );
-
-            throw new BuildException(
-                $message,
+        if (empty($source) && empty($this->fileset)) {
+            throw new MissingPropertyException(
+                'source',
                 $context->getCurrentTarget(),
                 $this
             );
         }
 
         $destination = $context->getProperties()
-            ->filter($this->getDestination());
+            ->filter($this->destination);
 
-        $source = $context->getProperties()
-            ->filter($this->getSource());
+        if (empty($destination)) {
+            throw new MissingPropertyException(
+                'destination',
+                $context->getCurrentTarget(),
+                $this
+            );
+        }
 
-        if (null !== $this->getSource()) {
+        if (!empty($source)) {
             if (!is_dir($source) && is_dir($destination)) {
                 $dest = $destination . DIRECTORY_SEPARATOR . basename($source);
             } else {
@@ -143,12 +126,10 @@ class Move implements TaskInterface
             }
 
             $context->getLogger()->debug(
-                sprintf(
-                    'Renaming source "%s" to destination "%s"',
-                    $source,
-                    $dest
-                ),
+                'Renaming source "{source}" to destination "{destination}"',
                 [
+                    'destination' => $destination,
+                    'source' => $source,
                     'target' => $context->getCurrentTarget()
                         ->getName()
                 ]
@@ -157,38 +138,26 @@ class Move implements TaskInterface
             $this->rename($source, $dest, $context);
         }
 
-        if (null !== $this->getFileset()) {
+        if (!empty($this->fileset)) {
             if (is_file($destination)) {
-                $message = sprintf(
-                    'Cannot move a fileset to file "%s"',
-                    $destination
-                );
-
-                $context->getLogger()->error(
-                    $message,
-                    [
-                        'target' => $context->getCurrentTarget()
-                            ->getName()
-                    ]
-                );
-
-                throw new BuildException(
-                    $message,
+                throw new TaskException(
+                    sprintf(
+                        'Cannot move a fileset to file "%s"',
+                        $destination
+                    ),
                     $context->getCurrentTarget(),
                     $this
                 );
             }
 
-            foreach ($this->getFileset()->getIterator($context) as $source) {
+            foreach ($this->fileset->getIterator($context) as $source) {
                 $dest = $destination . DIRECTORY_SEPARATOR . basename($source);
 
                 $context->getLogger()->debug(
-                    sprintf(
-                        'Renaming source "%s" to destination "%s"',
-                        $source,
-                        $dest
-                    ),
+                    'Renaming source "{source}" to destination "{destination}"',
                     [
+                        'destination' => $dest,
+                        'source' => $source,
                         'target' => $context->getCurrentTarget()
                             ->getName()
                     ]
@@ -202,78 +171,12 @@ class Move implements TaskInterface
     }
 
     /**
-     * Get the destination
-     *
-     * @return string|null
-     */
-    public function getDestination()
-    {
-        return $this->destination;
-    }
-
-    /**
-     * Get the fileset
-     *
-     * @return Fileset|null
-     */
-    public function getFileset()
-    {
-        return $this->fileSet;
-    }
-
-    /**
-     * Get the target file
-     *
-     * @return string|null
-     */
-    public function getSource()
-    {
-        return $this->source;
-    }
-
-    /**
-     * Set the destination file
-     *
-     * @param string $destination
-     * @return self
-     */
-    public function setDestination(string $destination): self
-    {
-        $this->destination = $destination;
-        return $this;
-    }
-
-    /**
-     * Set the fileset
-     *
-     * @param Fileset $fileSet
-     * @return self
-     */
-    public function setFileSet(Fileset $fileSet)
-    {
-        $this->fileSet = $fileSet;
-        return $this;
-    }
-
-    /**
-     * Set the target file
-     *
-     * @param string $source
-     * @return self
-     */
-    public function setSource(string $source): self
-    {
-        $this->source = $source;
-        return $this;
-    }
-
-    /**
      * Rename a source
      *
      * @param string $source
      * @param string $destination
      * @param ContextInterface $context
-     * @throws BuildException
+     * @throws TaskException
      */
     protected function rename($source, $destination, ContextInterface $context)
     {
@@ -282,22 +185,13 @@ class Move implements TaskInterface
                 rename($source, $destination);
             });
         } catch (ErrorException $e) {
-            $message = sprintf(
-                'Could not rename source "%s" to destination "%s" because "%s"',
-                $source,
-                $destination,
-                $e->getMessage()
-            );
-
-            $context->getLogger()->error(
-                $message,
-                [
-                    'target' => $context->getCurrentTarget()
-                ]
-            );
-
-            throw new BuildException(
-                $message,
+            throw new TaskException(
+                sprintf(
+                    'Could not rename source "%s" to destination "%s" because "%s"',
+                    $source,
+                    $destination,
+                    $e->getMessage()
+                ),
                 $context->getCurrentTarget(),
                 $this,
                 $e

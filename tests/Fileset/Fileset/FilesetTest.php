@@ -33,7 +33,7 @@ namespace Pants\Test\Fileset\Fileset;
 
 use org\bovigo\vfs\vfsStream;
 use Pants\ContextInterface;
-use Pants\Fileset\Fileset;
+use Pants\Files;
 use Pants\Property\PropertiesInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -46,7 +46,7 @@ class FilesetTest extends TestCase
     /**
      * File set
      *
-     * @var Fileset
+     * @var Files
      */
     protected $fileset;
 
@@ -71,7 +71,7 @@ class FilesetTest extends TestCase
             )
         );
 
-        $this->fileset = new Fileset(
+        $this->fileset = new Files(
             vfsStream::url('root')
         );
     }

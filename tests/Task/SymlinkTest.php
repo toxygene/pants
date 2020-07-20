@@ -70,7 +70,7 @@ class SymlinkTest extends TaskTestCase
     
     /**
      * @covers ::execute
-     * @expectedException \Pants\Task\BuildException
+     * @expectedException \Pants\Task\Exception\TaskException
      */
     public function testMissingLinkThrowsException()
     {
@@ -80,7 +80,7 @@ class SymlinkTest extends TaskTestCase
     
     /**
      * @covers ::execute
-     * @expectedException \Pants\Task\BuildException
+     * @expectedException \Pants\Task\Exception\TaskException
      */
     public function testMissingTargetThrowsException()
     {

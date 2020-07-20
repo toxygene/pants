@@ -31,10 +31,14 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace Pants\Task;
 
 use JMS\Serializer\Annotation as JMS;
 use Pants\ContextInterface;
+use Pants\Task\Exception\MissingPropertyException;
+use Pants\Task\Exception\TaskException;
 
 /**
  * Set properties from a file task
@@ -45,17 +49,15 @@ use Pants\ContextInterface;
  */
 class PropertyFile implements TaskInterface
 {
-
     /**
      * File
      *
      * @JMS\Expose()
      * @JMS\SerializedName("file")
-     * @JMS\SkipWhenEmpty()
      * @JMS\Type("string")
      * @JMS\XmlElement(cdata=false)
      *
-     * @var string|null
+     * @var string
      */
     protected $file;
 
@@ -64,26 +66,16 @@ class PropertyFile implements TaskInterface
      */
     public function execute(ContextInterface $context): TaskInterface
     {
-        if (null === $this->getFile()) {
-            $message = 'File not set';
+        $file = $context->getProperties()
+            ->filter($this->file);
 
-            $context->getLogger()->error(
-                'file not set',
-                [
-                    'target' => $context->getCurrentTarget()
-                        ->getName()
-                ]
-            );
-
-            throw new BuildException(
-                $message,
+        if (empty($file)) {
+            throw new MissingPropertyException(
+                'file',
                 $context->getCurrentTarget(),
                 $this
             );
         }
-
-        $file = $context->getProperties()
-            ->filter($this->getFile());
 
         foreach (parse_ini_file($file, false, INI_SCANNER_RAW) as $name => $value) {
             $name = $context->getProperties()
@@ -93,14 +85,12 @@ class PropertyFile implements TaskInterface
                 ->filter($value);
 
             $context->getLogger()->debug(
-                sprintf(
-                    'Setting property "%s" to value "%s"',
-                    $name,
-                    $value
-                ),
+                'Setting property "{name}" to value "{value}"',
                 [
+                    'name' => $name,
                     'target' => $context->getCurrentTarget()
-                        ->getName()
+                        ->getName(),
+                    'value' => $value
                 ]
             );
 
@@ -108,28 +98,6 @@ class PropertyFile implements TaskInterface
                 ->add($name, $value);
         }
 
-        return $this;
-    }
-
-    /**
-     * Get the file
-     *
-     * @return string|null
-     */
-    public function getFile()
-    {
-        return $this->file;
-    }
-
-    /**
-     * Set the file
-     *
-     * @param string $file
-     * @return self
-     */
-    public function setFile(string $file): self
-    {
-        $this->file = $file;
         return $this;
     }
 }

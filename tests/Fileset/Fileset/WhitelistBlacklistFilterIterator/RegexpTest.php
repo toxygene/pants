@@ -32,7 +32,7 @@
 namespace Pants\Test\Fileset\Fileset\WhitelistBlacklistFilterIterator;
 
 use org\bovigo\vfs\vfsStream;
-use Pants\Fileset\Fileset\Regexp;
+use Pants\Matcher\RegexpMatcher;
 use PHPUnit\Framework\TestCase;
 use SplFileInfo;
 
@@ -47,7 +47,7 @@ class RegexpTest extends TestCase
     /**
      * Regexp matcher
      *
-     * @var Regexp
+     * @var RegexpMatcher
      */
     protected $matcher;
     
@@ -58,7 +58,7 @@ class RegexpTest extends TestCase
     {
         parent::setUp();
 
-        $this->matcher = new Regexp('#^asdf$#');
+        $this->matcher = new RegexpMatcher('#^asdf$#');
         
         vfsStream::setup('root', null, array(
             'one' => array(

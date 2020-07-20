@@ -31,6 +31,8 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace Pants;
 
 use Pants\Property\PropertiesInterface;

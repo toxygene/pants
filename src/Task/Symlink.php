@@ -31,12 +31,16 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace Pants\Task;
 
 use ErrorException;
 use JMS\Serializer\Annotation as JMS;
 use Pants\ContextInterface;
 use function Pale\run;
+use Pants\Task\Exception\MissingPropertyException;
+use Pants\Task\Exception\TaskException;
 
 /**
  * Symlink file task
@@ -47,7 +51,6 @@ use function Pale\run;
  */
 class Symlink implements TaskInterface
 {
-
     /**
      * Link file
      *
@@ -79,55 +82,33 @@ class Symlink implements TaskInterface
      */
     public function execute(ContextInterface $context): TaskInterface
     {
-        if (null === $this->getLink()) {
-            $message = 'Link not set';
+        $link = $context->getProperties()
+            ->filter($this->link);
 
-            $context->getLogger()->error(
-                $message,
-                [
-                    'target' => $context->getCurrentTarget()
-                        ->getName()
-                ]
-            );
-
-            throw new BuildException(
-                $message,
-                $context->getCurrentTarget(),
-                $this
-            );
-        }
-
-        if (null === $this->getSource()) {
-            $message = 'Source not set';
-
-            $context->getLogger()->error(
-                $message,
-                [
-                    'target' => $context->getCurrentTarget()
-                        ->getName()
-                ]
-            );
-
-            throw new BuildException(
-                $message,
+        if (empty($link)) {
+            throw new MissingPropertyException(
+                'link',
                 $context->getCurrentTarget(),
                 $this
             );
         }
 
         $source = $context->getProperties()
-            ->filter($this->getSource());
+            ->filter($this->source);
 
-        $link = $context->getProperties()
-            ->filter($this->getLink());
+        if (empty($source)) {
+            throw new MissingPropertyException(
+                'source',
+                $context->getCurrentTarget(),
+                $this
+            );
+        }
 
         $context->getLogger()->debug(
-            sprintf(
-                'Symlinking source "%s" to link "%s"',
-                $source,
-                $link
-            ),
+            'Symlinking source "%s" to link "%s"',
             [
+                'link' => $link,
+                'source' => $source,
                 'target' => $context->getCurrentTarget()
                     ->getName()
             ]
@@ -138,73 +119,19 @@ class Symlink implements TaskInterface
                 symlink($source, $link);
             });
         } catch (ErrorException $e) {
-            $message = sprintf(
-                'Could not symlink source "%s" to link "%s" because "%s"',
-                $source,
-                $link,
-                $e->getMessage()
-            );
-
-            $context->getLogger()->error(
-                $message,
-                [
-                    'target' => $context->getCurrentTarget()
-                        ->getName()
-                ]
-            );
-
-            throw new BuildException(
-                $message,
+            throw new TaskException(
+                sprintf(
+                    'Could not symlink source "%s" to link "%s" because "%s"',
+                    $source,
+                    $link,
+                    $e->getMessage()
+                ),
                 $context->getCurrentTarget(),
                 $this,
                 $e
             );
         }
 
-        return $this;
-    }
-
-    /**
-     * Get the link
-     *
-     * @return string|null
-     */
-    public function getLink()
-    {
-        return $this->link;
-    }
-
-    /**
-     * Get the source
-     *
-     * @return string|null
-     */
-    public function getSource()
-    {
-        return $this->source;
-    }
-    
-    /**
-     * Set the link
-     *
-     * @param string $link
-     * @return self
-     */
-    public function setLink(string $link): self
-    {
-        $this->link = $link;
-        return $this;
-    }
-
-    /**
-     * Set the source
-     *
-     * @param string $source
-     * @return self
-     */
-    public function setSource(string $source): self
-    {
-        $this->source = $source;
         return $this;
     }
 }

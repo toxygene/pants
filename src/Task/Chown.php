@@ -31,11 +31,16 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace Pants\Task;
 
 use ErrorException;
 use JMS\Serializer\Annotation as JMS;
 use Pants\ContextInterface;
+use Pants\FilesInterface;
+use Pants\Task\Exception\MissingPropertyException;
+use Pants\Task\Exception\TaskException;
 use Traversable;
 use function Pale\run;
 
@@ -48,11 +53,15 @@ use function Pale\run;
  */
 class Chown implements TaskInterface
 {
-
     /**
      * Target files
      *
-     * @var Traversable|null
+     * @JMS\Expose()
+     * @JMS\SerializedName("files")
+     * @JMS\Type("Pants\Fileset\FilesetInterface")
+     * @JMS\XmlElement(cdata=false)
+     *
+     * @var FilesInterface
      */
     protected $files;
 
@@ -61,7 +70,6 @@ class Chown implements TaskInterface
      *
      * @JMS\Expose()
      * @JMS\SerializedName("owner")
-     * @JMS\SkipWhenEmpty()
      * @JMS\Type("string")
      * @JMS\XmlElement(cdata=false)
      *
@@ -70,60 +78,53 @@ class Chown implements TaskInterface
     protected $owner;
 
     /**
+     * Constructor
+     *
+     * @param iterable $files
+     * @param string $owner
+     */
+    public function __construct(
+        iterable $files,
+        string $owner
+    )
+    {
+        $this->files = $files;
+        $this->owner = $owner;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function execute(ContextInterface $context): TaskInterface
     {
-        if (!$this->getFiles()) {
-            $message = 'Files not set';
-
-            $context->getLogger()->error(
-                $message,
-                [
-                    'target' => $context->getCurrentTarget()
-                        ->getName()
-                ]
-            );
-
-            throw new BuildException(
-                $message,
+        if (empty($this->files)) {
+            throw new MissingPropertyException(
+                'files',
                 $context->getCurrentTarget(),
                 $this
             );
         }
 
-        if (!$this->getOwner()) {
-            $message = 'Owner not set';
-
-            $context->getLogger()->error(
-                $message,
-                [
-                    'target' => $context->getCurrentTarget()
-                        ->getName()
-                ]
-            );
-
-            throw new BuildException(
-                $message,
+        if (empty($this->owner)) {
+            throw new MissingPropertyException(
+                'owner',
                 $context->getCurrentTarget(),
                 $this
             );
         }
 
         $owner = $context->getProperties()
-            ->filter($this->getOwner());
+            ->filter($this->owner);
 
-        foreach ($this->getFiles() as $file) {
+        foreach ($this->files->getIterator($context) as $file) {
             $file = $context->getProperties()
                 ->filter($file);
 
             $context->getLogger()->debug(
-                sprintf(
-                    'Setting owner "%owner" on file "%file"',
-                    $owner,
-                    $file
-                ),
+                'Setting owner "{owner}" on file "{file}"',
                 [
+                    'file' => $file,
+                    'owner' => $owner,
                     'target' => $context->getCurrentTarget()
                         ->getName()
                 ]
@@ -134,22 +135,13 @@ class Chown implements TaskInterface
                     chown($file, $owner);
                 });
             } catch (ErrorException $e) {
-                $message = sprintf(
-                    'Could not set owner "%s" on file "%s" because "%s"',
-                    $owner,
-                    $file,
-                    $e->getMessage()
-                );
-
-                $context->getLogger()->error(
-                    $message,
-                    [
-                        'target' => $context->getCurrentTarget()
-                    ]
-                );
-
-                throw new BuildException(
-                    $message,
+                throw new TaskException(
+                    sprintf(
+                        'Could not set owner "%s" on file "%s" because "%s"',
+                        $owner,
+                        $file,
+                        $e->getMessage()
+                    ),
                     $context->getCurrentTarget(),
                     $this,
                     $e
@@ -157,62 +149,6 @@ class Chown implements TaskInterface
             }
         }
 
-        return $this;
-    }
-
-    /**
-     * Get the target files
-     *
-     * @return Traversable|null
-     */
-    public function getFiles()
-    {
-        return $this->files;
-    }
-
-    /**
-     * Get the owner
-     *
-     * @return string
-     */
-    public function getOwner()
-    {
-        return $this->owner;
-    }
-
-    /**
-     * Set the target file
-     *
-     * @param string $file
-     * @return self
-     */
-    public function setFile(string $file): self
-    {
-        $this->files = [$file];
-        return $this;
-    }
-
-    /**
-     * Set the target files
-     *
-     * @param Traversable $files
-     * @return self
-     */
-    public function setFiles(Traversable $files): self
-    {
-        $this->files = $files;
-        return $this;
-    }
-
-    /**
-     * Set the owner
-     *
-     * @param string $owner
-     * @return self
-     */
-    public function setOwner(string $owner): self
-    {
-        $this->owner = $owner;
         return $this;
     }
 }

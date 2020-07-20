@@ -31,12 +31,16 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace Pants\Task;
 
 use ErrorException;
 use JMS\Serializer\Annotation as JMS;
 use Pants\ContextInterface;
 use function Pale\run;
+use Pants\Task\Exception\TaskException;
+use Pants\Task\Exception\MissingPropertyException;
 
 /**
  * Change the current working directory task
@@ -53,45 +57,44 @@ class Chdir implements TaskInterface
      *
      * @JMS\Expose()
      * @JMS\SerializedName("directory")
-     * @JMS\SkipWhenEmpty()
      * @JMS\Type("string")
      * @JMS\XmlElement(cdata=false)
      *
-     * @var string|null
+     * @var string
      */
     protected $directory;
+
+    /**
+     * Constructor
+     *
+     * @param string $directory
+     */
+    public function __construct(string $directory)
+    {
+        $this->directory = $directory;
+    }
 
     /**
      * {@inheritdoc}
      */
     public function execute(ContextInterface $context): TaskInterface
     {
-        if (null === $this->getDirectory()) {
-            $context->getLogger()->error(
-                'Directory not set',
-                [
-                    'target' => $context->getCurrentTarget()
-                        ->getName()
-                ]
-            );
-
-            throw new BuildException(
-                'Directory not set',
+        if (empty($this->directory)) {
+            throw new MissingPropertyException(
+                'directory',
                 $context->getCurrentTarget(),
                 $this
             );
         }
 
         $directory = $context->getProperties()
-            ->filter($this->getDirectory());
+            ->filter($this->directory);
 
         $context->getLogger()->debug(
-            sprintf(
-                'Changing current working directory to "%s"',
-                $directory
-            ),
+            'Changing current working directory to "{directory}"',
             [
-                'target' => $context->getCurrentTarget()
+                'directory' => $directory,
+                'current_target' => $context->getCurrentTarget()
                     ->getName()
             ]
         );
@@ -101,51 +104,18 @@ class Chdir implements TaskInterface
                 return chdir($directory);
             });
         } catch (ErrorException $e) {
-            $message = sprintf(
-                'Could not change the current working directory to "%s" because "%s"',
-                $directory,
-                $e->getMessage()
-            );
-
-            $context->getLogger()->error(
-                $message,
-                [
-                    'target' => $context->getCurrentTarget()
-                        ->getName(),
-                    'reason' => $e->getMessage()
-                ]
-            );
-
-            throw new BuildException(
-                $message,
+            throw new TaskException(
+                sprintf(
+                    'Could not change the current working directory to "%s" because "%s"',
+                    $directory,
+                    $e->getMessage()
+                ),
                 $context->getCurrentTarget(),
                 $this,
                 $e
             );
         }
 
-        return $this;
-    }
-
-    /**
-     * Get the target directory
-     *
-     * @return string|null
-     */
-    public function getDirectory()
-    {
-        return $this->directory;
-    }
-
-    /**
-     * Set the target directory
-     *
-     * @param string $directory
-     * @return self
-     */
-    public function setDirectory(string $directory): self
-    {
-        $this->directory = $directory;
         return $this;
     }
 }

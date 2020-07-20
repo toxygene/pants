@@ -31,12 +31,16 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace Pants\Task;
 
 use ErrorException;
 use JMS\Serializer\Annotation as JMS;
 use Pants\ContextInterface;
 use function Pale\run;
+use Pants\Task\Exception\MissingPropertyException;
+use Pants\Task\Exception\TaskException;
 
 /**
  * Copy file(s) task
@@ -44,6 +48,7 @@ use function Pale\run;
  * @JMS\ExclusionPolicy("all")
  *
  * @package Pants\Task
+ * @todo refactor to support filesets?
  */
 class Copy implements TaskInterface
 {
@@ -53,75 +58,72 @@ class Copy implements TaskInterface
      *
      * @JMS\Expose()
      * @JMS\SerializedName("destination")
-     * @JMS\SkipWhenEmpty()
      * @JMS\Type("string")
      * @JMS\XmlElement(cdata=false)
      *
-     * @var string|null
+     * @var string
      */
     protected $destination;
 
     /**
      * Source file
      *
-     * @var string|null
+     * @JMS\Expose()
+     * @JMS\SerializedName("source")
+     * @JMS\Type("string")
+     * @JMS\XmlElement(cdata=false)
+     *
+     * @var string
      */
     protected $source;
+
+    /**
+     * Constructor
+     *
+     * @param string $source
+     * @param string $destination
+     */
+    public function __construct(
+        string $source,
+        string $destination
+    )
+    {
+        $this->destination = $destination;
+        $this->source = $source;
+    }
 
     /**
      * {@inheritdoc}
      */
     public function execute(ContextInterface $context): TaskInterface
     {
-        if (null === $this->getSource()) {
-            $message = 'Source not set';
-
-            $context->getLogger()->error(
-                $message,
-                [
-                    'target' => $context->getCurrentTarget()
-                        ->getName()
-                ]
-            );
-
-            throw new BuildException(
-                $message,
+        if (empty($this->source)) {
+            throw new MissingPropertyException(
+                'source',
                 $context->getCurrentTarget(),
                 $this
             );
         }
 
-        if (null === $this->getDestination()) {
-            $message = 'Destination not set';
-
-            $context->getLogger()->error(
-                $message,
-                [
-                    'target' => $context->getCurrentTarget()
-                        ->getName()
-                ]
-            );
-
-            throw new BuildException(
-                $message,
+        if (empty($this->destination)) {
+            throw new MissingPropertyException(
+                'destination',
                 $context->getCurrentTarget(),
                 $this
             );
         }
 
         $source = $context->getProperties()
-            ->filter($this->getSource());
+            ->filter($this->source);
 
         $destination = $context->getProperties()
-            ->filter($this->getDestination());
+            ->filter($this->destination);
 
         $context->getLogger()->debug(
-            sprintf(
-                'Copying source "%s" to destination "%s"',
-                $source,
-                $destination
-            ),
+            'Copying source "{source}" to destination "{destination}"',
             [
+                'destination' => $destination,
+                'source' => $source,
                 'target' => $context->getCurrentTarget()
                     ->getName()
             ]
@@ -132,72 +134,19 @@ class Copy implements TaskInterface
                 copy($source, $destination);
             });
         } catch (ErrorException $e) {
-            $message = sprintf(
-                'Could not copy source "%s" to destination "%s" because "%s"',
-                $source,
-                $destination,
-                $e->getMessage()
-            );
-
-            $context->getLogger()->error(
-                $message,
-                [
-                    'target' => $context->getCurrentTarget()
-                ]
-            );
-
-            throw new BuildException(
-                $message,
+            throw new TaskException(
+                sprintf(
+                    'Could not copy source "%s" to destination "%s" because "%s"',
+                    $source,
+                    $destination,
+                    $e->getMessage()
+                ),
                 $context->getCurrentTarget(),
                 $this,
                 $e
             );
         }
 
-        return $this;
-    }
-
-    /**
-     * Get the destination
-     *
-     * @return string|null
-     */
-    public function getDestination()
-    {
-        return $this->destination;
-    }
-
-    /**
-     * Get the target file
-     *
-     * @return string|null
-     */
-    public function getSource()
-    {
-        return $this->source;
-    }
-
-    /**
-     * Set the destination file
-     *
-     * @param string $destination
-     * @return self
-     */
-    public function setDestination(string $destination): self
-    {
-        $this->destination = $destination;
-        return $this;
-    }
-
-    /**
-     * Set the target file
-     *
-     * @param string $source
-     * @return self
-     */
-    public function setSource(string $source): self
-    {
-        $this->source = $source;
         return $this;
     }
 }

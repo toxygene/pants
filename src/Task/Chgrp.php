@@ -31,11 +31,16 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace Pants\Task;
 
 use ErrorException;
 use JMS\Serializer\Annotation as JMS;
 use Pants\ContextInterface;
+use Pants\FilesInterface;
+use Pants\Task\Exception\MissingPropertyException;
+use Pants\Task\Exception\TaskException;
 use Traversable;
 use function Pale\run;
 
@@ -52,7 +57,12 @@ class Chgrp implements TaskInterface
     /**
      * Target files
      *
-     * @var array|null
+     * @JMS\Expose()
+     * @JMS\SerializedName("files")
+     * @JMS\Type("Pants\Fileset\FilesetInterface")
+     * @JMS\XmlElement(cdata=false)
+     *
+     * @var FilesInterface
      */
     protected $files;
 
@@ -61,69 +71,61 @@ class Chgrp implements TaskInterface
      *
      * @JMS\Expose()
      * @JMS\SerializedName("group")
-     * @JMS\SkipWhenEmpty()
      * @JMS\Type("string")
      * @JMS\XmlElement(cdata=false)
      *
-     * @var string|null
+     * @var string
      */
     protected $group;
+
+    /**
+     * Constructor
+     *
+     * @param FilesInterface $files
+     * @param string $group
+     */
+    public function __construct(
+        FilesInterface $files,
+        string $group
+    )
+    {
+        $this->files = $files;
+        $this->group = $group;
+    }
 
     /**
      * {@inheritdoc}
      */
     public function execute(ContextInterface $context): TaskInterface
     {
-        if (null === $this->getFiles()) {
-            $message = 'Files not set';
-
-            $context->getLogger()->error(
-                $message,
-                [
-                    'target' => $context->getCurrentTarget()
-                        ->getName()
-                ]
-            );
-
-            throw new BuildException(
-                $message,
+        if (empty($this->files)) {
+            throw new MissingPropertyException(
+                'files',
                 $context->getCurrentTarget(),
                 $this
             );
         }
 
-        if (null === $this->getGroup()) {
-            $message = 'Group not set';
-
-            $context->getLogger()->error(
-                $message,
-                [
-                    'target' => $context->getCurrentTarget()
-                        ->getName()
-                ]
-            );
-
-            throw new BuildException(
-                $message,
+        if (empty($this->group)) {
+            throw new MissingPropertyException(
+                'group',
                 $context->getCurrentTarget(),
                 $this
             );
         }
 
         $group = $context->getProperties()
-            ->filter($this->getGroup());
+            ->filter($this->group);
 
-        foreach ($this->getFiles() as $file) {
+        foreach ($this->files->getIterator($context) as $file) {
             $file = $context->getProperties()
                 ->filter($file);
 
             $context->getLogger()->debug(
-                sprintf(
-                    'Setting group "%s" on file "%s"',
-                    $group,
-                    $file
-                ),
+                'Setting group "{group}" on file "{file}"',
                 [
+                    'file' => $file,
+                    'group' => $group,
                     'target' => $context->getCurrentTarget()
                         ->getName()
                 ]
@@ -134,24 +136,13 @@ class Chgrp implements TaskInterface
                     chgrp($file, (int)$group);
                 });
             } catch (ErrorException $e) {
-                $message = sprintf(
-                    'Could not set group "%s" on file "%s" because "%s"',
-                    $group,
-                    $file,
-                    $e->getMessage()
-                );
-
-                $context->getLogger()->error(
-                    $message,
-                    [
-                        'target' => $context->getCurrentTarget()
-                            ->getName(),
-                        'reason' => $e->getMessage()
-                    ]
-                );
-
-                throw new BuildException(
-                    $message,
+                throw new TaskException(
+                    sprintf(
+                        'Could not set group "%s" on file "%s" because "%s"',
+                        $group,
+                        $file,
+                        $e->getMessage()
+                    ),
                     $context->getCurrentTarget(),
                     $this,
                     $e
@@ -159,62 +150,6 @@ class Chgrp implements TaskInterface
             }
         }
 
-        return $this;
-    }
-
-    /**
-     * Get the target files
-     *
-     * @return array|null
-     */
-    public function getFiles()
-    {
-        return $this->files;
-    }
-
-    /**
-     * Get the group
-     *
-     * @return string|null
-     */
-    public function getGroup()
-    {
-        return $this->group;
-    }
-
-    /**
-     * Set the target file
-     *
-     * @param string $file
-     * @return self
-     */
-    public function setFile(string $file): self
-    {
-        $this->files = [$file];
-        return $this;
-    }
-
-    /**
-     * Set the target files
-     *
-     * @param Traversable $files
-     * @return self
-     */
-    public function setFiles(Traversable $files): self
-    {
-        $this->files = $files;
-        return $this;
-    }
-
-    /**
-     * Set the group
-     *
-     * @param string $group
-     * @return self
-     */
-    public function setGroup(string $group): self
-    {
-        $this->group = $group;
         return $this;
     }
 }

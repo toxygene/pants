@@ -31,10 +31,14 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace Pants\Task;
 
 use JMS\Serializer\Annotation as JMS;
 use Pants\ContextInterface;
+use Pants\Task\Exception\MissingPropertyException;
+use Pants\Task\Exception\TaskException;
 
 /**
  * Execute a shell command task
@@ -51,11 +55,10 @@ class Execute implements TaskInterface
      *
      * @JMS\Expose()
      * @JMS\SerializedName("command")
-     * @JMS\SkipWhenEmpty()
      * @JMS\Type("string")
      * @JMS\XmlElement(cdata=false)
      *
-     * @var string|null
+     * @var string
      */
     protected $command;
 
@@ -64,11 +67,10 @@ class Execute implements TaskInterface
      *
      * @JMS\Expose()
      * @JMS\SerializedName("directory")
-     * @JMS\SkipWhenEmpty()
      * @JMS\Type("string")
      * @JMS\XmlElement(cdata=false)
      *
-     * @var string|null
+     * @var string
      */
     protected $directory;
 
@@ -99,6 +101,27 @@ class Execute implements TaskInterface
     protected $printStdout;
 
     /**
+     * Constructor
+     *
+     * @param string $command
+     * @param string $directory
+     * @param bool $printStderr
+     * @param bool $printStdout
+     */
+    public function __construct(
+        string $command,
+        string $directory,
+        bool $printStderr = false,
+        bool $printStdout = false
+    )
+    {
+        $this->command = $command;
+        $this->directory = $directory;
+        $this->printStderr = $printStderr;
+        $this->printStdout = $printStdout;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function execute(ContextInterface $context): TaskInterface
@@ -113,19 +136,17 @@ class Execute implements TaskInterface
         $directory = $context->getProperties()
             ->filter($this->directory);
 
-        if (null === $command) {
-            $message = 'Command not set';
-
-            $context->getLogger()->error(
-                $message,
-                [
-                    'target' => $context->getCurrentTarget()
-                        ->getName()
-                ]
+        if (empty($command)) {
+            throw new MissingPropertyException(
+                'command',
+                $context->getCurrentTarget(),
+                $this
             );
+        }
 
-            throw new BuildException(
-                $message,
+        if (empty($directory)) {
+            throw new MissingPropertyException(
+                'directory',
                 $context->getCurrentTarget(),
                 $this
             );
@@ -137,12 +158,10 @@ class Execute implements TaskInterface
         );
 
         $context->getLogger()->debug(
-            sprintf(
-                'Executing command "%s" in directory "%s"',
-                $command,
-                $directory
-            ),
+            'Executing command "{command}" in directory "{directory}"',
             [
+                'command' => $command,
+                'directory' => $directory,
                 'target' => $context->getCurrentTarget()
                     ->getName()
             ]
@@ -155,23 +174,13 @@ class Execute implements TaskInterface
             $directory
         );
 
-        if (false === $process) {
-            $message = sprintf(
-                'Could not execute command "%s" in directory "%s"',
-                $command,
-                $directory
-            );
-
-            $context->getLogger()->error(
-                $message,
-                [
-                    'target' => $context->getCurrentTarget()
-                        ->getName()
-                ]
-            );
-
-            throw new BuildException(
-                $message,
+        if (false == $process) {
+            throw new TaskException(
+                sprintf(
+                    'Could not execute command "%s" in directory "%s"',
+                    $command,
+                    $directory
+                ),
                 $context->getCurrentTarget(),
                 $this
             );
@@ -185,37 +194,24 @@ class Execute implements TaskInterface
 
         $return = proc_close($process);
 
-        if (0 !== $return) {
-            $printStderr = $this->printStderr ?? true;
-
-            if ($printStderr) {
+        if (0 != $return) {
+            if ($this->printStderr ?? true) {
                 echo $stderr;
             }
 
-            $message = sprintf(
-                'Command "%s" in directory "%s" failed because "%s"',
-                $command,
-                $directory,
-                $stderr
-            );
-
-            $context->getLogger()->error(
-                $message,
-                [
-                    'target' => $context->getCurrentTarget()
-                ]
-            );
-
-            throw new BuildException(
-                $message,
+            throw new TaskException(
+                sprintf(
+                    'Command "%s" in directory "%s" failed because "%s"',
+                    $command,
+                    $directory,
+                    $stderr
+                ),
                 $context->getCurrentTarget(),
                 $this
             );
         }
 
-        $printStdout = $this->printStdout ?? true;
-
-        if ($printStdout) {
+        if ($this->printStdout ?? true) {
             echo $stdout;
         }
 

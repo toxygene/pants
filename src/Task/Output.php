@@ -31,10 +31,14 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace Pants\Task;
 
 use JMS\Serializer\Annotation as JMS;
 use Pants\ContextInterface;
+use Pants\Task\Exception\MissingPropertyException;
+use Pants\Task\Exception\TaskException;
 
 /**
  * Output task
@@ -50,11 +54,10 @@ class Output implements TaskInterface
      *
      * @JMS\Expose()
      * @JMS\SerializedName("append-newline")
-     * @JMS\SkipWhenEmpty()
      * @JMS\Type("boolean")
      * @JMS\XmlElement(cdata=false)
      *
-     * @var bool|null
+     * @var boolean
      */
     protected $appendNewline;
 
@@ -67,78 +70,55 @@ class Output implements TaskInterface
      * @JMS\Type("string")
      * @JMS\XmlElement(cdata=false)
      *
-     * @var string|null
+     * @var string
      */
     protected $message;
+
+    /**
+     * Constructor
+     *
+     * @param string $message
+     * @param boolean $appendNewline
+     */
+    public function __construct(
+        string $message,
+        boolean $appendNewline = true
+    )
+    {
+        $this->appendNewline = $appendNewline;
+        $this->message = $message;
+    }
 
     /**
      * {@inheritdoc}
      */
     public function execute(ContextInterface $context): TaskInterface
     {
-        if (null === $this->message) {
-            $message = 'Message not set';
+        $message = $context->getProperties()
+            ->filter($this->message);
 
-            $context->getLogger()->error(
-                $message,
-                [
-                    'target' => $context->getCurrentTarget()
-                        ->getName()
-                ]
-            );
-
-            throw new BuildException(
-                $message,
+        if (empty($message)) {
+            throw new MissingPropertyException(
+                'message',
                 $context->getCurrentTarget(),
                 $this
             );
         }
 
-        $appendNewline = $this->appendNewline ?? true;
-
-        $filteredMessage = $context->getProperties()
-            ->filter($this->message);
-
         $context->getLogger()->debug(
-            sprintf(
-                'Outputting message "%s"',
-                $filteredMessage
-            ),
+            'Outputting message "{message}"',
             [
+                'message' => $message,
                 'target' => $context->getCurrentTarget()
             ]
         );
 
-        echo $filteredMessage;
+        echo $message;
 
-        if ($appendNewline) {
+        if ($this->appendNewline ?? true) {
             echo PHP_EOL;
         }
 
-        return $this;
-    }
-
-    /**
-     * Set the append newline flag
-     *
-     * @param boolean $appendNewline
-     * @return self
-     */
-    public function setAppendNewline(boolean $appendNewline): self
-    {
-        $this->appendNewline = $appendNewline;
-        return $this;
-    }
-
-    /**
-     * Set the message
-     *
-     * @param string $message
-     * @return self
-     */
-    public function setMessage(string $message): self
-    {
-        $this->message = $message;
         return $this;
     }
 }

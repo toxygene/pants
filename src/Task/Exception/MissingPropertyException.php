@@ -33,84 +33,40 @@
 
 declare(strict_types=1);
 
-namespace Pants\Fileset\Fileset;
+namespace Pants\Task\Exception;
 
-use ArrayIterator;
-use Iterator;
-use IteratorAggregate;
-use JMS\Serializer\Annotation as JMS;
-use SplFileInfo;
+use Pants\Target\TargetInterface;
+use Pants\Task\TaskInterface;
 
-/**
- * Composite matcher
- *
- * @JMS\ExclusionPolicy("all")
- */
-class CompositeMatcher implements IteratorAggregate, MatcherInterface
+class MissingPropertyException extends TaskException
 {
     /**
-     * @JMS\Expose()
-     * @JMS\SerializedName("matchers")
-     * @JMS\Type("array<Pants\Fileset\Fileset\MatcherInterface>")
-     *
-     * @var MatcherInterface[]
+     * @var string
      */
-    private $matchers = [];
+    private $property;
 
     /**
      * Constructor
      *
-     * @param MatcherInterface[] $matchers
+     * @param string $property
+     * @param TargetInterface $target
+     * @param TaskInterface $task
      */
-    public function __construct(array $matchers)
+    public function __construct(
+        string $property,
+        TargetInterface $target,
+        TaskInterface $task
+    )
     {
-        foreach ($matchers as $matcher) {
-            $this->addMatcher($matcher);
-        }
+        parent::__construct(
+            sprintf(
+                'Property "{property}" not set',
+                $property
+            ),
+            $target,
+            $task
+        );
+
+        $this->property = $property;
     }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getIterator(): Iterator
-    {
-        return new ArrayIterator($this->matchers);
-    }
-
-    /**
-     * Get the matchers
-     *
-     * @return MatcherInterface[]
-     */
-    public function getMatchers(): array
-    {
-        return $this->matchers;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function match(SplFileInfo $file, string $baseDirectory = null): bool
-    {
-        foreach ($this->matchers as $matcher) {
-            if ($matcher->match($file, $baseDirectory)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Add a matcher
-     *
-     * @param MatcherInterface $matcher
-     * @return self
-     */
-    private function addMatcher(MatcherInterface $matcher): self
-    {
-        $this->matchers[] = $matcher;
-        return $this;
-    }
-
 }

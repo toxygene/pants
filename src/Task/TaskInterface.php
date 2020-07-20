@@ -31,8 +31,11 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace Pants\Task;
 
+use Pants\BuildException;
 use Pants\ContextInterface;
 
 /**

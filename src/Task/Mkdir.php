@@ -31,12 +31,16 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace Pants\Task;
 
 use ErrorException;
 use JMS\Serializer\Annotation as JMS;
 use Pants\ContextInterface;
 use function Pale\run;
+use Pants\Task\Exception\MissingPropertyException;
+use Pants\Task\Exception\TaskException;
 
 /**
  * @JMS\ExclusionPolicy("all")
@@ -46,11 +50,10 @@ class Mkdir implements TaskInterface
     /**
      * @JMS\Expose()
      * @JMS\SerializedName("path")
-     * @JMS\SkipWhenEmpty()
      * @JMS\Type("string")
      * @JMS\XmlElement(cdata=false)
      *
-     * @var string|null
+     * @var string
      */
     private $path;
 
@@ -72,7 +75,7 @@ class Mkdir implements TaskInterface
      * @JMS\Type("boolean")
      * @JMS\XmlElement(cdata=false)
      *
-     * @var boolean|null
+     * @var boolean
      */
     private $recursive;
 
@@ -83,45 +86,52 @@ class Mkdir implements TaskInterface
      * @JMS\Type("boolean")
      * @JMS\XmlElement(cdata=false)
      *
-     * @var boolean|null
+     * @var boolean
      */
     private $skipIfPathExists;
+
+    /**
+     * Constructor
+     *
+     * @param string $path
+     * @param string|int $mode
+     * @param boolean $recursive
+     * @param boolean $skipIfPathExists
+     */
+    public function __construct(
+        string $path,
+        $mode = null,
+        boolean $recursive = true,
+        boolean $skipIfPathExists = true
+    )
+    {
+        $this->mode = $mode;
+        $this->path = $path;
+        $this->skipIfPathExists = $skipIfPathExists;
+        $this->recursive = $recursive;
+    }
 
     /**
      * {@inheritdoc}
      */
     public function execute(ContextInterface $context): TaskInterface
     {
-        if (null === $this->getPath()) {
-            $message = 'Path not set';
+        $path = $context->getProperties()
+            ->filter($this->getPath());
 
-            $context->getLogger()->error(
-                $message,
-                [
-                    'target' => $context->getCurrentTarget()
-                        ->getName()
-                ]
-            );
-
-            throw new BuildException(
-                $message,
+        if (empty($path)) {
+            throw new MissingPropertyException(
+                'path',
                 $context->getCurrentTarget(),
                 $this
             );
         }
 
-        $path = $context->getProperties()
-            ->filter($this->getPath());
-
         if ($this->getSkipIfPathExists() && file_exists($path)) {
-            $message = sprintf(
-                'Directory "%s" already exists, skipping creation',
-                $path
-            );
-
             $context->getLogger()->info(
-                $message,
+                'Path "{path}" already exists, skipping creation',
                 [
+                    'path' => $path,
                     'target' => $context->getCurrentTarget()
                         ->getName()
                 ]
@@ -133,18 +143,18 @@ class Mkdir implements TaskInterface
         $mode = $context->getProperties()
             ->filter($this->getMode());
 
-        if (is_string($mode)) {
+        if (empty($mode)) {
+            $mode = 0777;
+        } elseif (is_string($mode)) {
             $mode = octdec($mode);
         }
 
         $context->getLogger()->debug(
-            sprintf(
-                'Creating directory "%s" with mode "%s" and recursive "%s"',
-                $path,
-                decoct($mode),
-                $this->getRecursive()
-            ),
+            'Creating path "%s" with mode "%s" and recursive "%s"',
             [
+                'mode' => decoct($mode),
+                'path' => $path,
+                'recursive' => $this->recursive,
                 'target' => $context->getCurrentTarget()
                     ->getName()
             ]
@@ -155,23 +165,14 @@ class Mkdir implements TaskInterface
                 mkdir($path, $mode, $this->getRecursive());
             });
         } catch (ErrorException $e) {
-            $message = sprintf(
-                'Could not create directory "%s" with mode "%s" and recursive "%s" because "%s"',
-                $path,
-                decoct($mode),
-                $this->getRecursive(),
-                $e->getMessage()
-            );
-
-            $context->getLogger()->error(
-                $message,
-                [
-                    'target' => $context->getCurrentTarget()
-                ]
-            );
-
-            throw new BuildException(
-                $message,
+            throw new TaskException(
+                sprintf(
+                    'Could not create directory "%s" with mode "%s" and recursive "%s" because "%s"',
+                    $path,
+                    decoct($mode),
+                    $this->getRecursive(),
+                    $e->getMessage()
+                ),
                 $context->getCurrentTarget(),
                 $this,
                 $e

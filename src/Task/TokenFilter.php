@@ -31,12 +31,17 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace Pants\Task;
 
 use ErrorException;
 use JMS\Serializer\Annotation as JMS;
+use Pants\BuildException;
 use Pants\ContextInterface;
 use function Pale\run;
+use Pants\Task\Exception\MissingPropertyException;
+use Pants\Task\Exception\TaskException;
 
 /**
  * Replace tokens in file(s) task
@@ -47,30 +52,27 @@ use function Pale\run;
  */
 class TokenFilter implements TaskInterface
 {
-
     /**
      * Ending character
      *
      * @JMS\Expose()
      * @JMS\SerializedName("ending-character")
-     * @JMS\SkipWhenEmpty()
      * @JMS\Type("string")
      * @JMS\XmlElement(cdata=false)
      *
      * @var string
      */
-    protected $endingCharacter = "@";
+    protected $endingCharacter;
 
     /**
      * Target file
      *
      * @JMS\Expose()
      * @JMS\SerializedName("file")
-     * @JMS\SkipWhenEmpty()
      * @JMS\Type("string")
      * @JMS\XmlElement(cdata=false)
      *
-     * @var string|null
+     * @var string
      */
     protected $file;
 
@@ -82,7 +84,7 @@ class TokenFilter implements TaskInterface
      * @JMS\Type("array<string>")
      * @JMS\XmlElement(cdata=false)
      *
-     * @var array|null
+     * @var array
      */
     protected $replacements = array();
 
@@ -91,25 +93,32 @@ class TokenFilter implements TaskInterface
      *
      * @JMS\Expose()
      * @JMS\SerializedName("starting-character")
-     * @JMS\SkipWhenEmpty()
      * @JMS\Type("string")
      * @JMS\XmlElement(cdata=false)
      *
      * @var string
      */
-    protected $startingCharacter = "@";
+    protected $startingCharacter;
 
     /**
-     * Add a replacement
+     * Constructor
      *
-     * @param string $token
-     * @param string $value
-     * @return TokenFilter
+     * @param string $file
+     * @param array $replacements
+     * @param string $startingCharacter
+     * @param string $endingCharacter
      */
-    public function addReplacement($token, $value)
+    public function __construct(
+        string $file,
+        array $replacements = [],
+        string $startingCharacter = '@',
+        string $endingCharacter = '@'
+    )
     {
-        $this->replacements[$token] = $value;
-        return $this;
+        $this->file = $file;
+        $this->replacements = $replacements;
+        $this->startingCharacter = $startingCharacter;
+        $this->endingCharacter = $endingCharacter;
     }
 
     /**
@@ -117,45 +126,60 @@ class TokenFilter implements TaskInterface
      */
     public function execute(ContextInterface $context): TaskInterface
     {
-        if (null === $this->getFile()) {
-            $message = 'File not set';
+        $file = $context->getProperties()
+            ->filter($this->file);
 
-            $context->getLogger()->error(
-                $message,
-                [
-                    'target' => $context->getCurrentTarget()
-                        ->getName()
-                ]
+        if (empty($file)) {
+            throw new MissingPropertyException(
+                'file',
+                $context->getCurrentTarget(),
+                $this
             );
+        }
 
-            throw new BuildException(
-                $message,
+        $startingCharacter = $context->getProperties()
+            ->filter($this->startingCharacter);
+
+        if (empty($startingCharacter)) {
+            throw new MissingPropertyException(
+                'starting-character',
                 $context->getCurrentTarget(),
                 $this
             );
         }
 
         $endingCharacter = $context->getProperties()
-            ->filter($this->getEndingCharacter());
+            ->filter($this->endingCharacter);
 
-        $file = $context->getProperties()
-            ->filter($this->getFile());
+        if (empty($endingCharacter)) {
+            throw new MissingPropertyException(
+                'ending-character',
+                $context->getCurrentTarget(),
+                $this
+            );
+        }
 
-        $startingCharacter = $context->getProperties()
-            ->filter($this->getStartingCharacter());
+        if (!file_exists($file)) {
+            throw new BuildException(
+                sprintf(
+                    'File "%s" does not exist',
+                    $file
+                )
+            );
+        }
 
         $contents = file_get_contents($file);
 
-        foreach ($this->getReplacements() as $token => $value) {
+        foreach ($this->replacements as $token => $value) {
             $search = $endingCharacter . $token . $startingCharacter;
 
             $context->getLogger()->debug(
-                sprintf(
-                    'Replacing search "%s" with value "%s" in contents "%s"',
-                    $search,
-                    $value,
-                    $contents
-                )
+                'Replacing search "{search}" with value "{value}" in contents "{contents}"',
+                [
+                    'search' => $search,
+                    'value' => $value,
+                    'contents' => $contents
+                ]
             );
 
             $contents = str_replace(
@@ -166,12 +190,10 @@ class TokenFilter implements TaskInterface
         }
 
         $context->getLogger()->debug(
-            sprintf(
-                'Writing contents "%s" to file "%s"',
-                $contents,
-                $file
-            ),
+            'Writing contents "{contents}" to file "{file}"',
             [
+                'contents' => $contents,
+                'file' => $file,
                 'target' => $context->getCurrentTarget()
                     ->getName()
             ]
@@ -182,104 +204,18 @@ class TokenFilter implements TaskInterface
                 file_put_contents($file, $contents);
             });
         } catch (ErrorException $e) {
-            $message = sprintf(
-                'Failed writing contents "%s" to file "%s"',
-                $contents,
-                $file
-            );
-
-            $context->getLogger()->error(
-                $message,
-                [
-                    'target' => $context->getCurrentTarget()
-                        ->getName()
-                ]
-            );
-
-            throw new BuildException(
-                $message,
+            throw new TaskException(
+                sprintf(
+                    'Failed writing contents "%s" to file "%s"',
+                    $contents,
+                    $file
+                ),
                 $context->getCurrentTarget(),
                 $this,
                 $e
             );
         }
 
-        return $this;
-    }
-
-    /**
-     * Get the ending character
-     *
-     * @return string
-     */
-    public function getEndingCharacter()
-    {
-        return $this->endingCharacter;
-    }
-
-    /**
-     * Get the target file
-     *
-     * @return string|null
-     */
-    public function getFile()
-    {
-        return $this->file;
-    }
-
-    /**
-     * Get the replacements
-     *
-     * @return array
-     */
-    public function getReplacements()
-    {
-        return $this->replacements;
-    }
-
-    /**
-     * Get the starting character
-     *
-     * @return string
-     */
-    public function getStartingCharacter()
-    {
-        return $this->startingCharacter;
-    }
-
-    /**
-     * Set the ending character
-     *
-     * @param string $endingCharacter
-     * @return self
-     */
-    public function setEndingCharacter(string $endingCharacter): self
-    {
-        $this->endingCharacter = $endingCharacter;
-        return $this;
-    }
-
-    /**
-     * Set the target file
-     *
-     * @param string $file
-     * @return self
-     */
-    public function setFile(string $file): self
-    {
-        $this->file = $file;
-        return $this;
-    }
-
-    /**
-     * Set the starting character
-     *
-     * @param string $startingCharacter
-     * @return self
-     */
-    public function setStartingCharacter(string $startingCharacter): self
-    {
-        $this->startingCharacter = $startingCharacter;
         return $this;
     }
 }

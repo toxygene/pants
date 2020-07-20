@@ -27,78 +27,59 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *
- * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
 declare(strict_types=1);
 
-namespace Pants\Fileset;
+namespace Pants;
 
-use FilesystemIterator;
+use FilterIterator;
 use Iterator;
-use JMS\Serializer\Annotation as JMS;
-use Pants\ContextInterface;
-use Pants\Fileset\Fileset\MatcherInterface;
-use Pants\Fileset\Fileset\WhitelistBlacklistFilterIterator;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
+use Pants\Matcher\MatcherInterface;
 
 /**
- * Standard fileset
- *
- * @JMS\ExclusionPolicy("all")
+ * Whitelist/blacklist pattern filter iterator
  */
-class Fileset implements FilesetInterface
+class WhitelistBlacklistFilterIterator extends FilterIterator
 {
-
     /**
-     * @JMS\Expose()
-     * @JMS\SerializedName("base-directory")
-     * @JMS\Type("string")
-     * @JMS\XmlElement(cdata=false)
+     * Base directory
      *
-     * @var string
+     * @var string|null
      */
-    private $baseDirectory;
+    protected $baseDirectory;
 
     /**
      * Blacklist
      *
-     * @JMS\Expose()
-     * @JMS\SerializedName("blacklist")
-     * @JMS\SkipWhenEmpty()
-     * @JMS\Type("Pants\Fileset\Fileset\MatcherInterface")
-     *
      * @var MatcherInterface|null
      */
-    private $blacklist;
+    protected $blacklist;
 
     /**
      * Whitelist
      *
-     * @JMS\Expose()
-     * @JMS\SerializedName("whitelist")
-     * @JMS\SkipWhenEmpty()
-     * @JMS\Type("Pants\Fileset\Fileset\MatcherInterface")
-     *
      * @var MatcherInterface|null
      */
-    private $whitelist;
+    protected $whitelist;
 
     /**
      * Constructor
      *
-     * @param string $baseDirectory
+     * @param Iterator $iterator
+     * @param string|null $baseDirectory
      * @param MatcherInterface|null $whitelist
      * @param MatcherInterface|null $blacklist
      */
     public function __construct(
-        string $baseDirectory,
+        Iterator $iterator,
+        ?string $baseDirectory = null,
         ?MatcherInterface $whitelist = null,
         ?MatcherInterface $blacklist = null
     )
     {
+        parent::__construct($iterator);
+
         $this->baseDirectory = $baseDirectory;
         $this->blacklist = $blacklist;
         $this->whitelist = $whitelist;
@@ -107,22 +88,41 @@ class Fileset implements FilesetInterface
     /**
      * {@inheritdoc}
      */
-    public function getIterator(ContextInterface $context): Iterator
+    public function accept()
     {
-        $baseDirectory = $context->getProperties()
-            ->filter($this->baseDirectory);
+        if (null != $this->whitelist) {
+            if (
+                !$this->whitelist
+                    ->match(
+                        $this->getInnerIterator()->current(),
+                        $this->baseDirectory
+                    )
+            ) {
+                return false;
+            }
 
-        return new WhitelistBlacklistFilterIterator(
-            new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator(
-                    $baseDirectory,
-                    FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO | FilesystemIterator::SKIP_DOTS
-                ),
-                RecursiveIteratorIterator::CHILD_FIRST
-            ),
-            $baseDirectory,
-            $this->whitelist,
-            $this->blacklist
-        );
+            if (
+                null != $this->blacklist &&
+                $this->blacklist
+                    ->match(
+                        $this->getInnerIterator()->current(),
+                        $this->baseDirectory
+                    )
+            ) {
+                return false;
+            }
+
+            return true;
+        }
+
+        if (null != $this->blacklist) {
+            return !$this->blacklist
+                ->match(
+                    $this->getInnerIterator()->current(),
+                    $this->baseDirectory
+                );
+        }
+
+        return true;
     }
 }

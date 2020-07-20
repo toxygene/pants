@@ -31,12 +31,16 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace Pants\Task;
 
 use ErrorException;
 use JMS\Serializer\Annotation as JMS;
 use Pants\ContextInterface;
 use function Pale\run;
+use Pants\Task\Exception\MissingPropertyException;
+use Pants\Task\Exception\TaskException;
 
 /**
  * Touch file(s) task
@@ -47,13 +51,11 @@ use function Pale\run;
  */
 class Touch implements TaskInterface
 {
-
     /**
      * Target path
      *
      * @JMS\Expose()
      * @JMS\SerializedName("path")
-     * @JMS\SkipWhenEmpty()
      * @JMS\Type("string")
      * @JMS\XmlElement(cdata=false)
      *
@@ -66,11 +68,10 @@ class Touch implements TaskInterface
      *
      * @JMS\Expose()
      * @JMS\SerializedName("time")
-     * @JMS\SkipWhenEmpty()
      * @JMS\Type("string")
      * @JMS\XmlElement(cdata=false)
      *
-     * @var string|null
+     * @var string
      */
     protected $time;
 
@@ -79,26 +80,16 @@ class Touch implements TaskInterface
      */
     public function execute(ContextInterface $context): TaskInterface
     {
-        if (null === $this->getPath()) {
-            $message = 'Path not set';
+        $path = $context->getProperties()
+            ->filter($this->getPath());
 
-            $context->getLogger()->error(
-                $message,
-                [
-                    'target' => $context->getCurrentTarget()
-                        ->getName()
-                ]
-            );
-
-            throw new BuildException(
-                $message,
+        if (empty($path)) {
+            throw new MissingPropertyException(
+                'path',
                 $context->getCurrentTarget(),
                 $this
             );
         }
-
-        $path = $context->getProperties()
-            ->filter($this->getPath());
 
         if (null !== $this->getTime()) {
             $time = $context->getProperties()
@@ -108,14 +99,12 @@ class Touch implements TaskInterface
         }
 
         $context->getLogger()->debug(
-            sprintf(
-                'Touching path "%s" with time "%s"',
-                $path,
-                $time
-            ),
+            'Touching path "{path}" with time "{time}"',
             [
+                'path' => $path,
                 'target' => $context->getCurrentTarget()
-                    ->getName()
+                    ->getName(),
+                'time' => $time
             ]
         );
 
@@ -124,22 +113,12 @@ class Touch implements TaskInterface
                 touch($path, $time);
             });
         } catch (ErrorException $e) {
-            $message = sprintf(
-                'Could not touch path "%s" with time "%s"',
-                $path,
-                $time
-            );
-
-            $context->getLogger()->error(
-                $message,
-                [
-                    'target' => $context->getCurrentTarget()
-                        ->getName()
-                ]
-            );
-
-            throw new BuildException(
-                $message,
+            throw new TaskException(
+                sprintf(
+                    'Could not touch path "%s" with time "%s"',
+                    $path,
+                    $time
+                ),
                 $context->getCurrentTarget(),
                 $this,
                 $e

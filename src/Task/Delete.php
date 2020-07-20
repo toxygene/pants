@@ -31,12 +31,16 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace Pants\Task;
 
 use FilesystemIterator;
 use JMS\Serializer\Annotation as JMS;
 use Pants\ContextInterface;
-use Pants\Fileset\FilesetInterface;
+use Pants\FilesInterface;
+use Pants\Task\Exception\MissingPropertyException;
+use Pants\Task\Exception\TaskException;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileObject;
@@ -47,192 +51,86 @@ use SplFileObject;
  * @JMS\ExclusionPolicy("all")
  *
  * @package Pants\Task
+ * @todo add path back (see Move)
  */
 class Delete implements TaskInterface
 {
-
     /**
-     * Fileset to delete
+     * Files to delete
      *
      * @JMS\Expose()
-     * @JMS\SerializedName("fileset")
-     * @JMS\SkipWhenEmpty()
-     * @JMS\Type("Pants\Fileset\Fileset")
+     * @JMS\SerializedName("files")
+     * @JMS\Type("Pants\Fileset\FilesetInterface")
      * @JMS\XmlElement(cdata=false)
      *
-     * @var FilesetInterface|null
+     * @var FilesInterface
      */
-    protected $fileset;
+    protected $files;
 
     /**
      * Follow symlinks
      *
      * @JMS\Expose()
      * @JMS\SerializedName("follow-symlinks")
-     * @JMS\SkipWhenEmpty()
      * @JMS\Type("boolean")
      * @JMS\XmlElement(cdata=false)
      *
-     * @var bool|null
+     * @var bool
      */
     protected $followSymlinks;
-
-    /**
-     * Path to delete
-     *
-     * @JMS\Expose()
-     * @JMS\SerializedName("path")
-     * @JMS\SkipWhenEmpty()
-     * @JMS\Type("string")
-     * @JMS\XmlElement(cdata=false)
-     *
-     * @var string|null
-     */
-    protected $path;
 
     /**
      * Recursive flag
      *
      * @JMS\Expose()
      * @JMS\SerializedName("recursive")
-     * @JMS\SkipWhenEmpty()
      * @JMS\Type("boolean")
      * @JMS\XmlElement(cdata=false)
      *
-     * @var bool|null
+     * @var bool
      */
     private $recursive;
+
+    /**
+     * Constructor
+     *
+     * @param FilesInterface $files
+     * @param bool $recursive
+     * @param bool $followSymlinks
+     */
+    public function __construct(
+        FilesInterface $files,
+        bool $recursive = false,
+        bool $followSymlinks = false
+    )
+    {
+        $this->files = $files;
+        $this->followSymlinks = $followSymlinks;
+        $this->recursive = $recursive;
+    }
 
     /**
      * {@inheritdoc}
      */
     public function execute(ContextInterface $context): TaskInterface
     {
-        // todo support for follow symlinks
-
-        if (null === $this->getPath() && null === $this->getFileset()) {
-            $message = 'Path not set';
-
-            $context->getLogger()->error(
-                $message,
-                [
-                    'target' => $context->getCurrentTarget()
-                        ->getName()
-                ]
-            );
-
-            throw new BuildException(
-                $message,
+        if (empty($this->files)) {
+            throw new MissingPropertyException(
+                'path',
                 $context->getCurrentTarget(),
                 $this
             );
         }
 
-        if (null !== $this->getPath()) {
-            $path = $context->getProperties()
-                ->filter($this->getPath());
-
-            $this->delete($path, $this->getRecursive());
-        }
-
-        if (null !== $this->getFileset()) {
-            foreach ($this->getFileset()->getIterator($context) as $path) {
-                $this->delete($path, $this->getRecursive());
+        if (empty($this->files)) {
+            foreach ($this->files as $file) {
+                $this->delete(
+                    $file,
+                    $this->recursive
+                );
             }
         }
 
-        return $this;
-    }
-
-    /**
-     * Get the fileset to apply the delete to
-     *
-     * @return FilesetInterface|null
-     */
-    public function getFileset()
-    {
-        return $this->fileset;
-    }
-
-    /**
-     * Get the follow symlinks flag
-     *
-     * @return bool
-     */
-    public function getFollowSymlinks()
-    {
-        return true === $this->followSymlinks;
-    }
-
-    /**
-     * Get the path to apply the delete to
-     *
-     * @return string|null
-     */
-    public function getPath()
-    {
-        return $this->path;
-    }
-
-    /**
-     * Get the recursive flag
-     *
-     * If the path is a directory, this determines if the unlink should be recursive.
-     *
-     * @return bool
-     */
-    public function getRecursive()
-    {
-        return true === $this->recursive;
-    }
-
-    /**
-     * Set the fileset to apply the delete to
-     *
-     * @param FilesetInterface $fileset
-     * @return self
-     */
-    public function setFileset(FilesetInterface $fileset): self
-    {
-        $this->fileset = $fileset;
-        return $this;
-    }
-
-    /**
-     * Set the follow symlinks flag
-     *
-     * @param bool $followSymlinks
-     * @return self
-     */
-    public function setFollowSymlinks(bool $followSymlinks): self
-    {
-        $this->followSymlinks = $followSymlinks;
-        return $this;
-    }
-
-    /**
-     * Set the path to apply the delete to
-     *
-     * @param string $path
-     * @return self
-     */
-    public function setPath(string $path): self
-    {
-        $this->path = $path;
-        return $this;
-    }
-
-    /**
-     * Set the recursive flag
-     *
-     * @see getRecursive
-     *
-     * @param bool $recursive
-     * @return self
-     */
-    public function setRecursive(bool $recursive): self
-    {
-        $this->recursive = $recursive;
         return $this;
     }
 
@@ -253,7 +151,7 @@ class Delete implements TaskInterface
                 FilesystemIterator::CURRENT_AS_FILEINFO |
                 FilesystemIterator::SKIP_DOTS;
 
-            if ($this->getFollowSymlinks()) {
+            if ($this->followSymlinks) {
                 $flags |= FilesystemIterator::FOLLOW_SYMLINKS;
             }
 

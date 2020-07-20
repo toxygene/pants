@@ -31,10 +31,14 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace Pants\Task;
 
 use JMS\Serializer\Annotation as JMS;
 use Pants\ContextInterface;
+use Pants\Task\Exception\MissingPropertyException;
+use Pants\Task\Exception\TaskException;
 
 /**
  * Include a PHP script task
@@ -49,46 +53,43 @@ class PhpScript implements TaskInterface
      *
      * @JMS\Expose()
      * @JMS\SerializedName("file")
-     * @JMS\SkipWhenEmpty()
      * @JMS\Type("string")
      * @JMS\XmlElement(cdata=false)
      *
-     * @var string|null
+     * @var string
      */
     protected $file;
+
+    /**
+     * Constructor
+     *
+     * @param string $file
+     */
+    public function __construct(string $file)
+    {
+        $this->file = $file;
+    }
 
     /**
      * {@inheritdoc}
      */
     public function execute(ContextInterface $context): TaskInterface
     {
-        if (null === $this->getFile()) {
-            $message = 'File not set';
+        $file = $context->getProperties()
+            ->filter($this->file);
 
-            $context->getLogger()->error(
-                $message,
-                [
-                    'target' => $context->getCurrentTarget()
-                        ->getName()
-                ]
-            );
-
-            throw new BuildException(
-                $message,
+        if (empty($file)) {
+            throw new MissingPropertyException(
+                'file',
                 $context->getCurrentTarget(),
                 $this
             );
         }
 
-        $file = $context->getProperties()
-            ->filter($this->getFile());
-
         $context->getLogger()->debug(
-            sprintf(
-                'Requiring file "%s"',
-                $file
-            ),
+            'Requiring file "{file}"',
             [
+                'file' => $file,
                 'target' => $context->getCurrentTarget()
                     ->getName()
             ]
@@ -96,28 +97,6 @@ class PhpScript implements TaskInterface
 
         require $file;
 
-        return $this;
-    }
-
-    /**
-     * Get the target file
-     *
-     * @return string|null
-     */
-    public function getFile()
-    {
-        return $this->file;
-    }
-
-    /**
-     * Set the target file
-     *
-     * @param string $file
-     * @return self
-     */
-    public function setFile(string $file): self
-    {
-        $this->file = $file;
         return $this;
     }
 }

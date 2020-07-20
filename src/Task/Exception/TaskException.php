@@ -27,26 +27,72 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
+ *
+ * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
 declare(strict_types=1);
 
-namespace Pants\Fileset\Fileset;
+namespace Pants\Task\Exception;
 
-use SplFileInfo;
+use Pants\BuildException;
+use Pants\Target\TargetInterface;
+use Pants\Task\TaskInterface;
+use Throwable;
 
-/**
- * Interface for a matcher
- */
-interface MatcherInterface
+class TaskException extends BuildException
 {
+    /**
+     * @var TargetInterface
+     */
+    private $target;
 
     /**
-     * Check if a pathname is a match
-     *
-     * @param SplFileInfo $file
-     * @param string|null $baseDirectory
-     * @return boolean
+     * @var TaskInterface
      */
-    public function match(SplFileInfo $file, string $baseDirectory = null): bool;
+    private $task;
+
+    /**
+     * Constructor
+     *
+     * @param string $message
+     * @param TargetInterface $target
+     * @param TaskInterface $task
+     * @param Throwable|null $throwable
+     */
+    public function __construct(
+        string $message,
+        TargetInterface $target,
+        TaskInterface $task,
+        Throwable $throwable = null
+    ) {
+        parent::__construct(
+            $message,
+            null,
+            $throwable
+        );
+
+        $this->target = $target;
+        $this->task = $task;
+    }
+
+    /**
+     * Get the target
+     *
+     * @return TargetInterface
+     */
+    public function getTarget()
+    {
+        return $this->target;
+    }
+
+    /**
+     * Get the task
+     *
+     * @return TaskInterface
+     */
+    public function getTask()
+    {
+        return $this->task;
+    }
 }

@@ -2,7 +2,7 @@
 /**
  * Pants
  *
- * Copyright (c) 2014-2017, Justin Hendrickson
+ * Copyright (c) 2011-2018, Justin Hendrickson
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,87 +29,54 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Pants\Test\Task;
+declare(strict_types=1);
 
-use org\bovigo\vfs\vfsStream;
-use Pants\Task\Delete;
+namespace Pants\Matcher;
+
+use JMS\Serializer\Annotation as JMS;
+use Pants\Matcher\MatcherInterface;
+use SplFileInfo;
 
 /**
- * @coversDefaultClass \Pants\Task\Delete
+ * Matcher that does a regular expression match on the path
+ *
+ * @JMS\ExclusionPolicy("all")
  */
-class DeleteTest extends TaskTestCase
+class RegexpMatcher implements MatcherInterface
 {
-    
     /**
-     * Path to delete
+     * Regular expression pattern to match against
+     *
+     * @JMS\Expose()
+     * @JMS\SerializedName("pattern")
+     * @JMS\Type("string")
+     * @JMS\XmlElement(cdata=false)
+     *
      * @var string
      */
-    protected $path;
+    protected $pattern;
 
     /**
-     * Delete task
-     * @var Delete
+     * Constructor
+     *
+     * @param string $pattern
      */
-    protected $task;
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setUp()
+    public function __construct(string $pattern)
     {
-        parent::setUp();
-
-        vfsStream::setup('root', null, array(
-            'test' => 'test'
-        ));
-        
-        $this->path = vfsStream::url('root/test');
-        
-        $this->task = new Delete();
+        $this->pattern = $pattern;
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    public function tearDown()
+    public function match(SplFileInfo $file, string $baseDirectory = null): bool
     {
-        parent::tearDown();
+        $path = preg_replace(
+            '~^' . preg_quote($baseDirectory, '~') . '/~',
+            '',
+            $file->getPathname()
+        );
 
-        unset($this->path);
-        unset($this->task);
+        return preg_match($this->pattern, $path) > 0;
     }
-
-    /**
-     * @covers ::execute
-     * @expectedException \Pants\Task\Exception\TaskException
-     */
-    public function testFileIsRequired()
-    {
-        $this->task
-            ->execute($this->mockContext);
-    }
-
-    /**
-     * @covers ::execute
-     * @expectedException \PHPUnit\Framework\Error\Warning
-     */
-    public function testFailureThrowsABuildException()
-    {
-        $this->task
-            ->setPath('something-that-does-not-exist')
-            ->execute($this->mockContext);
-    }
-
-    /**
-     * @covers ::execute
-     */
-    public function testFileIsDeleted()
-    {
-        $this->task
-            ->setPath($this->path)
-            ->execute($this->mockContext);
-             
-        $this->assertFalse(file_exists($this->path));
-    }
-
 }

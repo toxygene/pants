@@ -46,9 +46,9 @@ use JMS\Serializer\Serializer;
 use JMS\Serializer\SerializerBuilder;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
-use Pants\Fileset\Fileset\CompositeMatcher;
-use Pants\Fileset\Fileset\MatcherInterface;
-use Pants\Fileset\Fileset\Regexp;
+use Pants\Matcher\CompositeMatcher;
+use Pants\Matcher\MatcherInterface;
+use Pants\Matcher\RegexpMatcher;
 use Pants\Jms\CollectionsHandler;
 use Pants\Project;
 use Pants\Task\Call;
@@ -114,20 +114,20 @@ class Runner
             exit(255);
         }
 
-        if ($opt->getOption('help')) {
-            echo $opt->getHelpText();
+        if ($opt->getOption('version')) {
+            echo Project::getVersion();
             exit;
         }
 
-        if ($opt->getOption('version')) {
-            // todo hook up to some kind of build script
-            echo '0.0.1' . PHP_EOL;
+        if ($opt->getOption('help')) {
+            echo $opt->getHelpText();
             exit;
         }
 
         $buildFile = $opt->getOption('file');
 
         if (!preg_match('~.*\.(.*?)$~', $buildFile, $matches)) {
+            // todo error message about missing extension
             exit(1);
         }
 
@@ -200,7 +200,7 @@ class Runner
      *
      * @return Serializer
      *
-     * @todo implement a mechanism for registering new task classes
+     * @todo implement a mechanism for registering new implementations
      */
     protected function buildSerializer(): Serializer
     {
@@ -244,7 +244,7 @@ class Runner
 
         $filesetClasses = [
             'composite' => CompositeMatcher::class,
-            'regexp' => Regexp::class
+            'regexp' => RegexpMatcher::class
         ];
 
         $matcherInterfaceMetadata = new ClassMetadata(MatcherInterface::class);

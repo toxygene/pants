@@ -27,69 +27,26 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *
- * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
-namespace Pants\Task;
+declare(strict_types=1);
 
-use Pants\BuildException as BaseBuildException;
-use Pants\Target\TargetInterface;
-use Throwable;
+namespace Pants\Matcher;
 
-class BuildException extends BaseBuildException
+use SplFileInfo;
+
+/**
+ * Interface for a matcher
+ */
+interface MatcherInterface
 {
-    /**
-     * @var TargetInterface
-     */
-    private $target;
 
     /**
-     * @var TaskInterface
-     */
-    private $task;
-
-    /**
-     * Constructor
+     * Check if a pathname is a match
      *
-     * @param string $message
-     * @param TargetInterface $target
-     * @param TaskInterface $task
-     * @param Throwable|null $throwable
+     * @param SplFileInfo $file
+     * @param string|null $baseDirectory
+     * @return boolean
      */
-    public function __construct(
-        string $message,
-        TargetInterface $target,
-        TaskInterface $task,
-        Throwable $throwable = null
-    ) {
-        parent::__construct(
-            $message,
-            null,
-            $throwable
-        );
-
-        $this->target = $target;
-        $this->task = $task;
-    }
-
-    /**
-     * Get the target
-     *
-     * @return TargetInterface
-     */
-    public function getTarget()
-    {
-        return $this->target;
-    }
-
-    /**
-     * Get the task
-     *
-     * @return TaskInterface
-     */
-    public function getTask()
-    {
-        return $this->task;
-    }
+    public function match(SplFileInfo $file, string $baseDirectory = null): bool;
 }

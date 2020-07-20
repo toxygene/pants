@@ -27,55 +27,91 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
+ *
+ * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
 declare(strict_types=1);
 
-namespace Pants\Fileset\Fileset;
+namespace Pants\Matcher;
 
+use ArrayIterator;
+use Iterator;
+use IteratorAggregate;
 use JMS\Serializer\Annotation as JMS;
+use Pants\Matcher\MatcherInterface;
 use SplFileInfo;
 
 /**
- * Matcher that does a regular expression match on the path
+ * Composite matcher
  *
  * @JMS\ExclusionPolicy("all")
  */
-class Regexp implements MatcherInterface
+class CompositeMatcher implements IteratorAggregate, MatcherInterface
 {
     /**
-     * Regular expression pattern to match against
-     *
      * @JMS\Expose()
-     * @JMS\SerializedName("pattern")
-     * @JMS\Type("string")
-     * @JMS\XmlElement(cdata=false)
+     * @JMS\SerializedName("matchers")
+     * @JMS\Type("array<Pants\Fileset\Fileset\MatcherInterface>")
      *
-     * @var string
+     * @var MatcherInterface[]
      */
-    protected $pattern;
+    private $matchers = [];
 
     /**
      * Constructor
      *
-     * @param string $pattern
+     * @param MatcherInterface[] $matchers
      */
-    public function __construct(string $pattern)
+    public function __construct(array $matchers)
     {
-        $this->pattern = $pattern;
+        foreach ($matchers as $matcher) {
+            $this->addMatcher($matcher);
+        }
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
+     */
+    public function getIterator(): Iterator
+    {
+        return new ArrayIterator($this->matchers);
+    }
+
+    /**
+     * Get the matchers
+     *
+     * @return MatcherInterface[]
+     */
+    public function getMatchers(): array
+    {
+        return $this->matchers;
+    }
+
+    /**
+     * {@inheritdoc}
      */
     public function match(SplFileInfo $file, string $baseDirectory = null): bool
     {
-        $path = preg_replace(
-            '~^' . preg_quote($baseDirectory, '~') . '/~',
-            '',
-            $file->getPathname()
-        );
+        foreach ($this->matchers as $matcher) {
+            if ($matcher->match($file, $baseDirectory)) {
+                return true;
+            }
+        }
 
-        return preg_match($this->pattern, $path) > 0;
+        return false;
     }
+
+    /**
+     * Add a matcher
+     *
+     * @param MatcherInterface $matcher
+     * @return self
+     */
+    private function addMatcher(MatcherInterface $matcher): self
+    {
+        $this->matchers[] = $matcher;
+        return $this;
+    }
+
 }

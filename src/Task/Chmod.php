@@ -31,11 +31,16 @@
  * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
+declare(strict_types=1);
+
 namespace Pants\Task;
 
 use ErrorException;
 use JMS\Serializer\Annotation as JMS;
 use Pants\ContextInterface;
+use Pants\FilesInterface;
+use Pants\Task\Exception\MissingPropertyException;
+use Pants\Task\Exception\TaskException;
 use Traversable;
 use function Pale\run;
 
@@ -52,7 +57,12 @@ class Chmod implements TaskInterface
     /**
      * Target files
      *
-     * @var Traversable|null
+     * @JMS\Expose()
+     * @JMS\SerializedName("files")
+     * @JMS\Type("Pants\Fileset\FilesetInterface")
+     * @JMS\XmlElement(cdata=false)
+     *
+     * @var FilesInterface
      */
     protected $files;
 
@@ -61,7 +71,6 @@ class Chmod implements TaskInterface
      *
      * @JMS\Expose()
      * @JMS\SerializedName("mode")
-     * @JMS\SkipWhenEmpty()
      * @JMS\Type("string")
      * @JMS\XmlElement(cdata=false)
      *
@@ -70,64 +79,57 @@ class Chmod implements TaskInterface
     protected $mode;
 
     /**
+     * Constructor
+     *
+     * @param FilesInterface $files
+     * @param string|int $mode
+     */
+    public function __construct(
+        FilesInterface $files,
+        $mode
+    )
+    {
+        $this->files = $files;
+        $this->mode = $mode;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function execute(ContextInterface $context): TaskInterface
     {
-        if (null === $this->getFiles()) {
-            $message = 'Files not set';
-
-            $context->getLogger()->debug(
-                $message,
-                [
-                    'target' => $context->getCurrentTarget()
-                        ->getName()
-                ]
-            );
-
-            throw new BuildException(
-                $message,
+        if (empty($this->files)) {
+            throw new MissingPropertyException(
+                'files',
                 $context->getCurrentTarget(),
                 $this
             );
         }
 
-        if (null === $this->getMode()) {
-            $message = 'Mode not set';
-
-            $context->getLogger()->debug(
-                $message,
-                [
-                    'target' => $context->getCurrentTarget()
-                        ->getName()
-                ]
-            );
-
-            throw new BuildException(
-                $message,
+        if (empty($this->mode)) {
+            throw new MissingPropertyException(
+                'mode',
                 $context->getCurrentTarget(),
                 $this
             );
         }
 
         $mode = $context->getProperties()
-            ->filter($this->getMode());
+            ->filter($this->mode);
 
         if (is_string($mode)) {
             $mode = octdec($mode);
         }
 
-        foreach ($this->getFiles() as $file) {
+        foreach ($this->files->getIterator($context) as $file) {
             $file = $context->getProperties()
                 ->filter($file);
 
             $context->getLogger()->debug(
-                sprintf(
-                    'Setting mode "%s" on file "%s"',
-                    decoct($mode),
-                    $file
-                ),
+                'Setting mode "%s" on file "%s"',
                 [
+                    'file' => $file,
+                    'mode' => decoct($mode),
                     'target' => $context->getCurrentTarget()
                         ->getName()
                 ]
@@ -138,23 +140,13 @@ class Chmod implements TaskInterface
                     chmod($file, $mode);
                 });
             } catch (ErrorException $e) {
-                $message = sprintf(
-                    'Could not set mode "%s" on file "%s" because "%s"',
-                    decoct($mode),
-                    $file,
-                    $e->getMessage()
-                );
-
-                $context->getLogger()->error(
-                    $message,
-                    [
-                        'target' => $context->getCurrentTarget()
-                            ->getName()
-                    ]
-                );
-
-                throw new BuildException(
-                    $message,
+                throw new TaskException(
+                    sprintf(
+                        'Could not set mode "%s" on file "%s" because "%s"',
+                        decoct($mode),
+                        $file,
+                        $e->getMessage()
+                    ),
                     $context->getCurrentTarget(),
                     $this,
                     $e
@@ -162,62 +154,6 @@ class Chmod implements TaskInterface
             }
         }
 
-        return $this;
-    }
-
-    /**
-     * Get the target files
-     *
-     * @return Traversable|null
-     */
-    public function getFiles()
-    {
-        return $this->files;
-    }
-
-    /**
-     * Get the mode
-     *
-     * @return string|int|null
-     */
-    public function getMode()
-    {
-        return $this->mode;
-    }
-
-    /**
-     * Set the target file
-     *
-     * @param string $file
-     * @return self
-     */
-    public function setFile(string $file): self
-    {
-        $this->files = [$file];
-        return $this;
-    }
-
-    /**
-     * Set the target files
-     *
-     * @param Traversable $files
-     * @return self
-     */
-    public function setFiles(Traversable $files): self
-    {
-        $this->files = $files;
-        return $this;
-    }
-
-    /**
-     * Set the mode
-     *
-     * @param string|int $mode
-     * @return self
-     */
-    public function setMode($mode): self
-    {
-        $this->mode = $mode;
         return $this;
     }
 }

@@ -27,58 +27,79 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
+ *
+ * @author Justin Hendrickson <justin.hendrickson@gmail.com>
  */
 
 declare(strict_types=1);
 
-namespace Pants\Fileset\Fileset;
+namespace Pants;
 
-use FilterIterator;
+use FilesystemIterator;
 use Iterator;
+use JMS\Serializer\Annotation as JMS;
+use Pants\ContextInterface;
+use Pants\Matcher\MatcherInterface;
+use Pants\WhitelistBlacklistFilterIterator;
+use Pants\FilesInterface;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
 /**
- * Whitelist/blacklist pattern filter iterator
+ * Standard fileset
+ *
+ * @JMS\ExclusionPolicy("all")
  */
-class WhitelistBlacklistFilterIterator extends FilterIterator
+class Files implements FilesInterface
 {
+
     /**
-     * Base directory
+     * @JMS\Expose()
+     * @JMS\SerializedName("base-directory")
+     * @JMS\Type("string")
+     * @JMS\XmlElement(cdata=false)
      *
      * @var string
      */
-    protected $baseDirectory;
+    private $baseDirectory;
 
     /**
      * Blacklist
      *
+     * @JMS\Expose()
+     * @JMS\SerializedName("blacklist")
+     * @JMS\SkipWhenEmpty()
+     * @JMS\Type("Pants\Matcher\MatcherInterface")
+     *
      * @var MatcherInterface|null
      */
-    protected $blacklist;
+    private $blacklist;
 
     /**
      * Whitelist
      *
+     * @JMS\Expose()
+     * @JMS\SerializedName("whitelist")
+     * @JMS\SkipWhenEmpty()
+     * @JMS\Type("Pants\Matcher\MatcherInterface")
+     *
      * @var MatcherInterface|null
      */
-    protected $whitelist;
+    private $whitelist;
 
     /**
      * Constructor
      *
-     * @param Iterator $iterator
-     * @param string $baseDirectory
+     * @param string|null $baseDirectory
      * @param MatcherInterface|null $whitelist
      * @param MatcherInterface|null $blacklist
      */
     public function __construct(
-        Iterator $iterator,
-        string $baseDirectory,
+        ?string $baseDirectory = null,
         ?MatcherInterface $whitelist = null,
         ?MatcherInterface $blacklist = null
     )
     {
-        parent::__construct($iterator);
-
         $this->baseDirectory = $baseDirectory;
         $this->blacklist = $blacklist;
         $this->whitelist = $whitelist;
@@ -87,41 +108,22 @@ class WhitelistBlacklistFilterIterator extends FilterIterator
     /**
      * {@inheritdoc}
      */
-    public function accept()
+    public function getIterator(ContextInterface $context): Iterator
     {
-        if (null != $this->whitelist) {
-            if (
-                !$this->whitelist
-                    ->match(
-                        $this->getInnerIterator()->current(),
-                        $this->baseDirectory
-                    )
-            ) {
-                return false;
-            }
+        $baseDirectory = $context->getProperties()
+            ->filter($this->baseDirectory);
 
-            if (
-                null != $this->blacklist &&
-                $this->blacklist
-                    ->match(
-                        $this->getInnerIterator()->current(),
-                        $this->baseDirectory
-                    )
-            ) {
-                return false;
-            }
-
-            return true;
-        }
-
-        if (null != $this->blacklist) {
-            return !$this->blacklist
-                ->match(
-                    $this->getInnerIterator()->current(),
-                    $this->baseDirectory
-                );
-        }
-
-        return true;
+        return new WhitelistBlacklistFilterIterator(
+            new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator(
+                    $baseDirectory,
+                    FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO | FilesystemIterator::SKIP_DOTS
+                ),
+                RecursiveIteratorIterator::CHILD_FIRST
+            ),
+            $baseDirectory,
+            $this->whitelist,
+            $this->blacklist
+        );
     }
 }

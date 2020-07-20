@@ -32,7 +32,7 @@
 namespace Pants\Test\Task;
 
 use Pants\Target\Executor\ExecutorInterface;
-use Pants\Task\BuildException;
+use Pants\Task\Exception\TaskException;
 use Pants\Task\Call;
 use Pants\Task\TaskInterface;
 
@@ -71,7 +71,7 @@ class CallTest extends TaskTestCase
 
     /**
      * @covers ::execute
-     * @expectedException \Pants\Task\BuildException
+     * @expectedException \Pants\Task\Exception\TaskException
      */
     public function testExecutingTheTaskWithoutATargetCausesABuildException()
     {
@@ -93,7 +93,7 @@ class CallTest extends TaskTestCase
 
     /**
      * @covers ::execute
-     * @expectedException \Pants\Task\BuildException
+     * @expectedException \Pants\Task\Exception\TaskException
      */
     public function testExecutingTheTaskWithAnInvalidTargetCausesABuildException()
     {
@@ -111,7 +111,7 @@ class CallTest extends TaskTestCase
         $mockExecutor->expects($this->once())
             ->method('executeSingle')
             ->with('asdf', $this->mockContext)
-            ->will($this->throwException(new BuildException('message', $this->mockCurrentTarget, $mockTask)));
+            ->will($this->throwException(new TaskException('message', $this->mockCurrentTarget, $mockTask)));
 
         $this->task
             ->setTarget('asdf')

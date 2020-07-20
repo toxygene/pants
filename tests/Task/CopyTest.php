@@ -81,7 +81,7 @@ class CopyTest extends TaskTestCase
 
     /**
      * @covers ::execute
-     * @expectedException \Pants\Task\BuildException
+     * @expectedException \Pants\Task\Exception\TaskException
      */
     public function testFileIsRequired()
     {
@@ -92,7 +92,7 @@ class CopyTest extends TaskTestCase
 
     /**
      * @covers ::execute
-     * @expectedException \Pants\Task\BuildException
+     * @expectedException \Pants\Task\Exception\TaskException
      */
     public function testDestinationIsRequired()
     {
